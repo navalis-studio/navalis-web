@@ -1,0 +1,82 @@
+@import "tailwindcss" source(none);
+@source "./";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elev: var(--bg-elev);
+  --color-panel: var(--panel);
+  --color-border-tac: var(--border-tac);
+  --color-tac-blue: var(--tac-blue);
+  --color-tac-blue-deep: var(--tac-blue-deep);
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-mint: var(--neon-mint);
+  --color-neon-red: var(--neon-red);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --font-display: "Orbitron", "Rajdhani", ui-sans-serif, system-ui;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Rajdhani", ui-sans-serif, system-ui;
+}
+
+:root {
+  --bg: #0B0E14;
+  --bg-elev: #0D1117;
+  --panel: #111826;
+  --border-tac: #1E3A8A;
+  --tac-blue: #0052FF;
+  --tac-blue-deep: #1E3A8A;
+  --neon-cyan: #00A8FF;
+  --neon-mint: #00FFCC;
+  --neon-red: #FF3B5C;
+  --text: #E6F0FF;
+  --text-dim: #7A8AA8;
+}
+
+@layer base {
+  html, body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+  }
+  button, [role="button"] { cursor: pointer; }
+  * { border-color: color-mix(in oklab, var(--border-tac) 60%, transparent); }
+}
+
+@utility tac-panel {
+  background: linear-gradient(180deg, rgba(17,24,38,0.9), rgba(11,14,20,0.9));
+  border: 1px solid color-mix(in oklab, var(--neon-cyan) 18%, transparent);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,168,255,0.05),
+    0 0 40px -20px rgba(0,168,255,0.4);
+}
+
+@utility tac-grid-bg {
+  background-image:
+    linear-gradient(rgba(0,168,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,168,255,0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@utility neon-glow-cyan {
+  box-shadow: 0 0 12px rgba(0,168,255,0.6), 0 0 32px rgba(0,168,255,0.25);
+}
+
+@utility neon-text {
+  text-shadow: 0 0 8px rgba(0,168,255,0.7), 0 0 24px rgba(0,168,255,0.3);
+}
+
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse-neon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
