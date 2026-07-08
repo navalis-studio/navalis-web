@@ -17,7 +17,7 @@ export function FragmentRow({
 }) {
   return (
     <>
-      <div className="flex items-center justify-center text-[10px] text-text-dim font-mono tracking-widest">
+      <div className="flex items-center justify-center text-[9px] text-text-dim font-mono tracking-widest">
         {LETTERS[row]}
       </div>
       {Array.from({ length: GRID }).map((_, c) => {

@@ -20,17 +20,17 @@ export function BoardGrid({
   placed?.forEach((p) => cellsFor(p).forEach((k) => shipCells.add(k)));
 
   return (
-    <div className="select-none">
-      <div className="grid" style={{ gridTemplateColumns: `28px repeat(${GRID}, 1fr)` }}>
+    <div className="select-none max-w-[420px] mx-auto">
+      <div className="grid" style={{ gridTemplateColumns: `20px repeat(${GRID}, 1fr)` }}>
         <div />
         {Array.from({ length: GRID }).map((_, c) => (
-          <div key={c} className="text-center text-[10px] text-text-dim font-mono py-1 tracking-widest">
+          <div key={c} className="text-center text-[9px] text-text-dim font-mono py-0.5 tracking-widest">
             {c + 1}
           </div>
         ))}
       </div>
 
-      <div className="grid gap-0" style={{ gridTemplateColumns: `28px repeat(${GRID}, 1fr)` }}>
+      <div className="grid gap-0" style={{ gridTemplateColumns: `20px repeat(${GRID}, 1fr)` }}>
         {Array.from({ length: GRID }).map((_, r) => (
           <FragmentRow
             key={r}
