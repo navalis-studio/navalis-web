@@ -2,13 +2,16 @@ import { useState, useEffect, useMemo } from "react";
 import { FLEET, GRID, isValidPlacement, cellsFor } from "../shared/constants";
 import { BrandMark } from "../shared/BrandMark";
 import { BoardGrid } from "../board/BoardGrid";
+import { useGame } from "../../contexts/GameContext";
 
-export function PlacingShipsView({ onConfirm, onCancel }) {
+export function PlacingShipsView() {
+  const { confirmFleet, leaveGame, opponentReady } = useGame();
   const [placed, setPlaced] = useState([]);
   const [orientation, setOrientation] = useState("H");
   const [selectedShipId, setSelectedShipId] = useState(FLEET[0].id);
   const [hover, setHover] = useState(null);
   const [draggingId, setDraggingId] = useState(null);
+  const [confirming, setConfirming] = useState(false);
 
   const occupied = useMemo(() => {
     const s = new Set();
@@ -79,8 +82,14 @@ export function PlacingShipsView({ onConfirm, onCancel }) {
     setSelectedShipId(null);
   }
 
+  function handleConfirm() {
+    if (!allPlaced || confirming) return;
+    setConfirming(true);
+    confirmFleet(placed);
+  }
+
   return (
-    <div className="min-h-screen px-6 lg:px-10 py-6 max-w-[1400px] mx-auto">
+    <div className="min-h-screen px-4 lg:px-8 py-4 max-w-[1100px] mx-auto">
       <header className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-6">
           <BrandMark size={32} />
@@ -89,49 +98,55 @@ export function PlacingShipsView({ onConfirm, onCancel }) {
             <span className="text-[10px] tracking-[0.3em] text-text-dim font-display">FASE</span>
             <span className="text-xs text-neon-cyan font-display tracking-[0.25em]">POSICIONAMENTO</span>
           </div>
+          {opponentReady && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-neon-mint/60 bg-neon-mint/5">
+              <span className="h-1.5 w-1.5 rounded-full bg-neon-mint" />
+              <span className="text-[10px] tracking-[0.3em] text-neon-mint font-display">OPONENTE PRONTO</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={onCancel} className="text-[10px] tracking-[0.3em] text-text-dim hover:text-neon-red font-display">
+          <button onClick={leaveGame} className="text-[10px] tracking-[0.3em] text-text-dim hover:text-neon-red font-display">
             ABORTAR
           </button>
-          <button onClick={autoPlace} className="px-3 py-2 rounded border border-tac-blue-deep/70 text-text-dim hover:text-neon-cyan hover:border-neon-cyan/60 text-[10px] tracking-[0.3em] font-display">
+          <button onClick={autoPlace} disabled={confirming} className="px-3 py-2 rounded border border-tac-blue-deep/70 text-text-dim hover:text-neon-cyan hover:border-neon-cyan/60 text-[10px] tracking-[0.3em] font-display disabled:opacity-40">
             AUTO-POSICIONAR
           </button>
           <button
-            disabled={!allPlaced}
-            onClick={() => onConfirm(placed)}
+            disabled={!allPlaced || confirming}
+            onClick={handleConfirm}
             className={`px-6 py-2.5 rounded font-display font-bold tracking-[0.25em] text-xs transition-all ${
-              allPlaced
+              allPlaced && !confirming
                 ? "bg-neon-mint text-bg-elev neon-glow-cyan hover:bg-neon-cyan"
                 : "bg-bg-elev/60 text-text-dim border border-tac-blue-deep/50 cursor-not-allowed"
             }`}
           >
-            CONFIRMAR FROTA
+            {confirming ? "ENVIANDO..." : "CONFIRMAR FROTA"}
           </button>
         </div>
       </header>
 
-      <div className="grid lg:grid-cols-[320px_1fr] gap-6">
-        <aside className="tac-panel rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display tracking-[0.2em] text-sm">DOCA DA FROTA</h3>
-            <span className="text-[10px] text-text-dim font-mono">{placed.length}/{FLEET.length}</span>
+      <div className="grid lg:grid-cols-[260px_1fr] gap-4">
+        <aside className="tac-panel rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display tracking-[0.15em] text-xs">DOCA DA FROTA</h3>
+            <span className="text-[9px] text-text-dim font-mono">{placed.length}/{FLEET.length}</span>
           </div>
 
-          <div className="mb-5">
-            <div className="text-[10px] tracking-[0.3em] text-text-dim font-display mb-2">ORIENTAÇÃO · [R]</div>
+          <div className="mb-4">
+            <div className="text-[9px] tracking-[0.2em] text-text-dim font-display mb-2">ORIENTAÇÃO · [R]</div>
             <div className="grid grid-cols-2 p-1 rounded-md bg-bg-elev border border-tac-blue-deep/60">
               {["H", "V"].map((o) => (
                 <button
                   key={o}
                   onClick={() => setOrientation(o)}
-                  className={`py-2 text-xs font-display tracking-[0.25em] rounded transition-all ${
+                  className={`py-1.5 text-[10px] font-display tracking-[0.15em] rounded transition-all ${
                     orientation === o
                       ? "bg-tac-blue/20 text-neon-cyan neon-glow-cyan"
                       : "text-text-dim hover:text-text"
                   }`}
                 >
-                  {o === "H" ? "HORIZONTAL" : "VERTICAL"}
+                  {o === "H" ? "HORIZ." : "VERT."}
                 </button>
               ))}
             </div>
@@ -144,11 +159,11 @@ export function PlacingShipsView({ onConfirm, onCancel }) {
               return (
                 <div
                   key={s.id}
-                  draggable={!isPlaced}
+                  draggable={!isPlaced && !confirming}
                   onDragStart={() => { setDraggingId(s.id); setSelectedShipId(s.id); }}
                   onDragEnd={() => setDraggingId(null)}
-                  onClick={() => !isPlaced && setSelectedShipId(s.id)}
-                  className={`relative p-3 rounded-md border transition-all cursor-grab active:cursor-grabbing ${
+                  onClick={() => !isPlaced && !confirming && setSelectedShipId(s.id)}
+                  className={`relative p-2 rounded-md border transition-all cursor-grab active:cursor-grabbing ${
                     isPlaced
                       ? "border-tac-blue-deep/30 bg-bg-elev/30 opacity-40"
                       : isSelected
@@ -156,14 +171,14 @@ export function PlacingShipsView({ onConfirm, onCancel }) {
                       : "border-tac-blue-deep/60 bg-bg-elev/60 hover:border-neon-cyan/60"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-1">
                     <div>
-                      <div className="font-display tracking-wider text-sm text-text">{s.name}</div>
-                      <div className="text-[10px] text-text-dim font-mono tracking-widest">
-                        TAMANHO {s.size}  · QTD {isPlaced ? 0 : 1}
+                      <div className="font-display tracking-wider text-xs text-text">{s.name}</div>
+                      <div className="text-[9px] text-text-dim font-mono tracking-wide">
+                        TAM {s.size} · QTD {isPlaced ? 0 : 1}
                       </div>
                     </div>
-                    {isPlaced && (
+                    {isPlaced && !confirming && (
                       <button
                         onClick={(e) => { e.stopPropagation(); removeShip(s.id); }}
                         className="text-[10px] text-neon-red hover:underline font-display tracking-widest"
@@ -172,11 +187,11 @@ export function PlacingShipsView({ onConfirm, onCancel }) {
                       </button>
                     )}
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-0.5">
                     {Array.from({ length: s.size }).map((_, i) => (
                       <div
                         key={i}
-                        className={`h-3 flex-1 rounded-sm ${
+                        className={`h-2 flex-1 rounded-sm ${
                           isPlaced
                             ? "bg-tac-blue-deep/40"
                             : "bg-gradient-to-r from-tac-blue to-neon-cyan shadow-[0_0_8px_rgba(0,168,255,0.4)]"
@@ -209,13 +224,21 @@ export function PlacingShipsView({ onConfirm, onCancel }) {
           <BoardGrid
             occupied={occupied}
             placed={placed}
-            preview={preview}
-            interactive
+            preview={!confirming ? preview : null}
+            interactive={!confirming}
             onCellEnter={(r, c) => setHover({ row: r, col: c })}
             onCellLeave={() => setHover(null)}
             onCellClick={(r, c) => tryPlace(r, c)}
             onCellDrop={(r, c) => tryPlace(r, c)}
           />
+
+          {confirming && (
+            <div className="absolute inset-0 flex items-center justify-center bg-bg/60 rounded-xl">
+              <div className="px-6 py-3 rounded-md tac-panel border border-neon-cyan/40 text-neon-cyan font-display tracking-[0.3em] text-sm animate-pulse">
+                AGUARDANDO OPONENTE...
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </div>

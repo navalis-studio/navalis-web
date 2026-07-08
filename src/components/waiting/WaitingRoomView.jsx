@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { BrandMark } from "../shared/BrandMark";
+import { useAuth } from "../../contexts/AuthContext";
+import { useGame } from "../../contexts/GameContext";
 
-export function WaitingRoomView({ roomCode, username, onStart, onCancel }) {
+export function WaitingRoomView() {
+  const { user } = useAuth();
+  const { gameId, opponent, leaveGame } = useGame();
   const [copied, setCopied] = useState(false);
   const [dots, setDots] = useState("");
 
@@ -13,11 +17,14 @@ export function WaitingRoomView({ roomCode, username, onStart, onCancel }) {
   }, []);
 
   function copyCode() {
-    navigator.clipboard.writeText(roomCode).then(() => {
+    if (!gameId) return;
+    navigator.clipboard.writeText(gameId).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }
+
+  const displayId = gameId ? gameId.slice(0, 8).toUpperCase() : "---";
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
@@ -34,9 +41,9 @@ export function WaitingRoomView({ roomCode, username, onStart, onCancel }) {
         </div>
 
         <div className="mt-8 p-6 rounded-lg bg-bg-elev/80 border border-tac-blue-deep/60">
-          <div className="text-[10px] tracking-[0.4em] text-text-dim font-display mb-3">CÓDIGO DA SALA</div>
-          <div className="font-mono text-4xl font-bold text-neon-cyan tracking-[0.3em] neon-text">
-            {roomCode}
+          <div className="text-[10px] tracking-[0.4em] text-text-dim font-display mb-3">ID DA SALA</div>
+          <div className="font-mono text-2xl font-bold text-neon-cyan tracking-[0.2em] neon-text break-all">
+            {displayId}
           </div>
           <button
             onClick={copyCode}
@@ -46,18 +53,19 @@ export function WaitingRoomView({ roomCode, username, onStart, onCancel }) {
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
             </svg>
-            {copied ? "COPIADO!" : "COPIAR CÓDIGO"}
+            {copied ? "COPIADO!" : "COPIAR ID"}
           </button>
+          <p className="mt-3 text-[10px] text-text-dim font-mono break-all">{gameId}</p>
         </div>
 
         <p className="mt-6 text-text-dim text-sm">
-          Compartilhe o código acima com seu amigo para ele entrar na sala.
+          Compartilhe o ID acima com seu oponente para ele entrar na sala.
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-4">
           <div className="rounded-md bg-bg-elev/60 border border-neon-mint/40 py-3 px-4">
             <div className="text-[9px] tracking-[0.3em] text-text-dim font-display mb-1">JOGADOR 1</div>
-            <div className="text-sm text-neon-mint font-display tracking-wider">{username}</div>
+            <div className="text-sm text-neon-mint font-display tracking-wider">{user?.username}</div>
             <div className="flex items-center justify-center gap-1.5 mt-1">
               <span className="h-1.5 w-1.5 rounded-full bg-neon-mint animate-[pulse-neon_1.6s_ease-in-out_infinite] shadow-[0_0_8px_#00FFCC]" />
               <span className="text-[9px] text-neon-mint tracking-widest">CONECTADO</span>
@@ -65,23 +73,28 @@ export function WaitingRoomView({ roomCode, username, onStart, onCancel }) {
           </div>
           <div className="rounded-md bg-bg-elev/60 border border-tac-blue-deep/40 py-3 px-4">
             <div className="text-[9px] tracking-[0.3em] text-text-dim font-display mb-1">JOGADOR 2</div>
-            <div className="text-sm text-text-dim font-display tracking-wider">???</div>
+            <div className="text-sm text-text-dim font-display tracking-wider">
+              {opponent || "???"}
+            </div>
             <div className="flex items-center justify-center gap-1.5 mt-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-text-dim/40" />
-              <span className="text-[9px] text-text-dim tracking-widest">AGUARDANDO</span>
+              {opponent ? (
+                <>
+                  <span className="h-1.5 w-1.5 rounded-full bg-neon-mint animate-[pulse-neon_1.6s_ease-in-out_infinite] shadow-[0_0_8px_#00FFCC]" />
+                  <span className="text-[9px] text-neon-mint tracking-widest">CONECTADO</span>
+                </>
+              ) : (
+                <>
+                  <span className="h-1.5 w-1.5 rounded-full bg-text-dim/40" />
+                  <span className="text-[9px] text-text-dim tracking-widest">AGUARDANDO</span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
         <div className="mt-8 flex flex-col gap-3">
           <button
-            onClick={onStart}
-            className="w-full py-3 rounded-md font-display font-bold tracking-[0.25em] text-sm text-bg-elev bg-neon-cyan hover:bg-neon-mint transition-all neon-glow-cyan"
-          >
-            INICIAR PARTIDA
-          </button>
-          <button
-            onClick={onCancel}
+            onClick={leaveGame}
             className="text-[10px] tracking-[0.3em] text-text-dim hover:text-neon-red font-display transition-colors"
           >
             CANCELAR
