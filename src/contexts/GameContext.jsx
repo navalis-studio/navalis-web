@@ -116,6 +116,12 @@ export function GameProvider({ children }) {
         pushLog("Oponente entrou na sala!");
         break;
 
+      case "OPPONENT_DISCONNECTED":
+        setGameState("FINISHED");
+        setGameOver({ result: "victory", winnerId: event.winnerId });
+        pushLog("Oponente desconectou. Vitória por W.O.!");
+        break;
+
       default:
         console.log("Unknown event type:", event.type);
     }
