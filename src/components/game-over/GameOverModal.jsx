@@ -1,5 +1,13 @@
-export function GameOverModal({ result, onReturn }) {
+export function GameOverModal({ result, reason, onReturn }) {
   const victory = result === "victory";
+  const isWO = reason === "wo";
+
+  function getMessage() {
+    if (isWO) return "Oponente abandonou a partida. Vitória por W.O.!";
+    if (victory) return "Você afundou toda a frota inimiga!";
+    return "Sua frota foi destruída.";
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg/85 backdrop-blur-sm animate-in fade-in">
       <div className={`relative w-full max-w-lg rounded-2xl p-10 text-center tac-panel overflow-hidden border-2 ${
@@ -26,10 +34,10 @@ export function GameOverModal({ result, onReturn }) {
                 : "0 0 24px rgba(255,59,92,0.6)",
             }}
           >
-            {victory ? "VITÓRIA" : "DERROTA"}
+            {victory ? (isWO ? "W.O." : "VITÓRIA") : "DERROTA"}
           </h1>
           <p className="text-text-dim mt-4 font-display tracking-wider">
-            {victory ? "Você afundou toda a frota inimiga!" : "Sua frota foi destruída."}
+            {getMessage()}
           </p>
           <button
             onClick={onReturn}

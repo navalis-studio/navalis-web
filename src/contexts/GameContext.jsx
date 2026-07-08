@@ -118,8 +118,18 @@ export function GameProvider({ children }) {
 
       case "OPPONENT_DISCONNECTED":
         setGameState("FINISHED");
-        setGameOver({ result: "victory", winnerId: event.winnerId });
+        setGameOver({ result: "victory", winnerId: event.winnerId, reason: "wo" });
         pushLog("Oponente desconectou. Vitória por W.O.!");
+        break;
+
+      case "GAME_CANCELLED":
+        // Opponent left during WAITING or PLACING_SHIPS, return to lobby
+        stomp.disconnectStomp();
+        resetGameState();
+        setGameId(null);
+        setGameState(null);
+        setOpponent(null);
+        setLog([]);
         break;
 
       default:

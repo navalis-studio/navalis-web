@@ -48,6 +48,7 @@ export function NavalisApp() {
       {gameOver && (
         <GameOverModal
           result={gameOver.result}
+          reason={gameOver.reason}
           onReturn={() => leaveGame()}
         />
       )}
