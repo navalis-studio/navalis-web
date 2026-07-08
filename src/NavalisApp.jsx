@@ -5,12 +5,13 @@ import { WaitingRoomView } from "./components/waiting/WaitingRoomView";
 import { PlacingShipsView } from "./components/placing/PlacingShipsView";
 import { ArenaView } from "./components/arena/ArenaView";
 import { GameOverModal } from "./components/game-over/GameOverModal";
+import { CancelledModal } from "./components/game-over/CancelledModal";
 import { useAuth } from "./contexts/AuthContext";
 import { useGame } from "./contexts/GameContext";
 
 export function NavalisApp() {
   const { user, loading } = useAuth();
-  const { gameState, gameOver, leaveGame } = useGame();
+  const { gameState, gameOver, leaveGame, cancelledNotice, dismissCancelledNotice } = useGame();
 
   if (loading) return null;
 
@@ -50,6 +51,13 @@ export function NavalisApp() {
           result={gameOver.result}
           reason={gameOver.reason}
           onReturn={() => leaveGame()}
+        />
+      )}
+
+      {cancelledNotice && (
+        <CancelledModal
+          message={cancelledNotice}
+          onConfirm={dismissCancelledNotice}
         />
       )}
     </div>

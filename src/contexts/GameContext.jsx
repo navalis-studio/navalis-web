@@ -23,6 +23,7 @@ export function GameProvider({ children }) {
   const [log, setLog] = useState([]);
   const [opponentReady, setOpponentReady] = useState(false);
   const [myReady, setMyReady] = useState(false);
+  const [cancelledNotice, setCancelledNotice] = useState(null);
 
   const LETTERS = "ABCDEFGHIJ".split("");
 
@@ -123,13 +124,8 @@ export function GameProvider({ children }) {
         break;
 
       case "GAME_CANCELLED":
-        // Opponent left during WAITING or PLACING_SHIPS, return to lobby
-        stomp.disconnectStomp();
-        resetGameState();
-        setGameId(null);
-        setGameState(null);
-        setOpponent(null);
-        setLog([]);
+        // Opponent left during WAITING or PLACING_SHIPS, show modal
+        setCancelledNotice("Oponente abandonou a partida.");
         break;
 
       default:
@@ -249,12 +245,12 @@ export function GameProvider({ children }) {
 
   // Leave game / cancel
   const leaveGame = useCallback(async () => {
-    // If still waiting for opponent, cancel the game on backend
-    if (gameId && gameState === "WAITING_FOR_OPPONENT") {
+    // Cancel game on backend if not yet in progress
+    if (gameId && (gameState === "WAITING_FOR_OPPONENT" || gameState === "PLACING_SHIPS")) {
       try {
         await api.cancelGame(gameId);
       } catch {
-        // Game may already be cancelled/joined, ignore
+        // Game may already be cancelled, ignore
       }
     }
     stomp.disconnectStomp();
@@ -273,7 +269,17 @@ export function GameProvider({ children }) {
     setOpponentReady(false);
     setMyReady(false);
     setMyTurn(false);
+    setCancelledNotice(null);
   }
+
+  const dismissCancelledNotice = useCallback(() => {
+    stomp.disconnectStomp();
+    resetGameState();
+    setGameId(null);
+    setGameState(null);
+    setOpponent(null);
+    setLog([]);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -298,12 +304,14 @@ export function GameProvider({ children }) {
         log,
         opponentReady,
         myReady,
+        cancelledNotice,
         createGame,
         joinGame,
         fetchAvailableGames,
         confirmFleet,
         fire,
         leaveGame,
+        dismissCancelledNotice,
         setError,
       }}
     >
