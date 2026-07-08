@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const stored = api.getStoredAuth();
     if (stored) {
-      setUser({ username: stored.username, token: stored.token });
+      setUser({ username: stored.username, token: stored.token, userId: stored.userId });
     }
     setLoading(false);
   }, []);
@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const data = await api.login(username, password);
-      setUser({ username: data.username, token: data.token });
+      setUser({ username: data.username, token: data.token, userId: data.id });
       return data;
     } catch (err) {
       setError(err.message || "Falha no login");
@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const data = await api.register(username, password);
-      setUser({ username: data.username, token: data.token });
+      setUser({ username: data.username, token: data.token, userId: data.id });
       return data;
     } catch (err) {
       setError(err.message || "Falha no registro");

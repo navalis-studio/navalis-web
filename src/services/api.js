@@ -21,7 +21,7 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    const error = new Error(body.message || `Request failed: ${response.status}`);
+    const error = new Error(body.message || body.error || `Request failed: ${response.status}`);
     error.status = response.status;
     error.body = body;
     throw error;
@@ -37,8 +37,10 @@ export async function register(username, password) {
     method: "POST",
     body: JSON.stringify({ username, password }),
   });
+  // AuthResponse: { id (UUID), username, token }
   localStorage.setItem("navalis_token", data.token);
   localStorage.setItem("navalis_username", data.username);
+  localStorage.setItem("navalis_user_id", data.id);
   return data;
 }
 
@@ -47,24 +49,29 @@ export async function login(username, password) {
     method: "POST",
     body: JSON.stringify({ username, password }),
   });
+  // AuthResponse: { id (UUID), username, token }
   localStorage.setItem("navalis_token", data.token);
   localStorage.setItem("navalis_username", data.username);
+  localStorage.setItem("navalis_user_id", data.id);
   return data;
 }
 
 export function logout() {
   localStorage.removeItem("navalis_token");
   localStorage.removeItem("navalis_username");
+  localStorage.removeItem("navalis_user_id");
 }
 
 export function getStoredAuth() {
   const token = getToken();
   const username = localStorage.getItem("navalis_username");
-  if (token && username) return { token, username };
+  const userId = localStorage.getItem("navalis_user_id");
+  if (token && username && userId) return { token, username, userId };
   return null;
 }
 
 // Games
+// GameResponse: { gameId (UUID), status, message }
 export async function createGame() {
   return request("/games", { method: "POST" });
 }
@@ -79,4 +86,8 @@ export async function listAvailableGames() {
 
 export async function getGame(gameId) {
   return request(`/games/${gameId}`);
+}
+
+export async function cancelGame(gameId) {
+  return request(`/games/${gameId}`, { method: "DELETE" });
 }

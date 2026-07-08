@@ -53,9 +53,9 @@ export function WaitingRoomView() {
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
             </svg>
-            {copied ? "COPIADO!" : "COPIAR ID"}
+            {copied ? "COPIADO!" : "COPIAR ID COMPLETO"}
           </button>
-          <p className="mt-3 text-[10px] text-text-dim font-mono break-all">{gameId}</p>
+          <p className="mt-3 text-[10px] text-text-dim font-mono break-all select-all">{gameId}</p>
         </div>
 
         <p className="mt-6 text-text-dim text-sm">

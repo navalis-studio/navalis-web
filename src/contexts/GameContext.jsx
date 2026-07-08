@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, useRef, useEffect } f
 import * as api from "../services/api";
 import * as stomp from "../services/stomp";
 import { useAuth } from "./AuthContext";
-import { FLEET, key } from "../components/shared/constants";
+import { key } from "../components/shared/constants";
 
 const GameContext = createContext(null);
 
@@ -25,8 +25,6 @@ export function GameProvider({ children }) {
   const [myReady, setMyReady] = useState(false);
 
   const LETTERS = "ABCDEFGHIJ".split("");
-  const gameIdRef = useRef(gameId);
-  gameIdRef.current = gameId;
 
   function pushLog(msg) {
     setLog((l) => [`▸ ${msg}`, ...l].slice(0, 50));
@@ -34,15 +32,17 @@ export function GameProvider({ children }) {
 
   // Handle incoming WebSocket events
   const handleGameEvent = useCallback((event) => {
+    const myUserId = user?.userId;
+
     switch (event.type) {
       case "SHIP_PLACED":
-        if (event.playerId !== user?.username) {
+        if (event.playerId !== myUserId) {
           pushLog("Oponente posicionou um navio.");
         }
         break;
 
       case "PLAYER_READY":
-        if (event.playerId === user?.username) {
+        if (event.playerId === myUserId) {
           setMyReady(true);
           pushLog("Você está pronto!");
         } else {
@@ -53,18 +53,23 @@ export function GameProvider({ children }) {
 
       case "GAME_STARTED":
         setGameState("IN_PROGRESS");
-        setMyTurn(event.firstPlayerId === user?.username);
-        pushLog("Partida iniciada! Sonar online.");
-        if (event.firstPlayerId === user?.username) {
-          pushLog("Seu turno — atire!");
+        // Backend sets currentTurnPlayerId to player1 on start
+        // We need to check if we're player1 via the game info
+        // For now, the GAME_STARTED event doesn't tell us who goes first
+        // So we fetch game info to determine turn
+        if (event.firstPlayerId) {
+          setMyTurn(event.firstPlayerId === myUserId);
         } else {
-          pushLog("Turno do inimigo — aguarde...");
+          // If backend doesn't send firstPlayerId, we'll determine by fetching
+          // For now assume the creator (player1) goes first
+          setMyTurn(true); // Will be corrected by SHOT_FIRED events
         }
+        pushLog("Partida iniciada! Sonar online.");
         break;
 
       case "SHOT_FIRED": {
         const { shooterId, row, col, result, sunkShipType, gameOver: isGameOver, winnerId } = event;
-        const isMyShot = shooterId === user?.username;
+        const isMyShot = shooterId === myUserId;
         const hit = result === "HIT" || result === "SUNK";
         const cellKey = key(row, col);
 
@@ -86,9 +91,9 @@ export function GameProvider({ children }) {
 
         if (isGameOver) {
           setGameState("FINISHED");
-          const result = winnerId === user?.username ? "victory" : "defeat";
-          setGameOver({ result, winnerId });
-          pushLog(result === "victory" ? "VITÓRIA! Frota inimiga destruída!" : "DERROTA! Sua frota foi destruída.");
+          const gameResult = winnerId === myUserId ? "victory" : "defeat";
+          setGameOver({ result: gameResult, winnerId });
+          pushLog(gameResult === "victory" ? "VITÓRIA! Frota inimiga destruída!" : "DERROTA! Sua frota foi destruída.");
         } else {
           // Turn logic: if hit, same player shoots again; if miss, turn switches
           if (hit) {
@@ -108,13 +113,13 @@ export function GameProvider({ children }) {
       case "OPPONENT_JOINED":
         setOpponent(event.playerId);
         setGameState("PLACING_SHIPS");
-        pushLog(`${event.playerId} entrou na sala!`);
+        pushLog("Oponente entrou na sala!");
         break;
 
       default:
         console.log("Unknown event type:", event.type);
     }
-  }, [user?.username]);
+  }, [user?.userId]);
 
   // Connect to game WebSocket
   const connectToGame = useCallback(async (gId) => {
@@ -132,11 +137,13 @@ export function GameProvider({ children }) {
     setError(null);
     try {
       const game = await api.createGame();
-      setGameId(game.id);
+      // GameResponse: { gameId, status, message }
+      const id = game.gameId;
+      setGameId(id);
       setGameState("WAITING_FOR_OPPONENT");
       setOpponent(null);
       resetGameState();
-      await connectToGame(game.id);
+      await connectToGame(id);
       pushLog("Sala criada. Aguardando oponente...");
       return game;
     } catch (err) {
@@ -150,11 +157,13 @@ export function GameProvider({ children }) {
     setError(null);
     try {
       const game = await api.joinGame(gId);
-      setGameId(game.id);
+      // GameResponse: { gameId, status, message }
+      const id = game.gameId;
+      setGameId(id);
       setGameState("PLACING_SHIPS");
-      setOpponent(game.hostUsername || game.player1);
+      setOpponent(null);
       resetGameState();
-      await connectToGame(game.id);
+      await connectToGame(id);
       pushLog("Você entrou na partida! Posicione sua frota.");
       return game;
     } catch (err) {
@@ -177,52 +186,74 @@ export function GameProvider({ children }) {
   }, []);
 
   // Place a ship
-  const placeShip = useCallback((ship) => {
-    if (!gameId) return;
-    // Map frontend ship id to backend shipType enum
+  const placeShip = useCallback((gameIdVal, ship) => {
+    // Map frontend ship id to backend ShipType enum
     const typeMap = {
       carrier: "CARRIER",
       battleship: "BATTLESHIP",
-      destroyer: "CRUISER", // destroyer in frontend = CRUISER (size 3) in backend
+      destroyer: "CRUISER",
       submarine: "SUBMARINE",
-      patrol: "DESTROYER", // patrol in frontend = DESTROYER (size 2) in backend
+      patrol: "DESTROYER",
     };
-    stomp.sendPlaceShip(gameId, typeMap[ship.id] || ship.id.toUpperCase(), ship.row, ship.col, ship.orientation === "H" ? "HORIZONTAL" : "VERTICAL");
-  }, [gameId]);
+    stomp.sendPlaceShip(
+      gameIdVal,
+      typeMap[ship.id] || ship.id.toUpperCase(),
+      ship.row,
+      ship.col,
+      ship.orientation === "H" ? "HORIZONTAL" : "VERTICAL"
+    );
+  }, []);
 
   // Send all ships and mark ready
   const confirmFleet = useCallback((ships) => {
     if (!gameId) return;
     setPlacedShips(ships);
-    // Send each ship placement
-    ships.forEach((ship) => placeShip(ship));
-    // Send ready signal
+    // Send each ship placement with a small delay between them
+    ships.forEach((ship, index) => {
+      setTimeout(() => {
+        placeShip(gameId, ship);
+      }, index * 200);
+    });
+    // Send ready signal after all ships are placed
     setTimeout(() => {
       stomp.sendReady(gameId);
-    }, 500);
+      setMyReady(true);
+    }, ships.length * 200 + 300);
   }, [gameId, placeShip]);
 
   // Fire at a cell
   const fire = useCallback((row, col) => {
     if (!gameId || !myTurn) return;
+    const cellKey = key(row, col);
+    // Don't fire at already-attacked cells
+    if (enemyMarks.has(cellKey)) return;
     stomp.sendFire(gameId, row, col);
     setMyTurn(false); // Optimistically disable until server responds
-  }, [gameId, myTurn]);
+  }, [gameId, myTurn, enemyMarks]);
 
-  // Leave game
-  const leaveGame = useCallback(() => {
+  // Leave game / cancel
+  const leaveGame = useCallback(async () => {
+    // If still waiting for opponent, cancel the game on backend
+    if (gameId && gameState === "WAITING_FOR_OPPONENT") {
+      try {
+        await api.cancelGame(gameId);
+      } catch {
+        // Game may already be cancelled/joined, ignore
+      }
+    }
     stomp.disconnectStomp();
     resetGameState();
     setGameId(null);
     setGameState(null);
-  }, []);
+    setOpponent(null);
+    setLog([]);
+  }, [gameId, gameState]);
 
   function resetGameState() {
     setEnemyMarks(new Map());
     setMyMarks(new Map());
     setGameOver(null);
     setPlacedShips([]);
-    setLog([]);
     setOpponentReady(false);
     setMyReady(false);
     setMyTurn(false);

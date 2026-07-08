@@ -154,7 +154,7 @@ export function LobbyView() {
           <table className="w-full">
             <thead>
               <tr className="text-[10px] tracking-[0.3em] text-text-dim font-display">
-                <th className="text-left px-6 py-3">ANFITRIÃO</th>
+                <th className="text-left px-6 py-3">STATUS</th>
                 <th className="text-left px-6 py-3">ID DA SALA</th>
                 <th className="text-right px-6 py-3">AÇÃO</th>
               </tr>
@@ -162,23 +162,23 @@ export function LobbyView() {
             <tbody>
               {availableGames.map((game) => (
                 <tr
-                  key={game.id}
+                  key={game.gameId}
                   className="border-t border-tac-blue-deep/30 hover:bg-neon-cyan/[0.04] transition-colors group"
                 >
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-md bg-tac-blue/20 border border-tac-blue-deep flex items-center justify-center text-neon-cyan font-display font-bold">
-                        {(game.hostUsername || game.player1 || "?")[0].toUpperCase()}
+                        ⚓
                       </div>
-                      <span className="text-text">{game.hostUsername || game.player1 || "Desconhecido"}</span>
+                      <span className="text-text">{game.message || "Aguardando oponente"}</span>
                     </div>
                   </td>
                   <td className="px-6 py-3 font-mono text-neon-cyan tracking-wider text-xs">
-                    {game.id?.slice(0, 8)}...
+                    {game.gameId?.slice(0, 8).toUpperCase()}
                   </td>
                   <td className="px-6 py-3 text-right">
                     <button
-                      onClick={() => handleJoinGame(game.id)}
+                      onClick={() => handleJoinGame(game.gameId)}
                       disabled={loading}
                       className="px-4 py-1.5 rounded border border-neon-cyan/60 text-neon-cyan text-xs font-display tracking-[0.25em] hover:bg-neon-cyan hover:text-bg-elev transition-all hover:neon-glow-cyan disabled:opacity-40"
                     >
