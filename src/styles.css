@@ -5,78 +5,89 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-bg-elev: var(--bg-elev);
-  --color-panel: var(--panel);
-  --color-border-tac: var(--border-tac);
-  --color-tac-blue: var(--tac-blue);
-  --color-tac-blue-deep: var(--tac-blue-deep);
-  --color-neon-cyan: var(--neon-cyan);
-  --color-neon-mint: var(--neon-mint);
-  --color-neon-red: var(--neon-red);
-  --color-text: var(--text);
-  --color-text-dim: var(--text-dim);
-  --font-display: "Orbitron", "Rajdhani", ui-sans-serif, system-ui;
+  --color-surface: var(--surface);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-ink-black: var(--ink-black);
+  --color-paper-white: var(--paper-white);
+  --color-mid-tone-grey: var(--mid-tone-grey);
+  --color-light-grain: var(--light-grain);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-error: var(--error);
+  --color-error-container: var(--error-container);
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "Work Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-sans: "Rajdhani", ui-sans-serif, system-ui;
 }
 
 :root {
-  --bg: #0B0E14;
-  --bg-elev: #0D1117;
-  --panel: #111826;
-  --border-tac: #1E3A8A;
-  --tac-blue: #0052FF;
-  --tac-blue-deep: #1E3A8A;
-  --neon-cyan: #00A8FF;
-  --neon-mint: #00FFCC;
-  --neon-red: #FF3B5C;
-  --text: #E6F0FF;
-  --text-dim: #7A8AA8;
+  --surface: #131313;
+  --surface-container: #1f1f1f;
+  --surface-container-high: #2a2a2a;
+  --surface-container-low: #1b1b1b;
+  --on-surface: #e2e2e2;
+  --on-surface-variant: #c4c7c8;
+  --ink-black: #000000;
+  --paper-white: #FFFFFF;
+  --mid-tone-grey: #6E6E6E;
+  --light-grain: #C2C2C2;
+  --outline: #8e9192;
+  --outline-variant: #444748;
+  --error: #ffb4ab;
+  --error-container: #93000a;
 }
 
 @layer base {
   html, body {
-    background-color: var(--bg);
-    color: var(--text);
+    background-color: var(--surface);
+    color: var(--on-surface);
     font-family: var(--font-sans);
+    overflow: hidden;
   }
   button, [role="button"] { cursor: pointer; }
-  * { border-color: color-mix(in oklab, var(--border-tac) 60%, transparent); }
 }
 
-@utility tac-panel {
-  background: linear-gradient(180deg, rgba(17,24,38,0.9), rgba(11,14,20,0.9));
-  border: 1px solid color-mix(in oklab, var(--neon-cyan) 18%, transparent);
-  box-shadow:
-    inset 0 0 0 1px rgba(0,168,255,0.05),
-    0 0 40px -20px rgba(0,168,255,0.4);
+/* === Ink & Iron Utilities === */
+
+@utility ink-border {
+  border: 4px solid var(--ink-black);
 }
 
-@utility tac-grid-bg {
-  background-image:
-    linear-gradient(rgba(0,168,255,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,168,255,0.06) 1px, transparent 1px);
-  background-size: 24px 24px;
+@utility ink-border-heavy {
+  border: 6px solid var(--ink-black);
 }
 
-@utility neon-glow-cyan {
-  box-shadow: 0 0 12px rgba(0,168,255,0.6), 0 0 32px rgba(0,168,255,0.25);
+@utility hard-shadow {
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
 }
 
-@utility neon-text {
-  text-shadow: 0 0 8px rgba(0,168,255,0.7), 0 0 24px rgba(0,168,255,0.3);
+@utility hard-shadow-sm {
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
 }
 
-@keyframes radar-sweep {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* === Keyframes === */
+
+@keyframes boil {
+  0% { border-radius: 4px 6px 3px 5px; transform: translateX(-1px) rotate(-0.5deg); }
+  100% { border-radius: 5px 3px 6px 4px; transform: translateX(1px) rotate(0.5deg); }
 }
-@keyframes pulse-neon {
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(1px, 1px); }
+}
+
+@keyframes flicker {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
-}
-@keyframes scan {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  4% { opacity: 0.97; }
+  8% { opacity: 1; }
+  42% { opacity: 0.96; }
+  44% { opacity: 1; }
 }

@@ -1,3 +1,4 @@
+import { FilmOverlay } from "./components/shared/FilmOverlay";
 import { AmbientBackdrop } from "./components/shared/AmbientBackdrop";
 import { AuthView } from "./components/auth/AuthView";
 import { LobbyView } from "./components/lobby/LobbyView";
@@ -15,7 +16,6 @@ export function NavalisApp() {
 
   if (loading) return null;
 
-  // Determine current view based on auth and game state
   function getCurrentView() {
     if (!user) return "auth";
     if (!gameState) return "lobby";
@@ -36,8 +36,11 @@ export function NavalisApp() {
   const view = getCurrentView();
 
   return (
-    <div className="min-h-screen w-full bg-bg text-text font-sans relative overflow-hidden">
+    <div className="min-h-screen w-full bg-surface text-on-surface font-sans relative overflow-hidden">
+      {/* Background pattern */}
       <AmbientBackdrop />
+
+      {/* Content */}
       <div className="relative z-10">
         {view === "auth" && <AuthView />}
         {view === "lobby" && <LobbyView />}
@@ -46,6 +49,10 @@ export function NavalisApp() {
         {view === "arena" && <ArenaView />}
       </div>
 
+      {/* Film effects on top of everything */}
+      <FilmOverlay />
+
+      {/* Modals */}
       {gameOver && (
         <GameOverModal
           result={gameOver.result}

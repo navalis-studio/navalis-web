@@ -45,24 +45,45 @@ export function AuthView() {
   const displayError = localError || error;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md tac-panel rounded-xl p-8 relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-neon-cyan to-transparent" />
-        <div className="flex flex-col items-center gap-6">
-          <img src={logo} alt="Navalis.io" className="h-45" />
-          <p className="text-text-dim text-sm tracking-wide text-center">
-            Faça login para implantar sua frota.
+    <div className="min-h-screen flex items-center justify-center p-4">
+      {/* Card branco - Ink & Iron style */}
+      <div className="w-full max-w-lg bg-paper-white ink-border-heavy rounded-xl hard-shadow relative overflow-hidden flex flex-col z-10 scale-90">
+        {/* Cantos decorativos - círculos pretos */}
+        <div className="absolute top-2 left-2 w-4 h-4 rounded-full bg-ink-black" />
+        <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-ink-black" />
+        <div className="absolute bottom-2 left-2 w-4 h-4 rounded-full bg-ink-black" />
+        <div className="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-ink-black" />
+
+        {/* Borda interna tracejada */}
+        <div className="absolute inset-4 border-2 border-ink-black rounded-lg pointer-events-none opacity-50 border-dashed" />
+
+        {/* Conteúdo */}
+        <div className="p-8 pt-12 pb-10 flex flex-col items-center relative z-20">
+          {/* Logo */}
+          <div className="mb-6 text-center">
+            <img
+              src={logo}
+              alt="Navalis"
+              className="w-56 h-auto mx-auto"
+            />
+          </div>
+
+          {/* Tagline */}
+          <p className="font-display text-2xl font-semibold text-ink-black text-center mb-8 px-4 leading-tight">
+            "Faça login para implantar sua frota"
           </p>
 
-          <div className="grid grid-cols-2 w-full p-1 rounded-md bg-bg-elev border border-tac-blue-deep/60">
+          {/* Tabs Login/Register - pill com hard shadow */}
+          <div className="flex w-full max-w-sm mb-6 rounded-full ink-border hard-shadow-sm overflow-hidden">
             {["login", "register"].map((t) => (
               <button
                 key={t}
+                type="button"
                 onClick={() => { setTab(t); setLocalError(null); clearError(); }}
-                className={`py-2 text-xs uppercase tracking-[0.25em] font-display font-semibold rounded transition-all ${
+                className={`flex-1 py-2.5 font-mono text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
                   tab === t
-                    ? "bg-tac-blue/20 text-neon-cyan neon-glow-cyan"
-                    : "text-text-dim hover:text-text"
+                    ? "bg-ink-black text-paper-white"
+                    : "bg-paper-white text-ink-black hover:bg-light-grain"
                 }`}
               >
                 {t === "login" ? "LOGIN" : "REGISTRO"}
@@ -70,30 +91,63 @@ export function AuthView() {
             ))}
           </div>
 
+          {/* Error message */}
           {displayError && (
-            <div className="w-full px-4 py-2 rounded-md bg-neon-red/10 border border-neon-red/40 text-neon-red text-xs text-center font-display tracking-wider">
+            <div className="w-full max-w-sm px-4 py-2 mb-4 text-sm text-center font-sans text-red-800 bg-red-100 ink-border rounded-lg">
               {displayError}
             </div>
           )}
 
-          <form className="w-full space-y-4" onSubmit={handleSubmit}>
-            <NeonInput label="Nome de Usuário" value={name} onChange={setName} placeholder="commander_07" />
-            <NeonInput label="Senha" type="password" value={pwd} onChange={setPwd} placeholder="••••••••" />
+          {/* Form */}
+          <form className="w-full max-w-sm space-y-6" onSubmit={handleSubmit}>
+            <NeonInput
+              label="COMANDANTE"
+              value={name}
+              onChange={setName}
+              placeholder="Seu nome"
+            />
+            <NeonInput
+              label="CÓDIGO SECRETO"
+              type="password"
+              value={pwd}
+              onChange={setPwd}
+              placeholder="••••••••"
+            />
             {tab === "register" && (
-              <NeonInput label="Confirmar Senha" type="password" value={confirmPwd} onChange={setConfirmPwd} placeholder="••••••••" />
+              <NeonInput
+                label="CONFIRMAR CÓDIGO"
+                type="password"
+                value={confirmPwd}
+                onChange={setConfirmPwd}
+                placeholder="••••••••"
+              />
             )}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className={`w-full my-5 py-3 rounded-md font-display font-bold tracking-[0.25em] text-sm transition-all ${
-                submitting
-                  ? "bg-neon-cyan/50 text-bg-elev cursor-wait"
-                  : "text-bg-elev bg-neon-cyan hover:bg-neon-mint neon-glow-cyan"
-              }`}
-            >
-              {submitting ? "AGUARDE..." : tab === "login" ? "ENTRAR" : "CADASTRAR-SE"}
-            </button>
+            {/* Botão submit - rubber button */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={submitting}
+                className={`w-full bg-ink-black text-paper-white font-display text-[32px] font-extrabold py-3 px-6 rounded-full ink-border hard-shadow uppercase flex items-center justify-center gap-2 transition-all ${
+                  submitting
+                    ? "opacity-50 cursor-wait"
+                    : "hover:scale-105 hover:scale-y-95 active:scale-95 active:scale-y-105"
+                }`}
+                onMouseEnter={(e) => {
+                  if (!submitting) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.animation = "none";
+                }}
+              >
+                <span>{submitting ? "AGUARDE..." : tab === "login" ? "ENTRAR" : "REGISTRAR"}</span>
+                {!submitting && (
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    {tab === "login" ? "login" : "how_to_reg"}
+                  </span>
+                )}
+              </button>
+            </div>
           </form>
         </div>
       </div>
