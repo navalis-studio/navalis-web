@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { NeonInput } from "../shared/NeonInput";
 import { useAuth } from "../../contexts/AuthContext";
-import logo from "../../img/navalis_logo.png";
+import navalisName from "../../img/black_navalis_name.png";
+import navalisShip from "../../img/black_navalis_ship.png";
 
 export function AuthView() {
   const { login, register, error, clearError } = useAuth();
@@ -59,13 +60,22 @@ export function AuthView() {
 
         {/* Conteúdo */}
         <div className="p-8 pt-12 pb-10 flex flex-col items-center relative z-20">
-          {/* Logo */}
-          <div className="mb-6 text-center">
+          {/* Logo - Título + Navio animado */}
+          <div className="mb-6 flex flex-col items-center">
+            {/* Título NAVALIS */}
             <img
-              src={logo}
+              src={navalisName}
               alt="Navalis"
-              className="w-56 h-auto mx-auto"
+              className="w-72 h-auto"
             />
+            {/* Navio com walk-in-place animation */}
+            <div className="ship-walk mt-2">
+              <img
+                src={navalisShip}
+                alt=""
+                className="w-48 h-auto"
+              />
+            </div>
           </div>
 
           {/* Tagline */}
@@ -101,13 +111,13 @@ export function AuthView() {
           {/* Form */}
           <form className="w-full max-w-sm space-y-6" onSubmit={handleSubmit}>
             <NeonInput
-              label="COMANDANTE"
+              label="USUÁRIO"
               value={name}
               onChange={setName}
-              placeholder="Seu nome"
+              placeholder="Seu usuário"
             />
             <NeonInput
-              label="CÓDIGO SECRETO"
+              label="SENHA"
               type="password"
               value={pwd}
               onChange={setPwd}
@@ -115,7 +125,7 @@ export function AuthView() {
             />
             {tab === "register" && (
               <NeonInput
-                label="CONFIRMAR CÓDIGO"
+                label="CONFIRMAR SENHA"
                 type="password"
                 value={confirmPwd}
                 onChange={setConfirmPwd}
@@ -151,6 +161,45 @@ export function AuthView() {
           </form>
         </div>
       </div>
+
+      {/* Walk-in-place animation styles */}
+      <style>{`
+        .ship-walk {
+          animation: ship-bounce 0.9s ease-in-out infinite;
+        }
+
+        .ship-walk img {
+          animation: ship-sway 1.8s ease-in-out infinite;
+          transform-origin: center bottom;
+        }
+
+        @keyframes ship-bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          15% {
+            transform: translateY(-6px) scaleY(1.03) scaleX(0.97);
+          }
+          40% {
+            transform: translateY(0) scaleY(0.97) scaleX(1.02);
+          }
+          65% {
+            transform: translateY(-6px) scaleY(1.03) scaleX(0.97);
+          }
+          90% {
+            transform: translateY(0) scaleY(0.97) scaleX(1.02);
+          }
+        }
+
+        @keyframes ship-sway {
+          0%, 100% {
+            transform: rotate(-2deg);
+          }
+          50% {
+            transform: rotate(2deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }
