@@ -1,5 +1,4 @@
 import { FilmOverlay } from "./components/shared/FilmOverlay";
-import { AmbientBackdrop } from "./components/shared/AmbientBackdrop";
 import { AuthView } from "./components/auth/AuthView";
 import { LobbyView } from "./components/lobby/LobbyView";
 import { WaitingRoomView } from "./components/waiting/WaitingRoomView";
@@ -37,9 +36,6 @@ export function NavalisApp() {
 
   return (
     <div className="min-h-screen w-full bg-surface text-on-surface font-sans relative overflow-hidden">
-      {/* Background pattern */}
-      <AmbientBackdrop />
-
       {/* Content */}
       <div className="relative z-10">
         {view === "auth" && <AuthView />}

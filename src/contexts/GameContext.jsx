@@ -125,7 +125,9 @@ export function GameProvider({ children }) {
 
       case "GAME_CANCELLED":
         // Opponent left during WAITING or PLACING_SHIPS, show modal
-        setCancelledNotice("Oponente abandonou a partida.");
+        if (event.quitterId !== myUserId) {
+          setCancelledNotice("Oponente abandonou a partida.");
+        }
         break;
 
       default:

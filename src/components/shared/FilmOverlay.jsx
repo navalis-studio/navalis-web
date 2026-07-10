@@ -36,7 +36,7 @@ export function FilmOverlay() {
         <div className="film-scratch" style={{ left: "68%", animationDuration: "9s", animationDelay: "6s" }} />
       </div>
 
-      {/* Vignette estilo funil - bordas escuras profundas */}
+      {/* Vignette estilo funil - bordas escuras */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-[9998]"
@@ -44,9 +44,9 @@ export function FilmOverlay() {
           background: `
             radial-gradient(circle at 50% 50%,
               rgba(0,0,0,0.0) 0%,
-              rgba(0,0,0,0.3) 40%,
-              rgba(0,0,0,0.78) 65%,
-              rgba(0,0,0,0.97) 100%
+              rgba(0,0,0,0.1) 40%,
+              rgba(0,0,0,0.5) 68%,
+              rgba(0,0,0,0.85) 100%
             )
           `,
         }}
@@ -57,7 +57,7 @@ export function FilmOverlay() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-[1] projector-glow"
         style={{
-          background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 55%)",
+          background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 60%)",
         }}
       />
 

@@ -67,6 +67,7 @@ export function AuthView() {
               src={navalisName}
               alt="Navalis"
               className="w-72 h-auto"
+              draggable="false"
             />
             {/* Navio com walk-in-place animation */}
             <div className="ship-walk mt-2">
@@ -74,13 +75,14 @@ export function AuthView() {
                 src={navalisShip}
                 alt=""
                 className="w-48 h-auto"
+                draggable="false"
               />
             </div>
           </div>
 
           {/* Tagline */}
           <p className="font-display text-2xl font-semibold text-ink-black text-center mb-8 px-4 leading-tight">
-            "Faça login para implantar sua frota"
+            "A frota aguarda seu comando."
           </p>
 
           {/* Tabs Login/Register - pill com hard shadow */}
