@@ -1,4 +1,4 @@
-import { GRID, key, cellsFor } from "../shared/constants";
+import { GRID, LETTERS, key, cellsFor } from "../shared/constants";
 import { FragmentRow } from "./FragmentRow";
 
 export function BoardGrid({
@@ -14,23 +14,29 @@ export function BoardGrid({
   onCellClick,
   onCellDrop,
   disabled,
+  sunkCells,
 }) {
   const previewKeys = new Set((preview?.cells || []).map((c) => key(c.r, c.c)));
   const shipCells = new Set();
   placed?.forEach((p) => cellsFor(p).forEach((k) => shipCells.add(k)));
 
   return (
-    <div className="select-none max-w-[420px] mx-auto">
-      <div className="grid" style={{ gridTemplateColumns: `20px repeat(${GRID}, 1fr)` }}>
+    <div className="select-none w-full mx-auto">
+      {/* Column labels (A-J) */}
+      <div className="grid" style={{ gridTemplateColumns: `24px repeat(${GRID}, 1fr)` }}>
         <div />
-        {Array.from({ length: GRID }).map((_, c) => (
-          <div key={c} className="text-center text-[9px] text-text-dim font-mono py-0.5 tracking-widest">
-            {c + 1}
+        {LETTERS.map((letter) => (
+          <div key={letter} className="text-center font-mono text-[11px] font-bold text-paper-white py-1 tracking-wider">
+            {letter}
           </div>
         ))}
       </div>
 
-      <div className="grid gap-0" style={{ gridTemplateColumns: `20px repeat(${GRID}, 1fr)` }}>
+      {/* Grid rows */}
+      <div
+        className="grid gap-0 border-3 border-paper-white shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]"
+        style={{ gridTemplateColumns: `24px repeat(${GRID}, 1fr)` }}
+      >
         {Array.from({ length: GRID }).map((_, r) => (
           <FragmentRow
             key={r}
@@ -47,6 +53,7 @@ export function BoardGrid({
             onCellClick={onCellClick}
             onCellDrop={onCellDrop}
             disabled={disabled}
+            sunkCells={sunkCells}
           />
         ))}
       </div>
