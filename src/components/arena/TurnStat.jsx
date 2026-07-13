@@ -1,9 +1,9 @@
 export function TurnStat({ label, value, accent }) {
-  const color = accent === "mint" ? "text-neon-mint" : accent === "red" ? "text-neon-red" : "text-neon-cyan";
+  const color = accent === "green" ? "text-green-400" : accent === "red" ? "text-red-400" : "text-paper-white";
   return (
-    <div className="text-right">
-      <div className="text-[9px] tracking-[0.3em] text-text-dim font-display">{label}</div>
-      <div className={`font-display font-bold text-2xl ${color}`}>{value}</div>
+    <div className="text-center">
+      <div className="font-mono text-[9px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">{label}</div>
+      <div className={`font-display font-extrabold text-2xl ${color}`}>{value}</div>
     </div>
   );
 }

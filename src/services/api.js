@@ -71,13 +71,17 @@ export function getStoredAuth() {
 }
 
 // Games
-// GameResponse: { gameId (UUID), status, message }
+// GameResponse: { gameId (UUID), roomCode, status, message }
 export async function createGame() {
   return request("/games", { method: "POST" });
 }
 
 export async function joinGame(gameId) {
   return request(`/games/${gameId}/join`, { method: "POST" });
+}
+
+export async function joinByRoomCode(roomCode) {
+  return request(`/games/join/${roomCode}`, { method: "POST" });
 }
 
 export async function listAvailableGames() {

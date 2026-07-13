@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { FLEET, GRID, isValidPlacement, cellsFor } from "../shared/constants";
-import { BrandMark } from "../shared/BrandMark";
 import { BoardGrid } from "../board/BoardGrid";
 import { useGame } from "../../contexts/GameContext";
 
@@ -88,158 +87,250 @@ export function PlacingShipsView() {
     confirmFleet(placed);
   }
 
+  const SHIP_ICONS = {
+    carrier: "flight_takeoff",
+    battleship: "directions_boat",
+    destroyer: "sailing",
+    submarine: "waves",
+    patrol: "speed",
+  };
+
   return (
-    <div className="min-h-screen px-4 lg:px-8 py-4 max-w-[1100px] mx-auto">
-      <header className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-6">
-          <BrandMark size={32} />
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-tac-blue-deep/60 bg-bg-elev/60">
-            <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan animate-[pulse-neon_1.6s_ease-in-out_infinite]" />
-            <span className="text-[10px] tracking-[0.3em] text-text-dim font-display">FASE</span>
-            <span className="text-xs text-neon-cyan font-display tracking-[0.25em]">POSICIONAMENTO</span>
-          </div>
-          {opponentReady && (
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-neon-mint/60 bg-neon-mint/5">
-              <span className="h-1.5 w-1.5 rounded-full bg-neon-mint" />
-              <span className="text-[10px] tracking-[0.3em] text-neon-mint font-display">OPONENTE PRONTO</span>
-            </div>
-          )}
+    <div className="min-h-screen px-4 lg:px-8 py-6 max-w-[1200px] mx-auto relative z-10">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <h1 className="font-display text-2xl lg:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
+            Grade de Posicionamento
+          </h1>
+          <span className="hidden md:inline-block font-mono text-[11px] font-bold tracking-[0.1em] bg-paper-white text-ink-black px-3 py-1 rounded-full border-2 border-ink-black">
+            FASE DE PREPARAÇÃO
+          </span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={leaveGame} className="text-[10px] tracking-[0.3em] text-text-dim hover:text-neon-red font-display">
+          {opponentReady && (
+            <span className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container-high px-3 py-1.5 rounded-full ink-border flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse" />
+              OPONENTE PRONTO
+            </span>
+          )}
+          <button
+            onClick={leaveGame}
+            className="font-mono text-[12px] font-bold tracking-[0.1em] text-red-400 hover:text-red-300 transition-colors uppercase border border-red-400/50 rounded-full px-4 py-1.5 hover:border-red-300"
+          >
             ABORTAR
           </button>
-          <button onClick={autoPlace} disabled={confirming} className="px-3 py-2 rounded border border-tac-blue-deep/70 text-text-dim hover:text-neon-cyan hover:border-neon-cyan/60 text-[10px] tracking-[0.3em] font-display disabled:opacity-40">
-            AUTO-POSICIONAR
-          </button>
-          <button
-            disabled={!allPlaced || confirming}
-            onClick={handleConfirm}
-            className={`px-6 py-2.5 rounded font-display font-bold tracking-[0.25em] text-xs transition-all ${
-              allPlaced && !confirming
-                ? "bg-neon-mint text-bg-elev neon-glow-cyan hover:bg-neon-cyan"
-                : "bg-bg-elev/60 text-text-dim border border-tac-blue-deep/50 cursor-not-allowed"
-            }`}
-          >
-            {confirming ? "ENVIANDO..." : "CONFIRMAR FROTA"}
-          </button>
         </div>
-      </header>
+      </div>
 
-      <div className="grid lg:grid-cols-[260px_1fr] gap-4">
-        <aside className="tac-panel rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display tracking-[0.15em] text-xs">DOCA DA FROTA</h3>
-            <span className="text-[9px] text-text-dim font-mono">{placed.length}/{FLEET.length}</span>
+      {/* Main layout: Grid + Controls */}
+      <div className="grid lg:grid-cols-[1fr_320px] gap-8 h-[calc(100vh-130px)]">
+        {/* Grid Section */}
+        <div className="flex flex-col items-center justify-center relative">
+          <div className="max-w-[520px] w-full">
+            <BoardGrid
+              occupied={occupied}
+              placed={placed}
+              preview={!confirming ? preview : null}
+              interactive={!confirming}
+              onCellEnter={(r, c) => setHover({ row: r, col: c })}
+              onCellLeave={() => setHover(null)}
+              onCellClick={(r, c) => tryPlace(r, c)}
+              onCellDrop={(r, c) => tryPlace(r, c)}
+            />
           </div>
 
-          <div className="mb-4">
-            <div className="text-[9px] tracking-[0.2em] text-text-dim font-display mb-2">ORIENTAÇÃO · [R]</div>
-            <div className="grid grid-cols-2 p-1 rounded-md bg-bg-elev border border-tac-blue-deep/60">
-              {["H", "V"].map((o) => (
-                <button
-                  key={o}
-                  onClick={() => setOrientation(o)}
-                  className={`py-1.5 text-[10px] font-display tracking-[0.15em] rounded transition-all ${
-                    orientation === o
-                      ? "bg-tac-blue/20 text-neon-cyan neon-glow-cyan"
-                      : "text-text-dim hover:text-text"
-                  }`}
-                >
-                  {o === "H" ? "HORIZ." : "VERT."}
-                </button>
-              ))}
+          {/* Instructions */}
+          <div className="mt-8 max-w-[520px] w-full bg-surface-container-high ink-border rounded-lg p-4 hard-shadow-sm">
+            <div className="font-mono text-[12px] text-on-surface-variant leading-relaxed space-y-1.5">
+              <div>· Arraste ou clique para posicionar</div>
+              <div>· Pressione <span className="text-paper-white font-bold">[R]</span> para girar</div>
+              <div>· Clique "REMOVER" para reposicionar</div>
             </div>
           </div>
-
-          <div className="space-y-2">
-            {FLEET.map((s) => {
-              const isPlaced = placedIds.has(s.id);
-              const isSelected = selectedShipId === s.id && !isPlaced;
-              return (
-                <div
-                  key={s.id}
-                  draggable={!isPlaced && !confirming}
-                  onDragStart={() => { setDraggingId(s.id); setSelectedShipId(s.id); }}
-                  onDragEnd={() => setDraggingId(null)}
-                  onClick={() => !isPlaced && !confirming && setSelectedShipId(s.id)}
-                  className={`relative p-2 rounded-md border transition-all cursor-grab active:cursor-grabbing ${
-                    isPlaced
-                      ? "border-tac-blue-deep/30 bg-bg-elev/30 opacity-40"
-                      : isSelected
-                      ? "border-neon-cyan bg-neon-cyan/5 neon-glow-cyan"
-                      : "border-tac-blue-deep/60 bg-bg-elev/60 hover:border-neon-cyan/60"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div>
-                      <div className="font-display tracking-wider text-xs text-text">{s.name}</div>
-                      <div className="text-[9px] text-text-dim font-mono tracking-wide">
-                        TAM {s.size} · QTD {isPlaced ? 0 : 1}
-                      </div>
-                    </div>
-                    {isPlaced && !confirming && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); removeShip(s.id); }}
-                        className="text-[10px] text-neon-red hover:underline font-display tracking-widest"
-                      >
-                        REMOVER
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: s.size }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`h-2 flex-1 rounded-sm ${
-                          isPlaced
-                            ? "bg-tac-blue-deep/40"
-                            : "bg-gradient-to-r from-tac-blue to-neon-cyan shadow-[0_0_8px_rgba(0,168,255,0.4)]"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-5 text-[10px] text-text-dim font-mono leading-relaxed border-t border-tac-blue-deep/40 pt-3">
-            <div>· Arraste um navio até o tabuleiro</div>
-            <div>· Ou selecione + clique em uma célula</div>
-            <div>· Pressione <span className="text-neon-cyan">R</span> para girar</div>
-          </div>
-        </aside>
-
-        <section className="tac-panel rounded-xl p-5 relative">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display tracking-[0.2em] text-sm">GRADE DE POSICIONAMENTO</h3>
-            <div className="flex items-center gap-4 text-[10px] tracking-[0.25em] text-text-dim font-display">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-neon-mint shadow-[0_0_8px_#00FFCC]" /> VÁLIDO</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-neon-red shadow-[0_0_8px_#FF3B5C]" /> INVÁLIDO</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-neon-cyan" /> POSICIONADO</span>
-            </div>
-          </div>
-
-          <BoardGrid
-            occupied={occupied}
-            placed={placed}
-            preview={!confirming ? preview : null}
-            interactive={!confirming}
-            onCellEnter={(r, c) => setHover({ row: r, col: c })}
-            onCellLeave={() => setHover(null)}
-            onCellClick={(r, c) => tryPlace(r, c)}
-            onCellDrop={(r, c) => tryPlace(r, c)}
-          />
 
           {confirming && (
-            <div className="absolute inset-0 flex items-center justify-center bg-bg/60 rounded-xl">
-              <div className="px-6 py-3 rounded-md tac-panel border border-neon-cyan/40 text-neon-cyan font-display tracking-[0.3em] text-sm animate-pulse">
-                AGUARDANDO OPONENTE...
+            <div className="absolute inset-0 flex items-center justify-center bg-surface/80 rounded-xl">
+              <div className="bg-surface-container-high ink-border rounded-lg px-8 py-4 hard-shadow flex items-center gap-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-paper-white animate-pulse" />
+                <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide">
+                  Aguardando oponente...
+                </span>
               </div>
             </div>
           )}
-        </section>
+        </div>
+
+        {/* Right Panel: Fleet Dock + Controls */}
+        <aside className="flex flex-col gap-4">
+          {/* Fleet Dock */}
+          <div className="bg-paper-white border-4 border-ink-black rounded-xl p-5 shadow-[6px_6px_0px_0px_#000]">
+            <h3 className="font-display text-xl font-extrabold text-ink-black uppercase tracking-tight text-center border-b-4 border-ink-black pb-2 mb-4">
+              Doca da Frota
+            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-mono text-[12px] font-bold text-mid-tone-grey tracking-[0.1em]">
+                {placed.length}/{FLEET.length} POSICIONADOS
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {FLEET.map((s) => {
+                const isPlaced = placedIds.has(s.id);
+                const isSelected = selectedShipId === s.id && !isPlaced;
+                return (
+                  <div
+                    key={s.id}
+                    draggable={!isPlaced && !confirming}
+                    onDragStart={() => { setDraggingId(s.id); setSelectedShipId(s.id); }}
+                    onDragEnd={() => setDraggingId(null)}
+                    onClick={() => !isPlaced && !confirming && setSelectedShipId(s.id)}
+                    className={`flex items-center justify-between p-3.5 rounded-lg border-2 transition-all ${
+                      isPlaced
+                        ? "border-mid-tone-grey/50 bg-light-grain/50 opacity-50 cursor-not-allowed"
+                        : isSelected
+                        ? "border-ink-black bg-surface-container-high cursor-grab active:cursor-grabbing shadow-[3px_3px_0px_0px_#000]"
+                        : "border-ink-black bg-white cursor-grab active:cursor-grabbing hover:bg-light-grain"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`material-symbols-outlined text-xl ${isPlaced ? "text-mid-tone-grey" : isSelected ? "text-paper-white" : "text-ink-black"}`}
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        {SHIP_ICONS[s.id]}
+                      </span>
+                      <div className="flex flex-col">
+                        <span className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight ${
+                          isPlaced ? "text-mid-tone-grey line-through" : isSelected ? "text-paper-white" : "text-ink-black"
+                        }`}>
+                          {s.name}
+                        </span>
+                        <span className={`font-mono text-[11px] tracking-[0.05em] ${
+                          isPlaced ? "text-mid-tone-grey" : isSelected ? "text-on-surface-variant" : "text-mid-tone-grey"
+                        }`}>
+                          TAM. {s.size}
+                        </span>
+                      </div>
+                    </div>
+
+                    {isPlaced ? (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); if (!confirming) removeShip(s.id); }}
+                        className="font-mono text-[9px] font-bold text-ink-black bg-paper-white px-2 py-1 rounded border border-ink-black hover:bg-light-grain"
+                      >
+                        REMOVER
+                      </button>
+                    ) : (
+                      <div className="flex gap-1.5">
+                        {Array.from({ length: s.size }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={`w-3 h-3 rounded-sm ${isSelected ? "bg-paper-white" : "bg-ink-black"}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Orientation Toggle */}
+          <div className="bg-surface-container-high ink-border rounded-xl p-4 hard-shadow-sm flex flex-col items-center gap-3">
+            <span className="font-mono text-[11px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
+              Orientação · [R]
+            </span>
+            <div className="flex w-full bg-surface border-2 border-paper-white rounded-full p-1 relative">
+              <div
+                className={`absolute bg-paper-white rounded-full transition-all duration-200`}
+                style={{
+                  width: "calc(50% - 4px)",
+                  height: "calc(100% - 8px)",
+                  top: "4px",
+                  left: orientation === "V" ? "calc(50% + 2px)" : "4px",
+                }}
+              />
+              <button
+                onClick={() => setOrientation("H")}
+                className={`flex-1 text-center py-2 z-10 font-mono text-[11px] font-bold tracking-[0.1em] transition-colors ${
+                  orientation === "H" ? "text-ink-black" : "text-on-surface-variant"
+                }`}
+              >
+                HORIZ.
+              </button>
+              <button
+                onClick={() => setOrientation("V")}
+                className={`flex-1 text-center py-2 z-10 font-mono text-[11px] font-bold tracking-[0.1em] transition-colors ${
+                  orientation === "V" ? "text-ink-black" : "text-on-surface-variant"
+                }`}
+              >
+                VERT.
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <button
+            onClick={autoPlace}
+            disabled={confirming}
+            className="w-full bg-surface-container-high text-paper-white ink-border font-display text-base font-extrabold py-3 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
+            onMouseEnter={(e) => {
+              if (!confirming) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.animation = "none";
+            }}
+          >
+            <span
+              className="material-symbols-outlined text-xl"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              shuffle
+            </span>
+            Auto-Posicionar
+          </button>
+
+          <button
+            onClick={() => setPlaced([])}
+            disabled={confirming || placed.length === 0}
+            className="w-full bg-surface-container text-mid-tone-grey ink-border font-mono text-[12px] font-bold py-2.5 rounded-xl uppercase flex items-center justify-center gap-2 transition-all hover:text-paper-white disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <span
+              className="material-symbols-outlined text-lg"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              delete
+            </span>
+            Limpar Tudo
+          </button>
+
+          <button
+            disabled={!allPlaced || confirming}
+            onClick={handleConfirm}
+            className={`w-full font-display text-lg font-extrabold py-4 rounded-xl uppercase flex items-center justify-center gap-2 transition-all ${
+              allPlaced && !confirming
+                ? "bg-paper-white text-ink-black border-4 border-ink-black shadow-[6px_6px_0px_0px_#000] hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
+                : "bg-surface-container text-mid-tone-grey border-2 border-mid-tone-grey/50 cursor-not-allowed opacity-50"
+            }`}
+            onMouseEnter={(e) => {
+              if (allPlaced && !confirming) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.animation = "none";
+            }}
+          >
+            <span
+              className="material-symbols-outlined text-xl"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              check_circle
+            </span>
+            {confirming ? "Enviando..." : "Confirmar Frota"}
+          </button>
+
+        </aside>
       </div>
     </div>
   );

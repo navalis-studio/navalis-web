@@ -1,4 +1,24 @@
+import { useMemo } from "react";
+
+function generateParticles(count, sizeClass) {
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      id: `${sizeClass}-${i}`,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      delay: `${(Math.random() * 5).toFixed(1)}s`,
+      duration: `${(3 + Math.random() * 2).toFixed(1)}s`,
+      pattern: Math.floor(Math.random() * 4),
+    });
+  }
+  return particles;
+}
+
 export function FilmOverlay() {
+  const smallParticles = useMemo(() => generateParticles(12, "sm"), []);
+  const largeParticles = useMemo(() => generateParticles(5, "lg"), []);
+
   return (
     <>
       {/* Film Grain - estático, sem movimento */}
@@ -11,29 +31,30 @@ export function FilmOverlay() {
         }}
       />
 
-      {/* Dust particles - mais visíveis */}
+      {/* Dust particles */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-[9997] overflow-hidden">
-        <div className="dust-particle" style={{ top: "12%", left: "18%", animationDelay: "0s" }} />
-        <div className="dust-particle" style={{ top: "38%", left: "62%", animationDelay: "0.5s" }} />
-        <div className="dust-particle" style={{ top: "68%", left: "33%", animationDelay: "1.1s" }} />
-        <div className="dust-particle" style={{ top: "22%", left: "78%", animationDelay: "1.6s" }} />
-        <div className="dust-particle" style={{ top: "58%", left: "12%", animationDelay: "0.2s" }} />
-        <div className="dust-particle" style={{ top: "82%", left: "55%", animationDelay: "2.0s" }} />
-        <div className="dust-particle" style={{ top: "45%", left: "42%", animationDelay: "0.8s" }} />
-        <div className="dust-particle" style={{ top: "8%", left: "52%", animationDelay: "1.3s" }} />
-        <div className="dust-particle" style={{ top: "90%", left: "75%", animationDelay: "2.4s" }} />
-        <div className="dust-particle" style={{ top: "33%", left: "88%", animationDelay: "0.4s" }} />
-        <div className="dust-particle-lg" style={{ top: "28%", left: "70%", animationDelay: "1.0s" }} />
-        <div className="dust-particle-lg" style={{ top: "72%", left: "25%", animationDelay: "2.2s" }} />
-        <div className="dust-particle-lg" style={{ top: "50%", left: "85%", animationDelay: "0.6s" }} />
-        <div className="dust-particle-lg" style={{ top: "18%", left: "40%", animationDelay: "1.8s" }} />
+        {smallParticles.map((p) => (
+          <div
+            key={p.id}
+            className={`dust-particle dust-pattern-${p.pattern}`}
+            style={{ top: p.top, left: p.left, animationDelay: p.delay, animationDuration: p.duration }}
+          />
+        ))}
+        {largeParticles.map((p) => (
+          <div
+            key={p.id}
+            className={`dust-particle-lg dust-pattern-${p.pattern}`}
+            style={{ top: p.top, left: p.left, animationDelay: p.delay, animationDuration: p.duration }}
+          />
+        ))}
       </div>
 
       {/* Vertical scratches */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-[9996] overflow-hidden">
-        <div className="film-scratch" style={{ left: "22%", animationDuration: "8s", animationDelay: "0s" }} />
-        <div className="film-scratch" style={{ left: "47%", animationDuration: "10s", animationDelay: "3s" }} />
-        <div className="film-scratch" style={{ left: "68%", animationDuration: "9s", animationDelay: "6s" }} />
+        <div className="film-scratch" style={{ left: "18%", animationDuration: "6s", animationDelay: "0s" }} />
+        <div className="film-scratch" style={{ left: "42%", animationDuration: "7.5s", animationDelay: "2s" }} />
+        <div className="film-scratch" style={{ left: "65%", animationDuration: "6.5s", animationDelay: "4.5s" }} />
+        <div className="film-scratch" style={{ left: "83%", animationDuration: "8s", animationDelay: "1s" }} />
       </div>
 
       {/* Vignette estilo funil - bordas escuras */}
@@ -64,50 +85,84 @@ export function FilmOverlay() {
       <style>{`
         .dust-particle {
           position: absolute;
-          width: 3px;
-          height: 3px;
+          width: 4px;
+          height: 4px;
           background: white;
           border-radius: 50%;
           opacity: 0;
-          animation: dust-flicker 2s infinite;
         }
 
         .dust-particle-lg {
           position: absolute;
-          width: 5px;
-          height: 5px;
+          width: 6px;
+          height: 6px;
           background: white;
           border-radius: 50%;
           filter: blur(0.5px);
           opacity: 0;
-          animation: dust-flicker 2.5s infinite;
         }
 
-        @keyframes dust-flicker {
+        /* 4 padrões diferentes - cada um pisca 1x por ciclo em momentos distintos */
+        .dust-pattern-0 {
+          animation-name: dust-a;
+          animation-iteration-count: infinite;
+          animation-timing-function: ease-in-out;
+        }
+        .dust-pattern-1 {
+          animation-name: dust-b;
+          animation-iteration-count: infinite;
+          animation-timing-function: ease-in-out;
+        }
+        .dust-pattern-2 {
+          animation-name: dust-c;
+          animation-iteration-count: infinite;
+          animation-timing-function: ease-in-out;
+        }
+        .dust-pattern-3 {
+          animation-name: dust-d;
+          animation-iteration-count: infinite;
+          animation-timing-function: ease-in-out;
+        }
+
+        @keyframes dust-a {
           0%, 100% { opacity: 0; }
-          3% { opacity: 1; }
-          6% { opacity: 0.9; }
-          9% { opacity: 0; }
-          35% { opacity: 0; }
-          37% { opacity: 0.85; }
-          40% { opacity: 0; }
-          65% { opacity: 0; }
-          67% { opacity: 0.95; }
-          70% { opacity: 0; }
+          6% { opacity: 1; }
+          14% { opacity: 0; }
+        }
+
+        @keyframes dust-b {
+          0%, 100% { opacity: 0; }
+          28% { opacity: 0; }
+          34% { opacity: 1; }
+          42% { opacity: 0; }
+        }
+
+        @keyframes dust-c {
+          0%, 100% { opacity: 0; }
+          52% { opacity: 0; }
+          58% { opacity: 1; }
+          66% { opacity: 0; }
+        }
+
+        @keyframes dust-d {
+          0%, 100% { opacity: 0; }
+          75% { opacity: 0; }
+          81% { opacity: 1; }
+          89% { opacity: 0; }
         }
 
         .film-scratch {
           position: absolute;
           top: 0;
           bottom: 0;
-          width: 2px;
+          width: 1.5px;
           opacity: 0;
           background: linear-gradient(
             to bottom,
             transparent 0%,
-            rgba(255,255,255,0.6) 15%,
-            rgba(255,255,255,0.85) 50%,
-            rgba(255,255,255,0.6) 85%,
+            rgba(255,255,255,0.5) 20%,
+            rgba(255,255,255,0.75) 50%,
+            rgba(255,255,255,0.5) 80%,
             transparent 100%
           );
           animation: scratch-flicker infinite linear;
@@ -115,12 +170,12 @@ export function FilmOverlay() {
 
         @keyframes scratch-flicker {
           0%, 100% { opacity: 0; }
-          2% { opacity: 0.9; }
-          4% { opacity: 0.7; }
-          6% { opacity: 0; }
-          50% { opacity: 0; }
-          52% { opacity: 0.6; }
-          53% { opacity: 0; }
+          4% { opacity: 0.85; }
+          8% { opacity: 0.6; }
+          10% { opacity: 0; }
+          55% { opacity: 0; }
+          58% { opacity: 0.7; }
+          60% { opacity: 0; }
         }
 
         .projector-glow {
