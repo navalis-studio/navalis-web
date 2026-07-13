@@ -11,6 +11,7 @@ export function GameProvider({ children }) {
 
   // Game state
   const [gameId, setGameId] = useState(null);
+  const [roomCode, setRoomCode] = useState(null);
   const [gameState, setGameState] = useState(null); // WAITING_FOR_OPPONENT, PLACING_SHIPS, IN_PROGRESS, FINISHED
   const [opponent, setOpponent] = useState(null);
   const [myTurn, setMyTurn] = useState(false);
@@ -24,6 +25,12 @@ export function GameProvider({ children }) {
   const [opponentReady, setOpponentReady] = useState(false);
   const [myReady, setMyReady] = useState(false);
   const [cancelledNotice, setCancelledNotice] = useState(null);
+  const [sunkEnemyShips, setSunkEnemyShips] = useState([]);
+  const [sunkMyShips, setSunkMyShips] = useState([]);
+  const [sunkEnemyCells, setSunkEnemyCells] = useState(new Set());
+
+  const enemyMarksRef = useRef(enemyMarks);
+  useEffect(() => { enemyMarksRef.current = enemyMarks; }, [enemyMarks]);
 
   const LETTERS = "ABCDEFGHIJ".split("");
 
@@ -81,6 +88,36 @@ export function GameProvider({ children }) {
             return next;
           });
           pushLog(`TIRO ${LETTERS[row]}${col + 1} — ${hit ? "ACERTO DIRETO" : "ÁGUA"}${sunkShipType ? ` (${sunkShipType} AFUNDADO!)` : ""}`);
+          if (sunkShipType) {
+            setSunkEnemyShips((prev) => [...prev, sunkShipType]);
+            // Flood-fill to find all connected hit cells forming the sunk ship
+            setSunkEnemyCells((prev) => {
+              const next = new Set(prev);
+              const visited = new Set();
+              const queue = [cellKey];
+              visited.add(cellKey);
+              // We need current enemyMarks + the new cell
+              const currentMarks = new Map(enemyMarksRef.current);
+              currentMarks.set(cellKey, "hit");
+              while (queue.length > 0) {
+                const current = queue.shift();
+                next.add(current);
+                // Parse "row,col" from key
+                const [cr, cc] = current.split(",").map(Number);
+                const neighbors = [
+                  key(cr - 1, cc), key(cr + 1, cc),
+                  key(cr, cc - 1), key(cr, cc + 1),
+                ];
+                for (const n of neighbors) {
+                  if (!visited.has(n) && currentMarks.get(n) === "hit" && !prev.has(n)) {
+                    visited.add(n);
+                    queue.push(n);
+                  }
+                }
+              }
+              return next;
+            });
+          }
         } else {
           setMyMarks((prev) => {
             const next = new Map(prev);
@@ -88,6 +125,9 @@ export function GameProvider({ children }) {
             return next;
           });
           pushLog(`INIMIGO ATIRA ${LETTERS[row]}${col + 1} — ${hit ? "FOMOS ATINGIDOS" : "ÁGUA"}${sunkShipType ? ` (${sunkShipType} AFUNDADO!)` : ""}`);
+          if (sunkShipType) {
+            setSunkMyShips((prev) => [...prev, sunkShipType]);
+          }
         }
 
         if (isGameOver) {
@@ -126,7 +166,7 @@ export function GameProvider({ children }) {
       case "GAME_CANCELLED":
         // Opponent left during WAITING or PLACING_SHIPS, show modal
         if (event.quitterId !== myUserId) {
-          setCancelledNotice("Oponente abandonou a partida.");
+          setCancelledNotice("O covarde fugiu antes da batalha.");
         }
         break;
 
@@ -151,9 +191,10 @@ export function GameProvider({ children }) {
     setError(null);
     try {
       const game = await api.createGame();
-      // GameResponse: { gameId, status, message }
+      // GameResponse: { gameId, roomCode, status, message }
       const id = game.gameId;
       setGameId(id);
+      setRoomCode(game.roomCode);
       setGameState("WAITING_FOR_OPPONENT");
       setOpponent(null);
       resetGameState();
@@ -166,14 +207,19 @@ export function GameProvider({ children }) {
     }
   }, [connectToGame]);
 
-  // Join an existing game
+  // Join an existing game (by UUID or room code)
   const joinGame = useCallback(async (gId) => {
     setError(null);
     try {
-      const game = await api.joinGame(gId);
-      // GameResponse: { gameId, status, message }
+      // Detect if it's a room code (short, letters only) or a UUID
+      const isRoomCode = gId.length <= 6 && /^[A-Za-z]+$/.test(gId);
+      const game = isRoomCode
+        ? await api.joinByRoomCode(gId.toUpperCase())
+        : await api.joinGame(gId);
+      // GameResponse: { gameId, roomCode, status, message }
       const id = game.gameId;
       setGameId(id);
+      setRoomCode(game.roomCode);
       setGameState("PLACING_SHIPS");
       setOpponent(null);
       resetGameState();
@@ -258,8 +304,10 @@ export function GameProvider({ children }) {
     stomp.disconnectStomp();
     resetGameState();
     setGameId(null);
+    setRoomCode(null);
     setGameState(null);
     setOpponent(null);
+    setAvailableGames([]);
     setLog([]);
   }, [gameId, gameState]);
 
@@ -272,12 +320,15 @@ export function GameProvider({ children }) {
     setMyReady(false);
     setMyTurn(false);
     setCancelledNotice(null);
+    setSunkEnemyShips([]);
+    setSunkMyShips([]);
   }
 
   const dismissCancelledNotice = useCallback(() => {
     stomp.disconnectStomp();
     resetGameState();
     setGameId(null);
+    setRoomCode(null);
     setGameState(null);
     setOpponent(null);
     setLog([]);
@@ -294,6 +345,7 @@ export function GameProvider({ children }) {
     <GameContext.Provider
       value={{
         gameId,
+        roomCode,
         gameState,
         opponent,
         myTurn,
@@ -304,6 +356,9 @@ export function GameProvider({ children }) {
         availableGames,
         error,
         log,
+        sunkEnemyShips,
+        sunkEnemyCells,
+        sunkMyShips,
         opponentReady,
         myReady,
         cancelledNotice,
