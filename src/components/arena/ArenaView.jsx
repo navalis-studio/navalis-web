@@ -1,132 +1,311 @@
 import { useMemo } from "react";
 import { FLEET, cellsFor } from "../shared/constants";
-import { BrandMark } from "../shared/BrandMark";
 import { BoardGrid } from "../board/BoardGrid";
-import { TurnStat } from "./TurnStat";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGame } from "../../contexts/GameContext";
 
+const SHIP_TYPE_MAP = {
+  CARRIER: "carrier",
+  BATTLESHIP: "battleship",
+  CRUISER: "destroyer",
+  SUBMARINE: "submarine",
+  DESTROYER: "patrol",
+};
+
+const SHIP_ICONS = {
+  carrier: "sailing",
+  battleship: "directions_boat",
+  destroyer: "kayaking",
+  submarine: "water",
+  patrol: "phishing",
+};
+
 export function ArenaView() {
   const { user } = useAuth();
-  const { myTurn, enemyMarks, myMarks, placedShips, fire, leaveGame, log } = useGame();
+  const { myTurn, enemyMarks, myMarks, placedShips, fire, leaveGame, sunkEnemyShips, sunkMyShips, sunkEnemyCells } = useGame();
 
-  const myShipCells = useMemo(() => {
-    const s = new Set();
-    placedShips.forEach((p) => cellsFor(p).forEach((k) => s.add(k)));
-    return s;
-  }, [placedShips]);
-
-  // Build occupied set for the "placed" prop of BoardGrid
   const occupied = useMemo(() => {
     const s = new Set();
     placedShips.forEach((p) => cellsFor(p).forEach((k) => s.add(k)));
     return s;
   }, [placedShips]);
 
+  const sunkSet = useMemo(() => {
+    const s = new Set();
+    (sunkEnemyShips || []).forEach((type) => {
+      const mapped = SHIP_TYPE_MAP[type];
+      if (mapped) s.add(mapped);
+    });
+    return s;
+  }, [sunkEnemyShips]);
+
+  const mySunkSet = useMemo(() => {
+    const s = new Set();
+    (sunkMyShips || []).forEach((type) => {
+      const mapped = SHIP_TYPE_MAP[type];
+      if (mapped) s.add(mapped);
+    });
+    return s;
+  }, [sunkMyShips]);
+
+  // Hits received per ship (how many cells of each ship were hit)
+  const myShipHits = useMemo(() => {
+    const hitsMap = {};
+    placedShips.forEach((ship) => {
+      const cells = cellsFor(ship);
+      let count = 0;
+      cells.forEach((key) => {
+        if (myMarks.get(key) === "hit") count++;
+      });
+      hitsMap[ship.id] = count;
+    });
+    return hitsMap;
+  }, [placedShips, myMarks]);
+
+  const hits = Array.from(enemyMarks.values()).filter((v) => v === "hit").length;
+  const received = Array.from(myMarks.values()).filter((v) => v === "hit").length;
+
+  // Cells of my ships that have been sunk (for visual on my board)
+  const mySunkCells = useMemo(() => {
+    const s = new Set();
+    placedShips.forEach((ship) => {
+      if (mySunkSet.has(ship.id)) {
+        cellsFor(ship).forEach((k) => s.add(k));
+      }
+    });
+    return s;
+  }, [placedShips, mySunkSet]);
+
   function handleFire(r, c) {
     fire(r, c);
   }
 
   return (
-    <div className="min-h-screen px-4 lg:px-8 py-4 max-w-[960px] mx-auto">
-      <header className="flex items-center justify-between mb-5">
-        <BrandMark size={32} />
+    <div className="min-h-screen px-4 lg:px-8 py-6 max-w-[1280px] mx-auto relative z-10">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <h1 className="font-display text-2xl lg:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
+            Combate Naval
+          </h1>
+          <span className="hidden md:inline-block font-mono text-[11px] font-bold tracking-[0.1em] bg-paper-white text-ink-black px-3 py-1 rounded-full border-2 border-ink-black">
+            EM BATALHA
+          </span>
+        </div>
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-tac-blue-deep/60 bg-bg-elev/60">
-            <span className="text-[10px] tracking-[0.3em] text-text-dim font-display">CMTE</span>
-            <span className="text-xs text-neon-cyan font-display tracking-[0.25em]">{user?.username}</span>
+          <div className="flex items-center gap-1.5 bg-surface-container-high rounded-full px-3 py-1.5 ink-border">
+            <span className="material-symbols-outlined text-paper-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
+            <span className="font-mono text-[11px] font-bold text-paper-white tracking-[0.1em] uppercase">{user?.username}</span>
           </div>
-          <button onClick={leaveGame} className="text-[10px] tracking-[0.3em] text-text-dim hover:text-neon-red font-display">
+          <button
+            onClick={leaveGame}
+            className="font-mono text-[12px] font-bold tracking-[0.1em] text-red-400 hover:text-red-300 transition-colors uppercase border border-red-400/50 rounded-full px-4 py-1.5 hover:border-red-300"
+          >
             DESISTIR
           </button>
         </div>
-      </header>
-
-      <div
-        className={`relative overflow-hidden rounded-xl border mb-6 px-6 py-5 ${
-          myTurn ? "border-neon-mint/60 bg-neon-mint/5" : "border-neon-red/40 bg-neon-red/5"
-        }`}
-        style={{ boxShadow: myTurn ? "0 0 40px -10px rgba(0,255,204,0.4)" : "0 0 40px -10px rgba(255,59,92,0.3)" }}
-      >
-        <div className="absolute inset-0 pointer-events-none opacity-30" style={{
-          background: `repeating-linear-gradient(0deg, ${myTurn ? "rgba(0,255,204,0.06)" : "rgba(255,59,92,0.06)"} 0 2px, transparent 2px 4px)`
-        }} />
-        <div className="relative flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="text-[10px] tracking-[0.4em] text-text-dim font-display">STATUS DA PARTIDA</div>
-            <h2
-              className={`font-display font-black text-2xl md:text-4xl tracking-[0.1em] mt-1 ${myTurn ? "text-neon-mint" : "text-neon-red/80"}`}
-              style={{ textShadow: myTurn ? "0 0 16px rgba(0,255,204,0.6)" : "0 0 16px rgba(255,59,92,0.5)" }}
-            >
-              {myTurn ? "SEU TURNO — ATIRE!" : "TURNO DO INIMIGO — AGUARDE..."}
-            </h2>
-          </div>
-          <div className="flex items-center gap-6">
-            <TurnStat label="ACERTOS" value={Array.from(enemyMarks.values()).filter(v => v === "hit").length} accent="mint" />
-            <TurnStat label="RECEBIDOS" value={Array.from(myMarks.values()).filter(v => v === "hit").length} accent="red" />
-            <TurnStat label="TIROS" value={enemyMarks.size} accent="cyan" />
-          </div>
-        </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <section className="tac-panel rounded-xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="text-[10px] tracking-[0.3em] text-text-dim font-display">VISÃO DE DEFESA</div>
-              <h3 className="font-display tracking-[0.2em] text-sm">MINHA FROTA</h3>
+      {/* Main layout */}
+      <div className="grid lg:grid-cols-[1fr_280px] gap-8">
+        {/* Left: Boards area */}
+        <div className="flex flex-col gap-6">
+          {/* Turn indicator */}
+          <div className="flex items-center justify-center">
+            <div className={`flex items-center gap-2.5 px-5 py-2 rounded-full border-2 ${
+              myTurn ? "border-paper-white bg-surface-container-high" : "border-mid-tone-grey/50 bg-surface-container"
+            }`}>
+              {myTurn && <span className="h-2.5 w-2.5 rounded-full bg-green-400 animate-pulse" />}
+              <span className={`font-display text-base font-extrabold uppercase tracking-tight ${
+                myTurn ? "text-paper-white" : "text-mid-tone-grey"
+              }`}>
+                {myTurn ? "SEU TURNO — ATAQUE!" : "TURNO DO OPONENTE"}
+              </span>
             </div>
-            <span className="text-[10px] text-text-dim font-mono">APENAS VISUALIZAÇÃO</span>
           </div>
-          <BoardGrid placed={placedShips} marks={myMarks} />
-        </section>
 
-        <section className="tac-panel rounded-xl p-5 relative">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="text-[10px] tracking-[0.3em] text-text-dim font-display">VISÃO DE ATAQUE</div>
-              <h3 className="font-display tracking-[0.2em] text-sm flex items-center gap-2">
-                FROTA INIMIGA
-                <span className="text-[10px] text-text-dim font-mono">· NÉVOA DE GUERRA</span>
-              </h3>
-            </div>
-            <div className="relative h-8 w-8 rounded-full border border-neon-cyan/40 overflow-hidden">
-              <div className="absolute inset-0" style={{
-                background: "conic-gradient(from 0deg, rgba(0,168,255,0.6), transparent 40%)",
-                animation: "radar-sweep 3s linear infinite",
-              }} />
-              <div className="absolute inset-1 rounded-full border border-neon-cyan/30" />
-            </div>
-          </div>
-          <BoardGrid
-            marks={enemyMarks}
-            fog
-            interactive
-            attackMode
-            disabled={!myTurn}
-            onCellClick={(r, c) => handleFire(r, c)}
-          />
-          {!myTurn && (
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="px-4 py-1.5 rounded bg-bg-elev/80 border border-neon-red/40 text-[10px] tracking-[0.4em] text-neon-red/80 font-display">
-                BLOQUEADO · AGUARDANDO INIMIGO
+          {/* Two boards side by side */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Board: Minha Frota */}
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-paper-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
+                <h3 className="font-display text-sm font-extrabold text-paper-white uppercase tracking-wide">
+                  Minha Frota
+                </h3>
+                <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">DEFESA</span>
+              </div>
+              <div className="w-full max-w-[380px]">
+                <BoardGrid placed={placedShips} marks={myMarks} sunkCells={mySunkCells} />
               </div>
             </div>
-          )}
-        </section>
-      </div>
 
-      <section className="mt-6 tac-panel rounded-xl p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-display tracking-[0.2em] text-xs text-text-dim">REGISTRO DE COMBATE</h3>
-          <span className="text-[10px] text-text-dim font-mono">{log.length} ENTRADAS</span>
+            {/* Board: Frota Inimiga */}
+            <div className="flex flex-col items-center relative">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-paper-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>gps_fixed</span>
+                <h3 className="font-display text-sm font-extrabold text-paper-white uppercase tracking-wide">
+                  Frota Inimiga
+                </h3>
+                <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">ATAQUE</span>
+              </div>
+              <div className="w-full max-w-[380px]">
+                <BoardGrid
+                  marks={enemyMarks}
+                  fog
+                  interactive
+                  attackMode
+                  disabled={!myTurn}
+                  onCellClick={(r, c) => handleFire(r, c)}
+                  sunkCells={sunkEnemyCells}
+                />
+              </div>
+              {!myTurn && (
+                <div className="absolute inset-0 top-8 pointer-events-none flex items-center justify-center">
+                  <div className="bg-surface-container-high/90 ink-border rounded-lg px-4 py-1.5 hard-shadow-sm">
+                    <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-mid-tone-grey uppercase">
+                      BLOQUEADO
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Stats bar below boards */}
+          <div className="flex items-center justify-center gap-8 bg-surface-container-high ink-border rounded-xl px-6 py-3 hard-shadow-sm max-w-[500px] mx-auto">
+            <div className="flex flex-col items-center">
+              <span className="font-display text-2xl font-black text-green-400">{hits}</span>
+              <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-mid-tone-grey">ACERTOS</span>
+            </div>
+            <div className="w-px h-8 bg-mid-tone-grey/30" />
+            <div className="flex flex-col items-center">
+              <span className="font-display text-2xl font-black text-red-400">{received}</span>
+              <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-mid-tone-grey">RECEBIDOS</span>
+            </div>
+            <div className="w-px h-8 bg-mid-tone-grey/30" />
+            <div className="flex flex-col items-center">
+              <span className="font-display text-2xl font-black text-paper-white">{enemyMarks.size}</span>
+              <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-mid-tone-grey">TIROS</span>
+            </div>
+          </div>
         </div>
-        <div className="max-h-32 overflow-y-auto font-mono text-xs space-y-1">
-          {log.map((line, i) => (
-            <div key={i} className={i === 0 ? "text-neon-cyan" : "text-text-dim"}>{line}</div>
-          ))}
-        </div>
-      </section>
+
+        {/* Right Panel: Ship Tracker */}
+        <aside className="flex flex-col gap-4">
+          {/* Enemy Fleet Tracker */}
+          <div className="bg-paper-white border-4 border-ink-black rounded-xl p-5 shadow-[6px_6px_0px_0px_#000]">
+            <h3 className="font-display text-xl font-extrabold text-ink-black uppercase tracking-tight text-center border-b-4 border-ink-black pb-2 mb-4">
+              Frota Inimiga
+            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-mono text-[12px] font-bold text-mid-tone-grey tracking-[0.1em]">
+                {sunkSet.size}/{FLEET.length} AFUNDADOS
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {FLEET.map((ship) => {
+                const isSunk = sunkSet.has(ship.id);
+                return (
+                  <div
+                    key={ship.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                      isSunk
+                        ? "border-red-400/60 bg-red-50"
+                        : "border-ink-black bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`material-symbols-outlined text-xl ${isSunk ? "text-red-400" : "text-ink-black"}`}
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        {SHIP_ICONS[ship.id]}
+                      </span>
+                      <div className="flex flex-col">
+                        <span className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight ${
+                          isSunk ? "text-red-400 line-through" : "text-ink-black"
+                        }`}>
+                          {ship.name}
+                        </span>
+                        <span className={`font-mono text-[11px] tracking-[0.05em] ${
+                          isSunk ? "text-red-400/60" : "text-mid-tone-grey"
+                        }`}>
+                          TAM. {ship.size}
+                        </span>
+                      </div>
+                    </div>
+
+                    {isSunk ? (
+                      <span className="text-red-400 font-display text-2xl font-black leading-none">✕</span>
+                    ) : (
+                      <div className="flex gap-1.5">
+                        {Array.from({ length: ship.size }).map((_, i) => (
+                          <div key={i} className="w-2.5 h-2.5 rounded-sm bg-ink-black" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* My Fleet status */}
+          <div className="bg-surface-container-high ink-border rounded-xl p-5 hard-shadow-sm">
+            <h4 className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide text-center mb-4">
+              Minha Frota
+            </h4>
+            <div className="flex flex-col gap-3">
+              {FLEET.map((ship) => {
+                const isMySunk = mySunkSet.has(ship.id);
+                return (
+                  <div key={ship.id} className="flex items-center gap-3">
+                    {/* Ship icon with status */}
+                    <div className="relative shrink-0">
+                      <span
+                        className={`material-symbols-outlined text-lg ${isMySunk ? "text-mid-tone-grey/30" : "text-paper-white"}`}
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        {SHIP_ICONS[ship.id]}
+                      </span>
+                      {isMySunk && (
+                        <span className="absolute inset-0 flex items-center justify-center text-red-400 font-display text-xl font-black leading-none">
+                          ✕
+                        </span>
+                      )}
+                    </div>
+                    {/* Name + hull bar */}
+                    <div className="flex-1 min-w-0">
+                      <span className={`font-mono text-[11px] font-bold uppercase tracking-[0.05em] block mb-1 ${
+                        isMySunk ? "text-red-400" : "text-paper-white"
+                      }`}>
+                        {ship.name}
+                      </span>
+                      {/* Hull integrity bar */}
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: ship.size }).map((_, i) => {
+                          const hitsOnShip = myShipHits[ship.id] || 0;
+                          const isHit = i < hitsOnShip;
+                          return (
+                            <div
+                              key={i}
+                              className={`h-1.5 flex-1 rounded-sm transition-colors ${
+                                isHit ? "bg-red-400" : "bg-paper-white/80"
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
