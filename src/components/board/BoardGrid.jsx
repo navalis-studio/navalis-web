@@ -16,7 +16,8 @@ export function BoardGrid({
   disabled,
   sunkCells,
 }) {
-  const previewKeys = new Set((preview?.cells || []).map((c) => key(c.r, c.c)));
+  const previewKeys = new Set((preview?.cells || []).filter(c => c.r >= 0 && c.r < GRID && c.c >= 0 && c.c < GRID).map((c) => key(c.r, c.c)));
+  const previewInvalidKeys = new Set((preview?.cells || []).filter(c => c.invalid && c.r >= 0 && c.r < GRID && c.c >= 0 && c.c < GRID).map((c) => key(c.r, c.c)));
   const shipCells = new Set();
   placed?.forEach((p) => cellsFor(p).forEach((k) => shipCells.add(k)));
 
@@ -43,6 +44,7 @@ export function BoardGrid({
             row={r}
             shipCells={shipCells}
             previewKeys={previewKeys}
+            previewInvalidKeys={previewInvalidKeys}
             previewValid={preview?.valid ?? true}
             marks={marks}
             fog={fog}

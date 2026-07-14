@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
-import { FLEET, GRID, isValidPlacement, cellsFor } from "../shared/constants";
+import { FLEET, GRID, isValidPlacement, cellsFor, key } from "../shared/constants";
 import { BoardGrid } from "../board/BoardGrid";
 import { useGame } from "../../contexts/GameContext";
 
 export function PlacingShipsView() {
-  const { confirmFleet, leaveGame, opponentReady } = useGame();
+  const { confirmFleet, leaveGame, opponentReady, opponentDisconnected, reconnectCountdown } = useGame();
   const [placed, setPlaced] = useState([]);
   const [orientation, setOrientation] = useState("H");
   const [selectedShipId, setSelectedShipId] = useState(FLEET[0].id);
@@ -37,7 +37,9 @@ export function PlacingShipsView() {
     for (let i = 0; i < activeShip.size; i++) {
       const r = orientation === "H" ? hover.row : hover.row + i;
       const c = orientation === "H" ? hover.col + i : hover.col;
-      cells.push({ r, c });
+      const outOfBounds = r < 0 || r >= GRID || c < 0 || c >= GRID;
+      const isOccupied = !outOfBounds && occupied.has(key(r, c));
+      cells.push({ r, c, invalid: outOfBounds || isOccupied });
     }
     const valid = isValidPlacement(activeShip.size, hover.row, hover.col, orientation, occupied);
     return { cells, valid };
@@ -116,7 +118,7 @@ export function PlacingShipsView() {
           )}
           <button
             onClick={leaveGame}
-            className="font-mono text-[12px] font-bold tracking-[0.1em] text-red-400 hover:text-red-300 transition-colors uppercase border border-red-400/50 rounded-full px-4 py-1.5 hover:border-red-300"
+            className="font-mono text-[12px] font-bold tracking-[0.1em] text-mid-tone-grey hover:text-paper-white transition-colors uppercase border border-mid-tone-grey/50 rounded-full px-4 py-1.5 hover:border-paper-white"
           >
             ABORTAR
           </button>
@@ -124,7 +126,7 @@ export function PlacingShipsView() {
       </div>
 
       {/* Main layout: Grid + Controls */}
-      <div className="grid lg:grid-cols-[1fr_320px] gap-8 h-[calc(100vh-130px)]">
+      <div className="grid lg:grid-cols-[1fr_320px] gap-8">
         {/* Grid Section */}
         <div className="flex flex-col items-center justify-center relative">
           <div className="max-w-[520px] w-full">
@@ -295,10 +297,16 @@ export function PlacingShipsView() {
           <button
             onClick={() => setPlaced([])}
             disabled={confirming || placed.length === 0}
-            className="w-full bg-surface-container text-mid-tone-grey ink-border font-mono text-[12px] font-bold py-2.5 rounded-xl uppercase flex items-center justify-center gap-2 transition-all hover:text-paper-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-full bg-surface-container-high text-paper-white ink-border font-display text-base font-extrabold py-3 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
+            onMouseEnter={(e) => {
+              if (!confirming && placed.length > 0) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.animation = "none";
+            }}
           >
             <span
-              className="material-symbols-outlined text-lg"
+              className="material-symbols-outlined text-xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               delete
@@ -332,6 +340,28 @@ export function PlacingShipsView() {
 
         </aside>
       </div>
+
+      {/* Opponent disconnected overlay */}
+      {opponentDisconnected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface/80 backdrop-blur-sm">
+          <div className="bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center max-w-sm">
+            <span className="material-symbols-outlined text-4xl text-paper-white mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>
+              wifi_off
+            </span>
+            <h3 className="font-display text-xl font-extrabold text-paper-white uppercase tracking-tight mb-2">
+              Oponente Desconectou
+            </h3>
+            <p className="font-sans text-sm text-on-surface-variant mb-4">
+              Aguardando reconexão...
+            </p>
+            {reconnectCountdown !== null && (
+              <div className="font-mono text-4xl font-bold text-paper-white">
+                {reconnectCountdown}s
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
