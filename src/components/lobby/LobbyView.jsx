@@ -57,9 +57,9 @@ export function LobbyView() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 max-w-5xl mx-auto relative z-10">
+    <div className="min-h-screen flex flex-col items-center px-4 lg:px-8 py-6 lg:py-8 max-w-5xl mx-auto relative z-10">
       {/* Header */}
-      <header className="w-full flex items-center justify-between mb-10">
+      <header className="w-full flex items-center justify-between mb-6 lg:mb-10">
         <BrandMark size="sm" />
         <div className="flex items-center gap-4">
           {/* User badge */}
@@ -91,9 +91,9 @@ export function LobbyView() {
       )}
 
       {/* Welcome + Actions */}
-      <div className="w-full flex flex-col lg:flex-row gap-6 mb-8">
+      <div className="w-full flex flex-col lg:flex-row gap-4 lg:gap-6 mb-6 lg:mb-8">
         {/* Welcome card + Create */}
-        <div className="flex-1 lg:flex-[2] bg-surface-container-high ink-border rounded-xl p-8 hard-shadow relative overflow-hidden flex flex-col justify-between">
+        <div className="flex-1 lg:flex-[2] bg-surface-container-high ink-border rounded-xl p-6 lg:p-8 hard-shadow relative overflow-hidden flex flex-col justify-between">
           {/* Corner circles */}
           <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
           <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
@@ -104,7 +104,7 @@ export function LobbyView() {
           <div className="absolute inset-3 border-2 border-paper-white/30 border-dashed rounded-lg pointer-events-none" />
 
           <div className="relative z-10">
-            <h1 className="font-display text-[32px] lg:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight">
+            <h1 className="font-display text-[28px] lg:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight">
               Bem-vindo a bordo,{" "}
               <span className="inline-block">{user?.username}</span>
             </h1>
@@ -116,7 +116,7 @@ export function LobbyView() {
           <button
             onClick={handleCreateGame}
             disabled={loading}
-            className={`mt-6 self-start bg-paper-white text-ink-black font-display text-lg font-extrabold py-3 px-8 rounded-full ink-border hard-shadow uppercase flex items-center gap-2 transition-all ${
+            className={`mt-4 lg:mt-6 self-start bg-paper-white text-ink-black font-display text-base lg:text-lg font-extrabold py-2.5 lg:py-3 px-6 lg:px-8 rounded-full ink-border hard-shadow uppercase flex items-center gap-2 transition-all ${
               loading
                 ? "opacity-50 cursor-wait"
                 : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
@@ -184,7 +184,7 @@ export function LobbyView() {
       {/* Available Rooms */}
       <div className="w-full bg-surface-container-high ink-border rounded-xl hard-shadow overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b-4 border-paper-white">
+        <div className="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4 border-b-4 border-paper-white">
           <div className="flex items-center gap-3">
             <span
               className="material-symbols-outlined text-paper-white text-2xl"
@@ -192,7 +192,7 @@ export function LobbyView() {
             >
               folder_open
             </span>
-            <h2 className="font-display text-xl lg:text-2xl font-extrabold uppercase tracking-tight text-paper-white">
+            <h2 className="font-display text-lg lg:text-2xl font-extrabold uppercase tracking-tight text-paper-white">
               Salas Disponíveis
             </h2>
           </div>
@@ -212,7 +212,7 @@ export function LobbyView() {
 
         {/* Room list */}
         {availableGames.length === 0 ? (
-          <div className="px-6 py-14 text-center flex flex-col items-center gap-3">
+          <div className="px-6 py-10 lg:py-14 text-center flex flex-col items-center gap-3">
             <span
               className="material-symbols-outlined text-mid-tone-grey text-5xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -260,7 +260,7 @@ export function LobbyView() {
 
                   {/* Status: waiting indicator */}
                   <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.6)]" />
+                    <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
                     <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">
                       1/2
                     </span>

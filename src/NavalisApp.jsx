@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { FilmOverlay } from "./components/shared/FilmOverlay";
 import { AuthView } from "./components/auth/AuthView";
 import { LobbyView } from "./components/lobby/LobbyView";
@@ -34,8 +35,12 @@ export function NavalisApp() {
 
   const view = getCurrentView();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
+
   return (
-    <div className="min-h-screen w-full bg-surface text-on-surface font-sans relative overflow-hidden">
+    <div className="min-h-screen w-full bg-surface text-on-surface font-sans relative overflow-x-hidden overflow-y-auto">
       {/* Content */}
       <div className="relative z-10">
         {view === "auth" && <AuthView />}

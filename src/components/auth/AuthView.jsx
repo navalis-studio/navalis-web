@@ -48,7 +48,7 @@ export function AuthView() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       {/* Card branco - Ink & Iron style */}
-      <div className="w-full max-w-lg bg-paper-white ink-border-heavy rounded-xl hard-shadow relative overflow-hidden flex flex-col z-10 scale-90">
+      <div className="w-full max-w-[400px] bg-paper-white ink-border-heavy rounded-xl hard-shadow relative overflow-hidden flex flex-col z-10">
         {/* Cantos decorativos - círculos pretos */}
         <div className="absolute top-2 left-2 w-4 h-4 rounded-full bg-ink-black" />
         <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-ink-black" />
@@ -59,34 +59,34 @@ export function AuthView() {
         <div className="absolute inset-4 border-2 border-ink-black rounded-lg pointer-events-none opacity-50 border-dashed" />
 
         {/* Conteúdo */}
-        <div className="p-8 pt-12 pb-10 flex flex-col items-center relative z-20">
+        <div className="p-6 pt-9 pb-7 lg:p-7 lg:pt-10 lg:pb-8 flex flex-col items-center relative z-20">
           {/* Logo - Título + Navio animado */}
-          <div className="mb-6 flex flex-col items-center">
+          <div className="mb-3 lg:mb-4 flex flex-col items-center">
             {/* Título NAVALIS */}
             <img
               src={navalisName}
               alt="Navalis"
-              className="w-72 h-auto"
+              className="w-48 lg:w-60 h-auto"
               draggable="false"
             />
             {/* Navio com walk-in-place animation */}
-            <div className="ship-walk mt-2">
+            <div className="ship-walk mt-1">
               <img
                 src={navalisShip}
                 alt=""
-                className="w-48 h-auto"
+                className="w-32 lg:w-40 h-auto"
                 draggable="false"
               />
             </div>
           </div>
 
           {/* Tagline */}
-          <p className="font-display text-2xl font-semibold text-ink-black text-center mb-8 px-4 leading-tight">
+          <p className="font-display text-lg lg:text-xl font-semibold text-ink-black text-center mb-4 lg:mb-6 px-4 leading-tight">
             "A frota aguarda seu comando."
           </p>
 
           {/* Tabs Login/Register - pill com hard shadow */}
-          <div className="flex w-full max-w-sm mb-6 rounded-full ink-border hard-shadow-sm overflow-hidden">
+          <div className="flex w-full max-w-xs mb-4 lg:mb-5 rounded-full ink-border hard-shadow-sm overflow-hidden">
             {["login", "register"].map((t) => (
               <button
                 key={t}
@@ -105,13 +105,13 @@ export function AuthView() {
 
           {/* Error message */}
           {displayError && (
-            <div className="w-full max-w-sm px-4 py-2 mb-4 text-sm text-center font-sans text-red-800 bg-red-100 ink-border rounded-lg">
+            <div className="w-full max-w-sm px-4 py-2 mb-4 text-sm text-center font-sans text-ink-black bg-light-grain ink-border rounded-lg">
               {displayError}
             </div>
           )}
 
           {/* Form */}
-          <form className="w-full max-w-sm space-y-6" onSubmit={handleSubmit}>
+          <form className="w-full max-w-xs space-y-3 lg:space-y-4" onSubmit={handleSubmit}>
             <NeonInput
               label="USUÁRIO"
               value={name}
@@ -136,11 +136,11 @@ export function AuthView() {
             )}
 
             {/* Botão submit - rubber button */}
-            <div className="pt-4">
+            <div className="pt-1 lg:pt-2">
               <button
                 type="submit"
                 disabled={submitting}
-                className={`w-full bg-ink-black text-paper-white font-display text-[32px] font-extrabold py-3 px-6 rounded-full ink-border hard-shadow uppercase flex items-center justify-center gap-2 transition-all ${
+                className={`w-[85%] mx-auto bg-ink-black text-paper-white font-display text-[18px] lg:text-[20px] font-extrabold py-2 lg:py-2.5 px-4 rounded-full ink-border hard-shadow uppercase flex items-center justify-center gap-2 transition-all ${
                   submitting
                     ? "opacity-50 cursor-wait"
                     : "hover:scale-105 hover:scale-y-95 active:scale-95 active:scale-y-105"
