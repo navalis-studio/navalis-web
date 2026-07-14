@@ -4,6 +4,7 @@ export function FragmentRow({
   row,
   shipCells,
   previewKeys,
+  previewInvalidKeys,
   previewValid,
   marks,
   fog,
@@ -43,34 +44,54 @@ export function FragmentRow({
         }
         if (mark === "errou") {
           bg = "bg-surface-container";
-          content = <span className="block h-2 w-2 rounded-full bg-mid-tone-grey" />;
+          content = (
+            <span
+              className="material-symbols-outlined text-mid-tone-grey text-[14px]"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              water_drop
+            </span>
+          );
         }
         if (mark === "hit") {
           if (isSunkCell) {
-            // Sunk ship cell — stronger red background + filled X
-            bg = "bg-red-400/50";
+            // Sunk ship cell — skull icon
+            bg = "bg-paper-white/15";
             content = (
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-red-300" fill="none" stroke="currentColor" strokeWidth="4">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
+              <span
+                className="material-symbols-outlined text-paper-white text-[16px]"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                skull
+              </span>
             );
           } else {
-            // Regular hit
-            bg = "bg-red-400/30";
+            // Regular hit — X noir
+            bg = "bg-paper-white/10";
             content = (
-              <svg viewBox="0 0 24 24" className="h-4 w-4 text-red-400" fill="none" stroke="currentColor" strokeWidth="3">
+              <svg viewBox="0 0 24 24" className="h-4 w-4 text-paper-white" fill="none" stroke="currentColor" strokeWidth="3">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             );
           }
         }
         if (inPreview) {
-          bg = previewValid
-            ? "bg-green-400/30"
-            : "bg-red-400/30";
-          extra = previewValid
-            ? "border-green-400"
-            : "border-red-400";
+          const cellInvalid = previewInvalidKeys?.has(k);
+          if (cellInvalid) {
+            bg = "bg-paper-white/5";
+            extra = "border-mid-tone-grey";
+            content = (
+              <span
+                className="material-symbols-outlined text-mid-tone-grey text-[14px]"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                block
+              </span>
+            );
+          } else {
+            bg = "bg-paper-white/20";
+            extra = "border-paper-white/70";
+          }
         }
 
         const clickable = interactive && !disabled && !(attackMode && isAttacked);

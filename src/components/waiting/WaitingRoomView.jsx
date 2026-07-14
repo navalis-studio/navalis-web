@@ -100,7 +100,7 @@ export function WaitingRoomView() {
                 </span>
               </div>
               <div className="flex items-center justify-center gap-1.5 mt-2">
-                <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.6)]" />
+                <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
                 <span className="font-mono text-[9px] font-bold text-on-surface-variant tracking-[0.1em]">
                   CONECTADO
                 </span>
@@ -126,7 +126,7 @@ export function WaitingRoomView() {
               <div className="flex items-center justify-center gap-1.5 mt-2">
                 {opponent ? (
                   <>
-                    <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.6)]" />
+                    <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
                     <span className="font-mono text-[9px] font-bold text-on-surface-variant tracking-[0.1em]">
                       CONECTADO
                     </span>
