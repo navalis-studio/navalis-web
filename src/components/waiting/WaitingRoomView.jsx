@@ -27,8 +27,8 @@ export function WaitingRoomView() {
   const displayCode = roomCode || "------";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 relative z-10">
-      <div className="w-full max-w-lg bg-surface-container-high ink-border rounded-xl p-10 hard-shadow relative overflow-hidden text-center">
+    <div className="min-h-screen flex items-center justify-center px-8 py-10 relative z-10">
+      <div className="w-full max-w-md 2xl:max-w-lg bg-surface-container-high ink-border rounded-xl p-8 2xl:p-10 hard-shadow relative overflow-hidden text-center">
         {/* Corner circles */}
         <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
         <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
@@ -45,7 +45,7 @@ export function WaitingRoomView() {
           </span>
 
           {/* Title with animated dots */}
-          <h2 className="font-display text-2xl lg:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
+          <h2 className="font-display text-2xl 2xl:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
             Aguardando oponente{dots}
           </h2>
 
