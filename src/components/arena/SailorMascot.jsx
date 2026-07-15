@@ -29,7 +29,7 @@ export function SailorMascot({ isEnemy = false, shooting = false, damaged = fals
       <img
         src={img}
         alt={isEnemy ? "Oponente" : "Jogador"}
-        className="h-36 lg:h-44 w-auto object-contain drop-shadow-[3px_3px_0px_rgba(0,0,0,0.8)]"
+        className="h-44 2xl:h-52 w-auto object-contain drop-shadow-[3px_3px_0px_rgba(0,0,0,0.8)]"
         draggable="false"
       />
     </div>

@@ -15,13 +15,13 @@ export function HealthBar({ sunkCount = 0, label = "" }) {
           {label}
         </span>
       )}
-      <div className="flex gap-1">
+      <div className="flex gap-1.5">
         {Array.from({ length: totalShips }).map((_, i) => {
           const isAlive = i < alive;
           return (
             <div
               key={i}
-              className={`w-6 h-3 border-2 transition-all duration-300 ${
+              className={`w-7 h-4 border-2 transition-all duration-300 ${
                 isAlive
                   ? "border-paper-white bg-paper-white"
                   : "border-mid-tone-grey/50 bg-transparent"
