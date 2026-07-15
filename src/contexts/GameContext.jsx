@@ -14,6 +14,7 @@ export function GameProvider({ children }) {
   const [roomCode, setRoomCode] = useState(null);
   const [gameState, setGameState] = useState(null); // WAITING_FOR_OPPONENT, PLACING_SHIPS, IN_PROGRESS, FINISHED
   const [opponent, setOpponent] = useState(null);
+  const [opponentName, setOpponentName] = useState(null);
   const [myTurn, setMyTurn] = useState(false);
   const [enemyMarks, setEnemyMarks] = useState(new Map());
   const [myMarks, setMyMarks] = useState(new Map());
@@ -162,6 +163,7 @@ export function GameProvider({ children }) {
 
       case "OPPONENT_JOINED":
         setOpponent(event.playerId);
+        setOpponentName(event.username || null);
         setGameState("PLACING_SHIPS");
         pushLog("Oponente entrou na sala!");
         break;
@@ -231,6 +233,7 @@ export function GameProvider({ children }) {
         setMyTurn(data.myTurn);
         setOpponentReady(data.opponentReady);
         setMyReady(data.myReady);
+        setOpponentName(data.opponentUsername || null);
 
         // Restore my ships
         if (data.myShips && data.myShips.length > 0) {
@@ -319,6 +322,7 @@ export function GameProvider({ children }) {
       setRoomCode(game.roomCode);
       setGameState("WAITING_FOR_OPPONENT");
       setOpponent(null);
+    setOpponentName(null);
       resetGameState();
       await connectToGame(id);
       pushLog("Sala criada. Aguardando oponente...");
@@ -344,6 +348,8 @@ export function GameProvider({ children }) {
       setRoomCode(game.roomCode);
       setGameState("PLACING_SHIPS");
       setOpponent(null);
+    setOpponentName(null);
+      setOpponentName(game.hostUsername || null);
       resetGameState();
       await connectToGame(id);
       pushLog("Você entrou na partida! Posicione sua frota.");
@@ -437,6 +443,7 @@ export function GameProvider({ children }) {
     setRoomCode(null);
     setGameState(null);
     setOpponent(null);
+    setOpponentName(null);
     setAvailableGames([]);
     setLog([]);
   }, [gameId, gameState]);
@@ -464,6 +471,7 @@ export function GameProvider({ children }) {
     setRoomCode(null);
     setGameState(null);
     setOpponent(null);
+    setOpponentName(null);
     setLog([]);
   }, []);
 
@@ -481,6 +489,7 @@ export function GameProvider({ children }) {
         roomCode,
         gameState,
         opponent,
+        opponentName,
         myTurn,
         enemyMarks,
         myMarks,
