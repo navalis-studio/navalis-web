@@ -98,17 +98,9 @@ export function PlacingShipsView() {
   };
 
   return (
-    <div className="min-h-screen px-4 lg:px-8 py-6 max-w-[1200px] mx-auto relative z-10">
+    <div className="min-h-screen px-8 2xl:px-12 py-6 max-w-[1200px] mx-auto relative z-10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <h1 className="font-display text-2xl lg:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
-            Grade de Posicionamento
-          </h1>
-          <span className="hidden md:inline-block font-mono text-[11px] font-bold tracking-[0.1em] bg-paper-white text-ink-black px-3 py-1 rounded-full border-2 border-ink-black">
-            FASE DE PREPARAÇÃO
-          </span>
-        </div>
+      <div className="flex items-center justify-end mb-6">
         <div className="flex items-center gap-3">
           {opponentReady && (
             <span className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container-high px-3 py-1.5 rounded-full ink-border flex items-center gap-2">
@@ -118,17 +110,27 @@ export function PlacingShipsView() {
           )}
           <button
             onClick={leaveGame}
-            className="font-mono text-[12px] font-bold tracking-[0.1em] text-mid-tone-grey hover:text-paper-white transition-colors uppercase border border-mid-tone-grey/50 rounded-full px-4 py-1.5 hover:border-paper-white"
+            className="font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white hover:text-ink-black transition-colors uppercase border-2 border-paper-white rounded-full px-5 py-2 hover:bg-paper-white"
           >
-            ABORTAR
+            FUGIR
           </button>
         </div>
       </div>
 
       {/* Main layout: Grid + Controls */}
-      <div className="grid lg:grid-cols-[1fr_320px] gap-8">
+      <div className="grid lg:grid-cols-[1fr_320px] gap-6 2xl:gap-8">
         {/* Grid Section */}
         <div className="flex flex-col items-center justify-center relative">
+          {/* Title centered above board */}
+          <div className="flex flex-col items-center mb-6">
+            <h1 className="font-display text-3xl 2xl:text-4xl font-extrabold uppercase tracking-tight text-paper-white">
+              Grade de Posicionamento
+            </h1>
+            <span className="mt-3 font-mono text-[12px] font-bold tracking-[0.1em] bg-paper-white text-ink-black px-4 py-1.5 rounded-full border-2 border-ink-black">
+              POSICIONE SUAS TROPAS!
+            </span>
+          </div>
+
           <div className="max-w-[520px] w-full">
             <BoardGrid
               occupied={occupied}
@@ -142,13 +144,47 @@ export function PlacingShipsView() {
             />
           </div>
 
-          {/* Instructions */}
-          <div className="mt-8 max-w-[520px] w-full bg-surface-container-high ink-border rounded-lg p-4 hard-shadow-sm">
-            <div className="font-mono text-[12px] text-on-surface-variant leading-relaxed space-y-1.5">
-              <div>· Arraste ou clique para posicionar</div>
-              <div>· Pressione <span className="text-paper-white font-bold">[R]</span> para girar</div>
-              <div>· Clique "REMOVER" para reposicionar</div>
-            </div>
+          {/* Action Buttons below board */}
+          <div className="mt-6 max-w-[520px] w-full flex gap-3">
+            <button
+              onClick={autoPlace}
+              disabled={confirming}
+              className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-sm font-extrabold py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
+              onMouseEnter={(e) => {
+                if (!confirming) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.animation = "none";
+              }}
+            >
+              <span
+                className="material-symbols-outlined text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                shuffle
+              </span>
+              Auto-Posicionar
+            </button>
+
+            <button
+              onClick={() => { setPlaced([]); setSelectedShipId(FLEET[0].id); }}
+              disabled={confirming || placed.length === 0}
+              className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-sm font-extrabold py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
+              onMouseEnter={(e) => {
+                if (!confirming && placed.length > 0) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.animation = "none";
+              }}
+            >
+              <span
+                className="material-symbols-outlined text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                delete
+              </span>
+              Limpar Tudo
+            </button>
           </div>
 
           {confirming && (
@@ -186,53 +222,45 @@ export function PlacingShipsView() {
                     draggable={!isPlaced && !confirming}
                     onDragStart={() => { setDraggingId(s.id); setSelectedShipId(s.id); }}
                     onDragEnd={() => setDraggingId(null)}
-                    onClick={() => !isPlaced && !confirming && setSelectedShipId(s.id)}
+                    onClick={() => {
+                      if (confirming) return;
+                      if (isPlaced) {
+                        removeShip(s.id);
+                      } else {
+                        setSelectedShipId(s.id);
+                      }
+                    }}
                     className={`flex items-center justify-between p-3.5 rounded-lg border-2 transition-all ${
                       isPlaced
-                        ? "border-mid-tone-grey/50 bg-light-grain/50 opacity-50 cursor-not-allowed"
+                        ? "border-mid-tone-grey/50 bg-light-grain/50 opacity-60 hover:opacity-80 hover:border-ink-black"
                         : isSelected
-                        ? "border-ink-black bg-surface-container-high cursor-grab active:cursor-grabbing shadow-[3px_3px_0px_0px_#000]"
-                        : "border-ink-black bg-white cursor-grab active:cursor-grabbing hover:bg-light-grain"
+                        ? "border-ink-black bg-surface-container-high shadow-[3px_3px_0px_0px_#000]"
+                        : "border-ink-black bg-white hover:bg-light-grain"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <span
                         className={`material-symbols-outlined text-xl ${isPlaced ? "text-mid-tone-grey" : isSelected ? "text-paper-white" : "text-ink-black"}`}
                         style={{ fontVariationSettings: "'FILL' 1" }}
                       >
                         {SHIP_ICONS[s.id]}
                       </span>
-                      <div className="flex flex-col">
-                        <span className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight ${
+                      <div className="flex flex-col gap-1">
+                        <span className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight whitespace-nowrap ${
                           isPlaced ? "text-mid-tone-grey line-through" : isSelected ? "text-paper-white" : "text-ink-black"
                         }`}>
                           {s.name}
                         </span>
-                        <span className={`font-mono text-[11px] tracking-[0.05em] ${
-                          isPlaced ? "text-mid-tone-grey" : isSelected ? "text-on-surface-variant" : "text-mid-tone-grey"
-                        }`}>
-                          TAM. {s.size}
-                        </span>
+                        <div className="flex gap-1">
+                          {Array.from({ length: s.size }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={`w-2 h-2 ${isPlaced ? "bg-mid-tone-grey/40" : isSelected ? "bg-paper-white" : "bg-ink-black"}`}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
-
-                    {isPlaced ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); if (!confirming) removeShip(s.id); }}
-                        className="font-mono text-[9px] font-bold text-ink-black bg-paper-white px-2 py-1 rounded border border-ink-black hover:bg-light-grain"
-                      >
-                        REMOVER
-                      </button>
-                    ) : (
-                      <div className="flex gap-1.5">
-                        {Array.from({ length: s.size }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={`w-3 h-3 rounded-sm ${isSelected ? "bg-paper-white" : "bg-ink-black"}`}
-                          />
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -241,7 +269,7 @@ export function PlacingShipsView() {
 
           {/* Orientation Toggle */}
           <div className="bg-surface-container-high ink-border rounded-xl p-4 hard-shadow-sm flex flex-col items-center gap-3">
-            <span className="font-mono text-[11px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
+            <span className="font-mono text-[12px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
               Orientação · [R]
             </span>
             <div className="flex w-full bg-surface border-2 border-paper-white rounded-full p-1 relative">
@@ -273,46 +301,12 @@ export function PlacingShipsView() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <button
-            onClick={autoPlace}
-            disabled={confirming}
-            className="w-full bg-surface-container-high text-paper-white ink-border font-display text-base font-extrabold py-3 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
-            onMouseEnter={(e) => {
-              if (!confirming) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.animation = "none";
-            }}
-          >
-            <span
-              className="material-symbols-outlined text-xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              shuffle
-            </span>
-            Auto-Posicionar
-          </button>
-
-          <button
-            onClick={() => setPlaced([])}
-            disabled={confirming || placed.length === 0}
-            className="w-full bg-surface-container-high text-paper-white ink-border font-display text-base font-extrabold py-3 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
-            onMouseEnter={(e) => {
-              if (!confirming && placed.length > 0) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.animation = "none";
-            }}
-          >
-            <span
-              className="material-symbols-outlined text-xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              delete
-            </span>
-            Limpar Tudo
-          </button>
+          {/* Instructions */}
+          <div className="bg-surface-container-high ink-border rounded-lg p-3 hard-shadow-sm">
+            <div className="font-mono text-[12px] text-on-surface-variant leading-relaxed space-y-1">
+              <div>· Arraste ou clique para posicionar</div>
+              <div>· Pressione <span className="text-paper-white font-bold">[R]</span> para girar</div>            </div>
+          </div>
 
           <button
             disabled={!allPlaced || confirming}
@@ -343,22 +337,30 @@ export function PlacingShipsView() {
 
       {/* Opponent disconnected overlay */}
       {opponentDisconnected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface/80 backdrop-blur-sm">
-          <div className="bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center max-w-sm">
-            <span className="material-symbols-outlined text-4xl text-paper-white mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>
-              wifi_off
-            </span>
-            <h3 className="font-display text-xl font-extrabold text-paper-white uppercase tracking-tight mb-2">
-              Oponente Desconectou
-            </h3>
-            <p className="font-sans text-sm text-on-surface-variant mb-4">
-              Aguardando reconexão...
-            </p>
-            {reconnectCountdown !== null && (
-              <div className="font-mono text-4xl font-bold text-paper-white">
-                {reconnectCountdown}s
-              </div>
-            )}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-black/85">
+          <div className="relative w-full max-w-sm bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center overflow-hidden">
+            {/* Corner circles */}
+            <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <span className="material-symbols-outlined text-paper-white text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                wifi_off
+              </span>
+              <h3 className="font-display text-2xl font-extrabold text-paper-white uppercase tracking-tight">
+                Oponente Desconectou
+              </h3>
+              <p className="font-sans text-sm text-on-surface-variant">
+                Aguardando reconexão...
+              </p>
+              {reconnectCountdown !== null && (
+                <div className="font-mono text-4xl font-bold text-paper-white">
+                  {reconnectCountdown}s
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
