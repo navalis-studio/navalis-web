@@ -95,3 +95,11 @@ export async function getGame(gameId) {
 export async function cancelGame(gameId) {
   return request(`/games/${gameId}`, { method: "DELETE" });
 }
+
+export async function forfeitGame(gameId) {
+  return request(`/games/${gameId}/forfeit`, { method: "POST" });
+}
+
+export async function getActiveGame() {
+  return request("/games/active");
+}

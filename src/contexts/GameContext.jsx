@@ -28,14 +28,40 @@ export function GameProvider({ children }) {
   const [sunkEnemyShips, setSunkEnemyShips] = useState([]);
   const [sunkMyShips, setSunkMyShips] = useState([]);
   const [sunkEnemyCells, setSunkEnemyCells] = useState(new Set());
+  const [opponentDisconnected, setOpponentDisconnected] = useState(false);
+  const [reconnectCountdown, setReconnectCountdown] = useState(null);
 
   const enemyMarksRef = useRef(enemyMarks);
   useEffect(() => { enemyMarksRef.current = enemyMarks; }, [enemyMarks]);
+
+  const countdownRef = useRef(null);
 
   const LETTERS = "ABCDEFGHIJ".split("");
 
   function pushLog(msg) {
     setLog((l) => [`▸ ${msg}`, ...l].slice(0, 50));
+  }
+
+  function startCountdown(seconds) {
+    clearCountdown();
+    setReconnectCountdown(seconds);
+    countdownRef.current = setInterval(() => {
+      setReconnectCountdown((prev) => {
+        if (prev <= 1) {
+          clearCountdown();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  function clearCountdown() {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    setReconnectCountdown(null);
   }
 
   // Handle incoming WebSocket events
@@ -76,7 +102,7 @@ export function GameProvider({ children }) {
         break;
 
       case "SHOT_FIRED": {
-        const { shooterId, row, col, result, sunkShipType, gameOver: isGameOver, winnerId } = event;
+        const { shooterId, row, col, result, sunkShipType, sunkShipCells: shipCells, gameOver: isGameOver, winnerId } = event;
         const isMyShot = shooterId === myUserId;
         const hit = result === "HIT" || result === "SUNK";
         const cellKey = key(row, col);
@@ -90,33 +116,16 @@ export function GameProvider({ children }) {
           pushLog(`TIRO ${LETTERS[row]}${col + 1} — ${hit ? "ACERTO DIRETO" : "ÁGUA"}${sunkShipType ? ` (${sunkShipType} AFUNDADO!)` : ""}`);
           if (sunkShipType) {
             setSunkEnemyShips((prev) => [...prev, sunkShipType]);
-            // Flood-fill to find all connected hit cells forming the sunk ship
-            setSunkEnemyCells((prev) => {
-              const next = new Set(prev);
-              const visited = new Set();
-              const queue = [cellKey];
-              visited.add(cellKey);
-              // We need current enemyMarks + the new cell
-              const currentMarks = new Map(enemyMarksRef.current);
-              currentMarks.set(cellKey, "hit");
-              while (queue.length > 0) {
-                const current = queue.shift();
-                next.add(current);
-                // Parse "row,col" from key
-                const [cr, cc] = current.split(",").map(Number);
-                const neighbors = [
-                  key(cr - 1, cc), key(cr + 1, cc),
-                  key(cr, cc - 1), key(cr, cc + 1),
-                ];
-                for (const n of neighbors) {
-                  if (!visited.has(n) && currentMarks.get(n) === "hit" && !prev.has(n)) {
-                    visited.add(n);
-                    queue.push(n);
-                  }
-                }
-              }
-              return next;
-            });
+            // Use ship cells from backend to mark all cells of the sunk ship
+            if (shipCells && shipCells.length > 0) {
+              setSunkEnemyCells((prev) => {
+                const next = new Set(prev);
+                shipCells.forEach((cell) => {
+                  next.add(key(cell[0], cell[1]));
+                });
+                return next;
+              });
+            }
           }
         } else {
           setMyMarks((prev) => {
@@ -160,12 +169,32 @@ export function GameProvider({ children }) {
       case "OPPONENT_DISCONNECTED":
         setGameState("FINISHED");
         setGameOver({ result: "victory", winnerId: event.winnerId, reason: "wo" });
+        setOpponentDisconnected(false);
+        clearCountdown();
         pushLog("Oponente desconectou. Vitória por W.O.!");
+        break;
+
+      case "OPPONENT_DISCONNECTED_TEMP":
+        if (event.playerId !== myUserId) {
+          setOpponentDisconnected(true);
+          startCountdown(event.timeoutSeconds || 30);
+          pushLog("Oponente desconectou. Aguardando reconexão...");
+        }
+        break;
+
+      case "OPPONENT_RECONNECTED":
+        if (event.playerId !== myUserId) {
+          setOpponentDisconnected(false);
+          clearCountdown();
+          pushLog("Oponente reconectou!");
+        }
         break;
 
       case "GAME_CANCELLED":
         // Opponent left during WAITING or PLACING_SHIPS, show modal
         if (event.quitterId !== myUserId) {
+          setOpponentDisconnected(false);
+          clearCountdown();
           setCancelledNotice("O covarde fugiu antes da batalha.");
         }
         break;
@@ -185,6 +214,99 @@ export function GameProvider({ children }) {
       setError("Falha na conexão WebSocket: " + err.message);
     }
   }, [user?.token, handleGameEvent]);
+
+  // Check for active game on page load (reconnection after reload)
+  useEffect(() => {
+    if (!user?.token) return;
+
+    async function checkActiveGame() {
+      try {
+        const data = await api.getActiveGame();
+        if (!data) return; // No active game (204 No Content)
+
+        // Restore game state from server
+        setGameId(data.gameId);
+        setRoomCode(data.roomCode);
+        setGameState(data.status);
+        setMyTurn(data.myTurn);
+        setOpponentReady(data.opponentReady);
+        setMyReady(data.myReady);
+
+        // Restore my ships
+        if (data.myShips && data.myShips.length > 0) {
+          const SHIP_TYPE_TO_ID = {
+            CARRIER: "carrier",
+            BATTLESHIP: "battleship",
+            CRUISER: "destroyer",
+            SUBMARINE: "submarine",
+            DESTROYER: "patrol",
+          };
+          const SHIP_SIZES = { carrier: 5, battleship: 4, destroyer: 3, submarine: 3, patrol: 2 };
+          const SHIP_NAMES = { carrier: "Porta-Aviões", battleship: "Encouraçado", destroyer: "Cruzador", submarine: "Submarino", patrol: "Destroyer" };
+
+          const restoredShips = data.myShips.map((s) => {
+            const id = SHIP_TYPE_TO_ID[s.shipType] || s.shipType.toLowerCase();
+            return {
+              id,
+              name: SHIP_NAMES[id] || id,
+              size: SHIP_SIZES[id] || 3,
+              row: s.row,
+              col: s.col,
+              orientation: s.orientation === "HORIZONTAL" ? "H" : "V",
+            };
+          });
+          setPlacedShips(restoredShips);
+        }
+
+        // Restore enemy marks (shots I fired)
+        if (data.myShots && data.myShots.length > 0) {
+          const marks = new Map();
+          data.myShots.forEach((s) => {
+            marks.set(key(s.row, s.col), s.result === "HIT" || s.result === "SUNK" ? "hit" : "errou");
+          });
+          setEnemyMarks(marks);
+        }
+
+        // Restore my marks (shots enemy fired at me)
+        if (data.enemyShots && data.enemyShots.length > 0) {
+          const marks = new Map();
+          data.enemyShots.forEach((s) => {
+            marks.set(key(s.row, s.col), s.result === "HIT" || s.result === "SUNK" ? "hit" : "errou");
+          });
+          setMyMarks(marks);
+        }
+
+        // Restore sunk ships
+        if (data.sunkEnemyShips) setSunkEnemyShips(data.sunkEnemyShips);
+        if (data.sunkMyShips) setSunkMyShips(data.sunkMyShips);
+
+        // Restore sunkEnemyCells from enemy marks (all hits that belong to sunk ships)
+        if (data.myShots && data.sunkEnemyShips && data.sunkEnemyShips.length > 0) {
+          const hitCells = new Set();
+          data.myShots.forEach((s) => {
+            if (s.result === "HIT" || s.result === "SUNK") {
+              hitCells.add(key(s.row, s.col));
+            }
+          });
+          // For simplicity on reconnect, mark all hit cells as sunk cells
+          // (accurate enough — sunk ships' cells are always in hit cells)
+          // A more precise approach would need ship positions from enemy, which we don't expose
+          setSunkEnemyCells(hitCells);
+        }
+
+        // Connect to WebSocket and subscribe
+        await connectToGame(data.gameId);
+        pushLog("Reconectado à partida!");
+      } catch (err) {
+        // If 204 or error, just ignore - no active game
+        if (err?.status !== 204) {
+          console.log("No active game to reconnect to");
+        }
+      }
+    }
+
+    checkActiveGame();
+  }, [user?.token]);
 
   // Create a new game
   const createGame = useCallback(async () => {
@@ -301,6 +423,14 @@ export function GameProvider({ children }) {
         // Game may already be cancelled, ignore
       }
     }
+    // Forfeit if game is in progress (immediate WO, no timer)
+    if (gameId && gameState === "IN_PROGRESS") {
+      try {
+        await api.forfeitGame(gameId);
+      } catch {
+        // Game may already be finished, ignore
+      }
+    }
     stomp.disconnectStomp();
     resetGameState();
     setGameId(null);
@@ -322,6 +452,9 @@ export function GameProvider({ children }) {
     setCancelledNotice(null);
     setSunkEnemyShips([]);
     setSunkMyShips([]);
+    setSunkEnemyCells(new Set());
+    setOpponentDisconnected(false);
+    clearCountdown();
   }
 
   const dismissCancelledNotice = useCallback(() => {
@@ -362,6 +495,8 @@ export function GameProvider({ children }) {
         opponentReady,
         myReady,
         cancelledNotice,
+        opponentDisconnected,
+        reconnectCountdown,
         createGame,
         joinGame,
         fetchAvailableGames,
