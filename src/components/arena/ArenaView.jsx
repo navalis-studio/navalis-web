@@ -15,22 +15,23 @@ const SHIP_TYPE_MAP = {
 };
 
 const SHIP_ICONS = {
-  carrier: "sailing",
+  carrier: "flight_takeoff",
   battleship: "directions_boat",
-  destroyer: "kayaking",
-  submarine: "water",
-  patrol: "phishing",
+  destroyer: "sailing",
+  submarine: "waves",
+  patrol: "speed",
 };
 
 export function ArenaView() {
   const { user } = useAuth();
-  const { myTurn, enemyMarks, myMarks, placedShips, fire, leaveGame, sunkEnemyShips, sunkMyShips, sunkEnemyCells, opponentDisconnected, reconnectCountdown } = useGame();
+  const { myTurn, enemyMarks, myMarks, placedShips, fire, leaveGame, sunkEnemyShips, sunkMyShips, sunkEnemyCells, opponentDisconnected, reconnectCountdown, opponentName } = useGame();
 
   // Mascot animation states
   const [myShooting, setMyShooting] = useState(false);
   const [enemyShooting, setEnemyShooting] = useState(false);
   const [myDamaged, setMyDamaged] = useState(false);
   const [enemyDamaged, setEnemyDamaged] = useState(false);
+  const [showFleeModal, setShowFleeModal] = useState(false);
   const prevSunkEnemyCount = useRef(0);
   const prevSunkMyCount = useRef(0);
 
@@ -82,23 +83,6 @@ export function ArenaView() {
     return s;
   }, [sunkMyShips]);
 
-  // Hits received per ship (how many cells of each ship were hit)
-  const myShipHits = useMemo(() => {
-    const hitsMap = {};
-    placedShips.forEach((ship) => {
-      const cells = cellsFor(ship);
-      let count = 0;
-      cells.forEach((key) => {
-        if (myMarks.get(key) === "hit") count++;
-      });
-      hitsMap[ship.id] = count;
-    });
-    return hitsMap;
-  }, [placedShips, myMarks]);
-
-  const hits = Array.from(enemyMarks.values()).filter((v) => v === "hit").length;
-  const received = Array.from(myMarks.values()).filter((v) => v === "hit").length;
-
   // Cells of my ships that have been sunk (for visual on my board)
   const mySunkCells = useMemo(() => {
     const s = new Set();
@@ -115,33 +99,36 @@ export function ArenaView() {
   }
 
   return (
-    <div className="min-h-screen px-4 lg:px-8 py-6 max-w-[1280px] mx-auto relative z-10">
+    <div className="min-h-screen px-8 2xl:px-12 py-6 max-w-[1200px] 2xl:max-w-[1280px] mx-auto relative z-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <h1 className="font-display text-2xl lg:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
+          <h1 className="font-display text-2xl 2xl:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
             Combate Naval
           </h1>
           <span className="hidden md:inline-block font-mono text-[11px] font-bold tracking-[0.1em] bg-paper-white text-ink-black px-3 py-1 rounded-full border-2 border-ink-black">
             EM BATALHA
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-surface-container-high rounded-full px-3 py-1.5 ink-border">
-            <span className="material-symbols-outlined text-paper-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
-            <span className="font-mono text-[11px] font-bold text-paper-white tracking-[0.1em] uppercase">{user?.username}</span>
+        <div className="flex items-center">
+          <div className="flex items-center bg-surface-container-high ink-border rounded-full overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-2">
+              <span className="material-symbols-outlined text-paper-white text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
+              <span className="font-mono text-[12px] font-bold text-paper-white tracking-[0.1em] uppercase">{user?.username}</span>
+            </div>
+            <div className="w-[2px] h-6 bg-paper-white/20" />
+            <button
+              onClick={() => setShowFleeModal(true)}
+              className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white/60 px-4 py-2 hover:text-paper-white transition-colors uppercase"
+            >
+              FUGIR
+            </button>
           </div>
-          <button
-            onClick={leaveGame}
-            className="font-mono text-[12px] font-bold tracking-[0.1em] text-mid-tone-grey hover:text-paper-white transition-colors uppercase border border-mid-tone-grey/50 rounded-full px-4 py-1.5 hover:border-paper-white"
-          >
-            DESISTIR
-          </button>
         </div>
       </div>
 
       {/* Main layout */}
-      <div className="grid lg:grid-cols-[1fr_280px] gap-8">
+      <div className="grid lg:grid-cols-[1fr_280px] gap-6 2xl:gap-8">
         {/* Left: Boards area */}
         <div className="flex flex-col gap-6">
           {/* Turn indicator */}
@@ -172,10 +159,18 @@ export function ArenaView() {
               <div className="w-full max-w-[380px]">
                 <BoardGrid placed={placedShips} marks={myMarks} sunkCells={mySunkCells} />
               </div>
+              {/* My Mascot */}
+              <div className="flex flex-col items-center gap-3 mt-8">
+                <span className="font-mono text-[13px] font-bold tracking-[0.1em] text-paper-white uppercase truncate max-w-[150px]">
+                  {user?.username || "VOCÊ"} <span className="text-mid-tone-grey">(eu)</span>
+                </span>
+                <HealthBar sunkCount={sunkMyShips?.length || 0} />
+                <SailorMascot shooting={myShooting} damaged={myDamaged} />
+              </div>
             </div>
 
             {/* Board: Frota Inimiga */}
-            <div className="flex flex-col items-center relative">
+            <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-paper-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>gps_fixed</span>
                 <h3 className="font-display text-sm font-extrabold text-paper-white uppercase tracking-wide">
@@ -183,7 +178,7 @@ export function ArenaView() {
                 </h3>
                 <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">ATAQUE</span>
               </div>
-              <div className="w-full max-w-[380px]">
+              <div className="w-full max-w-[380px] relative">
                 <BoardGrid
                   marks={enemyMarks}
                   fog
@@ -193,55 +188,24 @@ export function ArenaView() {
                   onCellClick={(r, c) => handleFire(r, c)}
                   sunkCells={sunkEnemyCells}
                 />
-              </div>
-              {!myTurn && (
-                <div className="absolute inset-0 top-8 pointer-events-none flex items-center justify-center">
-                  <div className="bg-surface-container-high/90 ink-border rounded-lg px-4 py-1.5 hard-shadow-sm">
-                    <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-mid-tone-grey uppercase">
-                      BLOQUEADO
-                    </span>
+                {!myTurn && (
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                    <div className="bg-surface-container-high/90 ink-border rounded-lg px-4 py-1.5 hard-shadow-sm">
+                      <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-mid-tone-grey uppercase">
+                        BLOQUEADO
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Stats bar below boards */}
-          <div className="flex items-center justify-center gap-8 bg-surface-container-high ink-border rounded-xl px-6 py-3 hard-shadow-sm max-w-[500px] mx-auto">
-            <div className="flex flex-col items-center">
-              <span className="font-display text-2xl font-black text-paper-white">{hits}</span>
-              <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-mid-tone-grey">ACERTOS</span>
-            </div>
-            <div className="w-px h-8 bg-mid-tone-grey/30" />
-            <div className="flex flex-col items-center">
-              <span className="font-display text-2xl font-black text-mid-tone-grey">{received}</span>
-              <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-mid-tone-grey">RECEBIDOS</span>
-            </div>
-            <div className="w-px h-8 bg-mid-tone-grey/30" />
-            <div className="flex flex-col items-center">
-              <span className="font-display text-2xl font-black text-paper-white">{enemyMarks.size}</span>
-              <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-mid-tone-grey">TIROS</span>
-            </div>
-          </div>
-
-          {/* Mascots Section */}
-          <div className="flex items-end justify-center gap-16 mt-6 max-w-[700px] mx-auto">
-            {/* My Mascot */}
-            <div className="flex flex-col items-center gap-2">
-              <HealthBar sunkCount={sunkMyShips?.length || 0} label="MINHA FROTA" />
-              <SailorMascot shooting={myShooting} damaged={myDamaged} />
-            </div>
-
-            {/* VS divider */}
-            <div className="flex flex-col items-center gap-1 pb-8">
-              <span className="font-display text-2xl font-black text-paper-white uppercase tracking-tight">VS</span>
-              <div className="w-px h-12 bg-mid-tone-grey/30" />
-            </div>
-
-            {/* Enemy Mascot */}
-            <div className="flex flex-col items-center gap-2">
-              <HealthBar sunkCount={sunkEnemyShips?.length || 0} label="FROTA INIMIGA" />
-              <SailorMascot isEnemy shooting={enemyShooting} damaged={enemyDamaged} />
+                )}
+              </div>
+              {/* Enemy Mascot */}
+              <div className="flex flex-col items-center gap-3 mt-8">
+                <span className="font-mono text-[13px] font-bold tracking-[0.1em] text-paper-white uppercase truncate max-w-[150px]">
+                  {opponentName || "OPONENTE"}
+                </span>
+                <HealthBar sunkCount={sunkEnemyShips?.length || 0} />
+                <SailorMascot isEnemy shooting={enemyShooting} damaged={enemyDamaged} />
+              </div>
             </div>
           </div>
         </div>
@@ -265,95 +229,36 @@ export function ArenaView() {
                 return (
                   <div
                     key={ship.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                    className={`flex items-center p-3.5 rounded-lg border-2 transition-all ${
                       isSunk
                         ? "border-mid-tone-grey/60 bg-light-grain/10"
                         : "border-ink-black bg-white"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <span
                         className={`material-symbols-outlined text-xl ${isSunk ? "text-mid-tone-grey" : "text-ink-black"}`}
                         style={{ fontVariationSettings: "'FILL' 1" }}
                       >
                         {SHIP_ICONS[ship.id]}
                       </span>
-                      <div className="flex flex-col">
-                        <span className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight ${
+                      <div className="flex flex-col gap-1">
+                        <span className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight whitespace-nowrap ${
                           isSunk ? "text-mid-tone-grey line-through" : "text-ink-black"
                         }`}>
                           {ship.name}
                         </span>
-                        <span className={`font-mono text-[11px] tracking-[0.05em] ${
-                          isSunk ? "text-mid-tone-grey/60" : "text-mid-tone-grey"
-                        }`}>
-                          TAM. {ship.size}
-                        </span>
+                        <div className="flex gap-1">
+                          {Array.from({ length: ship.size }).map((_, i) => (
+                            <div key={i} className={`w-2 h-2 ${isSunk ? "bg-mid-tone-grey/40" : "bg-ink-black"}`} />
+                          ))}
+                        </div>
                       </div>
                     </div>
 
-                    {isSunk ? (
-                      <span className="text-ink-black font-display text-2xl font-black leading-none">✕</span>
-                    ) : (
-                      <div className="flex gap-1.5">
-                        {Array.from({ length: ship.size }).map((_, i) => (
-                          <div key={i} className="w-2.5 h-2.5 rounded-sm bg-ink-black" />
-                        ))}
-                      </div>
+                    {isSunk && (
+                      <span className="ml-auto text-ink-black font-display text-2xl font-black leading-none">✕</span>
                     )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* My Fleet status */}
-          <div className="bg-surface-container-high ink-border rounded-xl p-5 hard-shadow-sm">
-            <h4 className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide text-center mb-4">
-              Minha Frota
-            </h4>
-            <div className="flex flex-col gap-3">
-              {FLEET.map((ship) => {
-                const isMySunk = mySunkSet.has(ship.id);
-                return (
-                  <div key={ship.id} className="flex items-center gap-3">
-                    {/* Ship icon with status */}
-                    <div className="relative shrink-0">
-                      <span
-                        className={`material-symbols-outlined text-lg ${isMySunk ? "text-mid-tone-grey/30" : "text-paper-white"}`}
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                      >
-                        {SHIP_ICONS[ship.id]}
-                      </span>
-                      {isMySunk && (
-                        <span className="absolute inset-0 flex items-center justify-center text-paper-white font-display text-xl font-black leading-none">
-                          ✕
-                        </span>
-                      )}
-                    </div>
-                    {/* Name + hull bar */}
-                    <div className="flex-1 min-w-0">
-                      <span className={`font-mono text-[11px] font-bold uppercase tracking-[0.05em] block mb-1 ${
-                        isMySunk ? "text-mid-tone-grey" : "text-paper-white"
-                      }`}>
-                        {ship.name}
-                      </span>
-                      {/* Hull integrity bar */}
-                      <div className="flex gap-0.5">
-                        {Array.from({ length: ship.size }).map((_, i) => {
-                          const hitsOnShip = myShipHits[ship.id] || 0;
-                          const isHit = i < hitsOnShip;
-                          return (
-                            <div
-                              key={i}
-                              className={`h-1.5 flex-1 rounded-sm transition-colors ${
-                                isHit ? "bg-mid-tone-grey" : "bg-paper-white/80"
-                              }`}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
                   </div>
                 );
               })}
@@ -364,22 +269,82 @@ export function ArenaView() {
 
       {/* Opponent disconnected overlay */}
       {opponentDisconnected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface/80 backdrop-blur-sm">
-          <div className="bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center max-w-sm">
-            <span className="material-symbols-outlined text-4xl text-paper-white mb-3 block" style={{ fontVariationSettings: "'FILL' 1" }}>
-              wifi_off
-            </span>
-            <h3 className="font-display text-xl font-extrabold text-paper-white uppercase tracking-tight mb-2">
-              Oponente Desconectou
-            </h3>
-            <p className="font-sans text-sm text-on-surface-variant mb-4">
-              Aguardando reconexão...
-            </p>
-            {reconnectCountdown !== null && (
-              <div className="font-mono text-4xl font-bold text-paper-white">
-                {reconnectCountdown}s
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-black/85">
+          <div className="relative w-full max-w-sm bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center overflow-hidden">
+            {/* Corner circles */}
+            <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <span className="material-symbols-outlined text-paper-white text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                wifi_off
+              </span>
+              <h3 className="font-display text-2xl font-extrabold text-paper-white uppercase tracking-tight">
+                Oponente Desconectou
+              </h3>
+              <p className="font-sans text-sm text-on-surface-variant">
+                Aguardando reconexão...
+              </p>
+              {reconnectCountdown !== null && (
+                <div className="font-mono text-4xl font-bold text-paper-white">
+                  {reconnectCountdown}s
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Flee confirmation modal */}
+      {showFleeModal && (
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-ink-black/85">
+          <div className="relative w-full max-w-sm bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center overflow-hidden">
+            {/* Corner circles */}
+            <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <span
+                className="material-symbols-outlined text-paper-white text-5xl"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                directions_run
+              </span>
+
+              <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper-white">
+                FUGIR?
+              </h2>
+
+              <p className="font-sans text-sm text-on-surface-variant">
+                Abandonar o campo de batalha contará como derrota. Seu oponente vencerá por W.O.
+              </p>
+
+              <div className="flex flex-col gap-3 w-full mt-2">
+                <button
+                  onClick={leaveGame}
+                  className="w-full bg-paper-white text-ink-black font-display text-sm font-extrabold py-3 px-6 rounded-full ink-border hard-shadow uppercase transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.animation = "none";
+                  }}
+                >
+                  SIM, SOU UM COVARDE
+                </button>
+
+                <button
+                  onClick={() => setShowFleeModal(false)}
+                  className="w-full font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white uppercase py-2 transition-colors hover:text-mid-tone-grey"
+                >
+                  VOLTAR À BATALHA
+                </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
