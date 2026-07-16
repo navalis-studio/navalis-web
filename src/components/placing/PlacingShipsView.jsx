@@ -120,18 +120,15 @@ export function PlacingShipsView() {
       {/* Main layout: Grid + Controls */}
       <div className="grid lg:grid-cols-[1fr_320px] gap-6 2xl:gap-8">
         {/* Grid Section */}
-        <div className="flex flex-col items-center justify-center relative">
+        <div className="flex flex-col items-center justify-start relative">
           {/* Title centered above board */}
-          <div className="flex flex-col items-center mb-6">
-            <h1 className="font-display text-3xl 2xl:text-4xl font-extrabold uppercase tracking-tight text-paper-white">
+          <div className="flex flex-col items-center mb-3 2xl:mb-6">
+            <h1 className="font-display text-2xl 2xl:text-4xl font-extrabold uppercase tracking-tight text-paper-white">
               Grade de Posicionamento
             </h1>
-            <span className="mt-3 font-mono text-[12px] font-bold tracking-[0.1em] bg-paper-white text-ink-black px-4 py-1.5 rounded-full border-2 border-ink-black">
-              POSICIONE SUAS TROPAS!
-            </span>
           </div>
 
-          <div className="max-w-[520px] w-full">
+          <div className="max-w-[420px] 2xl:max-w-[520px] w-full">
             <BoardGrid
               occupied={occupied}
               placed={placed}
@@ -145,7 +142,7 @@ export function PlacingShipsView() {
           </div>
 
           {/* Action Buttons below board */}
-          <div className="mt-6 max-w-[520px] w-full flex gap-3">
+          <div className="mt-4 2xl:mt-6 max-w-[420px] 2xl:max-w-[520px] w-full flex gap-3">
             <button
               onClick={autoPlace}
               disabled={confirming}
@@ -212,7 +209,7 @@ export function PlacingShipsView() {
               </span>
             </div>
 
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               {FLEET.map((s) => {
                 const isPlaced = placedIds.has(s.id);
                 const isSelected = selectedShipId === s.id && !isPlaced;
@@ -230,7 +227,7 @@ export function PlacingShipsView() {
                         setSelectedShipId(s.id);
                       }
                     }}
-                    className={`flex items-center justify-between p-3.5 rounded-lg border-2 transition-all ${
+                    className={`flex items-center justify-between p-2.5 2xl:p-3.5 rounded-lg border-2 transition-all ${
                       isPlaced
                         ? "border-mid-tone-grey/50 bg-light-grain/50 opacity-60 hover:opacity-80 hover:border-ink-black"
                         : isSelected
@@ -268,7 +265,7 @@ export function PlacingShipsView() {
           </div>
 
           {/* Orientation Toggle */}
-          <div className="bg-surface-container-high ink-border rounded-xl p-4 hard-shadow-sm flex flex-col items-center gap-3">
+          <div className="bg-surface-container-high ink-border rounded-xl p-3 2xl:p-4 hard-shadow-sm flex flex-col items-center gap-2 2xl:gap-3">
             <span className="font-mono text-[12px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
               Orientação · [R]
             </span>
@@ -311,7 +308,7 @@ export function PlacingShipsView() {
           <button
             disabled={!allPlaced || confirming}
             onClick={handleConfirm}
-            className={`w-full font-display text-lg font-extrabold py-4 rounded-xl uppercase flex items-center justify-center gap-2 transition-all ${
+            className={`w-full font-display text-base 2xl:text-lg font-extrabold py-3 2xl:py-4 rounded-xl uppercase flex items-center justify-center gap-2 transition-all ${
               allPlaced && !confirming
                 ? "bg-paper-white text-ink-black border-4 border-ink-black shadow-[6px_6px_0px_0px_#000] hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
                 : "bg-surface-container text-mid-tone-grey border-2 border-mid-tone-grey/50 cursor-not-allowed opacity-50"

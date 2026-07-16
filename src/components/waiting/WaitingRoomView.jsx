@@ -27,8 +27,8 @@ export function WaitingRoomView() {
   const displayCode = roomCode || "------";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-8 py-10 relative z-10">
-      <div className="w-full max-w-md 2xl:max-w-lg bg-surface-container-high ink-border rounded-xl p-8 2xl:p-10 hard-shadow relative overflow-hidden text-center">
+    <div className="min-h-screen flex items-center justify-center px-8 py-6 relative z-10">
+      <div className="w-full max-w-sm 2xl:max-w-lg bg-surface-container-high ink-border rounded-xl px-8 py-6 2xl:p-10 hard-shadow relative overflow-hidden text-center">
         {/* Corner circles */}
         <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
         <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
@@ -38,28 +38,28 @@ export function WaitingRoomView() {
         {/* Dashed inner border */}
         <div className="absolute inset-4 border-2 border-paper-white/30 border-dashed rounded-lg pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col items-center gap-6">
+        <div className="relative z-10 flex flex-col items-center gap-4 2xl:gap-6">
           {/* Header label */}
-          <span className="font-mono text-[11px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
+          <span className="font-mono text-[10px] 2xl:text-[11px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
             SALA CRIADA
           </span>
 
           {/* Title with animated dots */}
-          <h2 className="font-display text-2xl 2xl:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
+          <h2 className="font-display text-xl 2xl:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
             Aguardando oponente{dots}
           </h2>
 
           {/* Room code card */}
-          <div className="w-full bg-surface ink-border rounded-lg p-6 hard-shadow-sm">
-            <span className="font-mono text-[10px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
+          <div className="w-full bg-surface ink-border rounded-lg p-4 2xl:p-6 hard-shadow-sm">
+            <span className="font-mono text-[9px] 2xl:text-[10px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
               CÓDIGO DA SALA
             </span>
-            <div className="mt-3 font-mono text-4xl font-bold text-paper-white tracking-[0.4em]">
+            <div className="mt-2 2xl:mt-3 font-mono text-3xl 2xl:text-4xl font-bold text-paper-white tracking-[0.4em]">
               {displayCode}
             </div>
             <button
               onClick={copyCode}
-              className="mt-4 inline-flex items-center gap-2 bg-paper-white text-ink-black font-mono text-[11px] font-bold tracking-[0.1em] px-5 py-2.5 rounded-full ink-border hard-shadow-sm uppercase transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
+              className="mt-3 2xl:mt-4 inline-flex items-center gap-2 bg-paper-white text-ink-black font-mono text-[10px] 2xl:text-[11px] font-bold tracking-[0.1em] px-4 py-2 2xl:px-5 2xl:py-2.5 rounded-full ink-border hard-shadow-sm uppercase transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
               onMouseEnter={(e) => {
                 e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
               }}
@@ -82,9 +82,9 @@ export function WaitingRoomView() {
           </p>
 
           {/* Players */}
-          <div className="w-full grid grid-cols-2 gap-3">
+          <div className="w-full grid grid-cols-2 gap-2 2xl:gap-3">
             {/* Player 1 (host) */}
-            <div className="bg-surface ink-border rounded-lg p-4 hard-shadow-sm">
+            <div className="bg-surface ink-border rounded-lg p-3 2xl:p-4 hard-shadow-sm">
               <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
                 JOGADOR 1
               </span>
@@ -108,7 +108,7 @@ export function WaitingRoomView() {
             </div>
 
             {/* Player 2 (opponent) */}
-            <div className="bg-surface ink-border rounded-lg p-4 hard-shadow-sm">
+            <div className="bg-surface ink-border rounded-lg p-3 2xl:p-4 hard-shadow-sm">
               <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
                 JOGADOR 2
               </span>

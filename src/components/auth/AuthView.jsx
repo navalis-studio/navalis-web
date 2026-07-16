@@ -46,7 +46,7 @@ export function AuthView() {
   const displayError = localError || error;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-8 py-4">
+    <div className="min-h-screen flex items-center justify-center px-8 py-2">
       {/* Card branco - Ink & Iron style */}
       <div className="w-full max-w-[400px] 2xl:max-w-[460px] bg-paper-white ink-border-heavy rounded-xl hard-shadow relative overflow-hidden flex flex-col z-10">
         {/* Cantos decorativos - círculos pretos */}
@@ -59,9 +59,9 @@ export function AuthView() {
         <div className="absolute inset-4 border-2 border-ink-black rounded-lg pointer-events-none opacity-50 border-dashed" />
 
         {/* Conteúdo */}
-        <div className="p-6 pt-8 pb-8 2xl:p-8 2xl:pt-10 2xl:pb-10 flex flex-col items-center relative z-20">
+        <div className="p-6 pt-7 pb-7 2xl:p-8 2xl:pt-10 2xl:pb-10 flex flex-col items-center relative z-20">
           {/* Logo - Título + Navio animado */}
-          <div className="mb-2 2xl:mb-4 flex flex-col items-center">
+          <div className="mb-1 2xl:mb-4 flex flex-col items-center">
             {/* Título NAVALIS */}
             <img
               src={navalisName}
@@ -70,7 +70,7 @@ export function AuthView() {
               draggable="false"
             />
             {/* Navio com walk-in-place animation */}
-            <div className="ship-walk mt-1">
+            <div className="ship-walk mt-0">
               <img
                 src={navalisShip}
                 alt=""
@@ -81,12 +81,12 @@ export function AuthView() {
           </div>
 
           {/* Tagline */}
-          <p className="font-display text-lg 2xl:text-xl font-semibold text-ink-black text-center mb-4 2xl:mb-6 px-4 leading-tight">
+          <p className="font-display text-lg 2xl:text-xl font-semibold text-ink-black text-center mb-3 2xl:mb-6 px-4 leading-tight">
             "A frota aguarda seu comando."
           </p>
 
           {/* Tabs Login/Register - pill com hard shadow */}
-          <div className="flex w-full max-w-xs mb-4 2xl:mb-5 rounded-full ink-border hard-shadow-sm overflow-hidden">
+          <div className="flex w-full max-w-xs mb-3 2xl:mb-5 rounded-full ink-border hard-shadow-sm overflow-hidden">
             {["login", "register"].map((t) => (
               <button
                 key={t}
@@ -111,7 +111,7 @@ export function AuthView() {
           )}
 
           {/* Form */}
-          <form className="w-full max-w-xs 2xl:max-w-sm space-y-3 2xl:space-y-4" onSubmit={handleSubmit}>
+          <form className="w-full max-w-xs 2xl:max-w-sm space-y-2.5 2xl:space-y-4" onSubmit={handleSubmit}>
             <NeonInput
               label="USUÁRIO"
               value={name}

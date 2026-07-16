@@ -57,9 +57,9 @@ export function LobbyView() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-8 2xl:px-12 py-6 2xl:py-8 max-w-5xl 2xl:max-w-6xl mx-auto relative z-10">
+    <div className="min-h-screen flex flex-col items-center px-8 2xl:px-12 py-4 2xl:py-8 max-w-5xl 2xl:max-w-6xl mx-auto relative z-10">
       {/* Header */}
-      <header className="w-full flex items-center justify-between mb-6 2xl:mb-10">
+      <header className="w-full flex items-center justify-between mb-4 2xl:mb-10">
         <BrandMark size="sm" />
         <div className="flex items-center">
           {/* User badge with logout */}
@@ -94,9 +94,9 @@ export function LobbyView() {
       )}
 
       {/* Welcome + Actions */}
-      <div className="w-full flex flex-col lg:flex-row gap-4 2xl:gap-6 mb-6 2xl:mb-8">
+      <div className="w-full flex flex-col lg:flex-row gap-4 2xl:gap-6 mb-4 2xl:mb-8">
         {/* Welcome card + Create */}
-        <div className="flex-1 lg:flex-[2] bg-surface-container-high ink-border rounded-xl p-6 2xl:p-8 hard-shadow relative overflow-hidden flex flex-col justify-center gap-4">
+        <div className="flex-1 lg:flex-[2] bg-surface-container-high ink-border rounded-xl p-5 2xl:p-8 hard-shadow relative overflow-hidden flex flex-col justify-center gap-3 2xl:gap-4">
           {/* Corner circles */}
           <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
           <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
@@ -142,14 +142,14 @@ export function LobbyView() {
         </div>
 
         {/* Enter by ID */}
-        <div className="flex-1 bg-surface-container-high ink-border rounded-xl p-6 hard-shadow relative overflow-hidden flex flex-col justify-between">
+        <div className="flex-1 bg-surface-container-high ink-border rounded-xl p-5 2xl:p-6 hard-shadow relative overflow-hidden flex flex-col justify-between">
           {/* Corner circles */}
           <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
           <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
           <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
           <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
 
-          <div className="flex items-center gap-2 border-b-2 border-paper-white/40 pb-2 mb-4">
+          <div className="flex items-center gap-2 border-b-2 border-paper-white/40 pb-2 mb-3">
             <span
               className="material-symbols-outlined text-paper-white text-lg"
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -161,13 +161,13 @@ export function LobbyView() {
             </h3>
           </div>
 
-          <div className="flex flex-col gap-4 flex-1 justify-center">
+          <div className="flex flex-col gap-3 flex-1 justify-center">
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="Ex: ABCXYZ"
               maxLength={6}
-              className="w-full bg-surface border-2 border-paper-white rounded-lg p-4 text-paper-white font-mono text-sm tracking-wider text-center placeholder:text-mid-tone-grey outline-none transition-all focus:ring-2 focus:ring-paper-white uppercase"
+              className="w-full bg-surface border-2 border-paper-white rounded-lg p-3 text-paper-white font-mono text-sm tracking-wider text-center placeholder:text-mid-tone-grey outline-none transition-all focus:ring-2 focus:ring-paper-white uppercase"
             />
             <button
               onClick={handleJoinByCode}
@@ -215,7 +215,7 @@ export function LobbyView() {
 
         {/* Room list */}
         {availableGames.length === 0 ? (
-          <div className="px-6 py-10 2xl:py-14 text-center flex flex-col items-center gap-3">
+          <div className="px-6 py-8 2xl:py-14 text-center flex flex-col items-center gap-3">
             <span
               className="material-symbols-outlined text-mid-tone-grey text-5xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
