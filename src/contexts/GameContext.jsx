@@ -31,11 +31,13 @@ export function GameProvider({ children }) {
   const [sunkEnemyCells, setSunkEnemyCells] = useState(new Set());
   const [opponentDisconnected, setOpponentDisconnected] = useState(false);
   const [reconnectCountdown, setReconnectCountdown] = useState(null);
+  const [turnTimer, setTurnTimer] = useState(null);
 
   const enemyMarksRef = useRef(enemyMarks);
   useEffect(() => { enemyMarksRef.current = enemyMarks; }, [enemyMarks]);
 
   const countdownRef = useRef(null);
+  const turnTimerRef = useRef(null);
 
   const LETTERS = "ABCDEFGHIJ".split("");
 
@@ -63,6 +65,28 @@ export function GameProvider({ children }) {
       countdownRef.current = null;
     }
     setReconnectCountdown(null);
+  }
+
+  function startTurnCountdown(seconds) {
+    clearTurnTimer();
+    setTurnTimer(seconds);
+    turnTimerRef.current = setInterval(() => {
+      setTurnTimer((prev) => {
+        if (prev <= 1) {
+          clearTurnTimer();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  function clearTurnTimer() {
+    if (turnTimerRef.current) {
+      clearInterval(turnTimerRef.current);
+      turnTimerRef.current = null;
+    }
+    setTurnTimer(null);
   }
 
   // Handle incoming WebSocket events
@@ -199,6 +223,10 @@ export function GameProvider({ children }) {
           clearCountdown();
           setCancelledNotice("O covarde fugiu antes da batalha.");
         }
+        break;
+
+      case "TURN_TIMER_START":
+        startTurnCountdown(event.durationSeconds || 20);
         break;
 
       default:
@@ -462,6 +490,7 @@ export function GameProvider({ children }) {
     setSunkEnemyCells(new Set());
     setOpponentDisconnected(false);
     clearCountdown();
+    clearTurnTimer();
   }
 
   const dismissCancelledNotice = useCallback(() => {
@@ -506,6 +535,7 @@ export function GameProvider({ children }) {
         cancelledNotice,
         opponentDisconnected,
         reconnectCountdown,
+        turnTimer,
         createGame,
         joinGame,
         fetchAvailableGames,
