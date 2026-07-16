@@ -12,24 +12,29 @@ import player2Img from "../../img/player2.png";
 export function SailorMascot({ isEnemy = false, shooting = false, damaged = false, className = "" }) {
   const img = isEnemy ? player2Img : player1Img;
 
+  // All mascot PNGs face RIGHT by default.
+  // Enemy mascot is flipped horizontally so it faces LEFT.
+  // Flash always exits from the RIGHT side of the image (gun tip),
+  // but since enemy is flipped, it visually appears on the left.
+
   return (
     <div
-      className={`relative inline-block ${className} ${damaged ? "animate-mascot-damage" : ""} ${shooting ? "animate-mascot-shoot" : ""}`}
+      className={`relative inline-block ${damaged ? "animate-mascot-damage" : ""} ${isEnemy ? "-scale-x-100" : ""}`}
     >
-      {/* Muzzle flash */}
+      {/* Muzzle flash — cartoon burst at gun tip (always right side of image) */}
       {shooting && (
-        <div className="absolute right-0 top-[40%] animate-flash-fade">
-          <svg width="28" height="20" viewBox="0 0 28 20" fill="none">
-            <polygon points="0,10 28,3 24,10 28,17" fill="white" opacity="0.9" />
-            <circle cx="5" cy="10" r="4" fill="white" opacity="0.7" />
-          </svg>
+        <div className="absolute right-[-8px] top-[32%] animate-flash-fade pointer-events-none">
+          <div className="relative w-6 h-6">
+            <div className="absolute inset-0 rounded-full bg-paper-white animate-ping-once" />
+            <div className="absolute inset-1 rounded-full bg-paper-white opacity-90" />
+          </div>
         </div>
       )}
 
       <img
         src={img}
         alt={isEnemy ? "Oponente" : "Jogador"}
-        className="h-44 2xl:h-52 w-auto object-contain drop-shadow-[3px_3px_0px_rgba(0,0,0,0.8)]"
+        className={`w-auto object-contain drop-shadow-[3px_3px_0px_rgba(0,0,0,0.8)] transition-[filter] duration-200 ${damaged ? "brightness-[0.3]" : "brightness-100"} ${className}`}
         draggable="false"
       />
     </div>

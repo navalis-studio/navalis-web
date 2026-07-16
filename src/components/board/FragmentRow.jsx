@@ -17,6 +17,7 @@ export function FragmentRow({
   disabled,
   sunkCells,
 }) {
+
   return (
     <>
       {/* Row label */}
@@ -100,6 +101,7 @@ export function FragmentRow({
           <button
             key={c}
             type="button"
+            data-cell={`${row}-${c}`}
             disabled={!clickable}
             onMouseEnter={() => onCellEnter?.(row, c)}
             onMouseLeave={() => onCellLeave?.()}
