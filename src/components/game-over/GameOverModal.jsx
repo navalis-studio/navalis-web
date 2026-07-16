@@ -15,7 +15,7 @@ export function GameOverModal({ result, reason, onReturn }) {
 
   function getIcon() {
     if (isWO) return "directions_run";
-    return victory ? "emoji_events" : "storm";
+    return victory ? "emoji_events" : "skull";
   }
 
   return (
