@@ -22,7 +22,6 @@ export function GameProvider({ children }) {
   const [placedShips, setPlacedShips] = useState([]);
   const [availableGames, setAvailableGames] = useState([]);
   const [error, setError] = useState(null);
-  const [log, setLog] = useState([]);
   const [opponentReady, setOpponentReady] = useState(false);
   const [myReady, setMyReady] = useState(false);
   const [cancelledNotice, setCancelledNotice] = useState(null);
@@ -38,12 +37,6 @@ export function GameProvider({ children }) {
 
   const countdownRef = useRef(null);
   const turnTimerRef = useRef(null);
-
-  const LETTERS = "ABCDEFGHIJ".split("");
-
-  function pushLog(msg) {
-    setLog((l) => [`▸ ${msg}`, ...l].slice(0, 50));
-  }
 
   function startCountdown(seconds) {
     clearCountdown();
@@ -95,18 +88,13 @@ export function GameProvider({ children }) {
 
     switch (event.type) {
       case "SHIP_PLACED":
-        if (event.playerId !== myUserId) {
-          pushLog("Oponente posicionou um navio.");
-        }
         break;
 
       case "PLAYER_READY":
         if (event.playerId === myUserId) {
           setMyReady(true);
-          pushLog("Você está pronto!");
         } else {
           setOpponentReady(true);
-          pushLog("Oponente está pronto!");
         }
         break;
 
@@ -123,7 +111,6 @@ export function GameProvider({ children }) {
           // For now assume the creator (player1) goes first
           setMyTurn(true); // Will be corrected by SHOT_FIRED events
         }
-        pushLog("Partida iniciada! Sonar online.");
         break;
 
       case "SHOT_FIRED": {
@@ -138,7 +125,6 @@ export function GameProvider({ children }) {
             next.set(cellKey, hit ? "hit" : "errou");
             return next;
           });
-          pushLog(`TIRO ${LETTERS[row]}${col + 1} — ${hit ? "ACERTO DIRETO" : "ÁGUA"}${sunkShipType ? ` (${sunkShipType} AFUNDADO!)` : ""}`);
           if (sunkShipType) {
             setSunkEnemyShips((prev) => [...prev, sunkShipType]);
             // Use ship cells from backend to mark all cells of the sunk ship
@@ -158,7 +144,6 @@ export function GameProvider({ children }) {
             next.set(cellKey, hit ? "hit" : "errou");
             return next;
           });
-          pushLog(`INIMIGO ATIRA ${LETTERS[row]}${col + 1} — ${hit ? "FOMOS ATINGIDOS" : "ÁGUA"}${sunkShipType ? ` (${sunkShipType} AFUNDADO!)` : ""}`);
           if (sunkShipType) {
             setSunkMyShips((prev) => [...prev, sunkShipType]);
           }
@@ -168,18 +153,12 @@ export function GameProvider({ children }) {
           setGameState("FINISHED");
           const gameResult = winnerId === myUserId ? "victory" : "defeat";
           setGameOver({ result: gameResult, winnerId });
-          pushLog(gameResult === "victory" ? "VITÓRIA! Frota inimiga destruída!" : "DERROTA! Sua frota foi destruída.");
         } else {
           // Turn logic: if hit, same player shoots again; if miss, turn switches
           if (hit) {
             setMyTurn(isMyShot);
           } else {
             setMyTurn(!isMyShot);
-          }
-          if (!hit && !isMyShot) {
-            pushLog("Seu turno — atire!");
-          } else if (!hit && isMyShot) {
-            pushLog("Turno do inimigo — aguarde...");
           }
         }
         break;
@@ -189,7 +168,6 @@ export function GameProvider({ children }) {
         setOpponent(event.playerId);
         setOpponentName(event.username || null);
         setGameState("PLACING_SHIPS");
-        pushLog("Oponente entrou na sala!");
         break;
 
       case "OPPONENT_DISCONNECTED":
@@ -197,14 +175,12 @@ export function GameProvider({ children }) {
         setGameOver({ result: "victory", winnerId: event.winnerId, reason: "wo" });
         setOpponentDisconnected(false);
         clearCountdown();
-        pushLog("Oponente desconectou. Vitória por W.O.!");
         break;
 
       case "OPPONENT_DISCONNECTED_TEMP":
         if (event.playerId !== myUserId) {
           setOpponentDisconnected(true);
           startCountdown(event.timeoutSeconds || 30);
-          pushLog("Oponente desconectou. Aguardando reconexão...");
         }
         break;
 
@@ -212,7 +188,6 @@ export function GameProvider({ children }) {
         if (event.playerId !== myUserId) {
           setOpponentDisconnected(false);
           clearCountdown();
-          pushLog("Oponente reconectou!");
         }
         break;
 
@@ -327,7 +302,6 @@ export function GameProvider({ children }) {
 
         // Connect to WebSocket and subscribe
         await connectToGame(data.gameId);
-        pushLog("Reconectado à partida!");
       } catch (err) {
         // If 204 or error, just ignore - no active game
         if (err?.status !== 204) {
@@ -353,7 +327,6 @@ export function GameProvider({ children }) {
     setOpponentName(null);
       resetGameState();
       await connectToGame(id);
-      pushLog("Sala criada. Aguardando oponente...");
       return game;
     } catch (err) {
       setError(err.message || "Falha ao criar partida");
@@ -380,7 +353,6 @@ export function GameProvider({ children }) {
       setOpponentName(game.hostUsername || null);
       resetGameState();
       await connectToGame(id);
-      pushLog("Você entrou na partida! Posicione sua frota.");
       return game;
     } catch (err) {
       setError(err.message || "Falha ao entrar na partida");
@@ -473,7 +445,6 @@ export function GameProvider({ children }) {
     setOpponent(null);
     setOpponentName(null);
     setAvailableGames([]);
-    setLog([]);
   }, [gameId, gameState]);
 
   function resetGameState() {
@@ -501,7 +472,6 @@ export function GameProvider({ children }) {
     setGameState(null);
     setOpponent(null);
     setOpponentName(null);
-    setLog([]);
   }, []);
 
   // Cleanup on unmount
@@ -526,7 +496,6 @@ export function GameProvider({ children }) {
         placedShips,
         availableGames,
         error,
-        log,
         sunkEnemyShips,
         sunkEnemyCells,
         sunkMyShips,

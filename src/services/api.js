@@ -88,10 +88,6 @@ export async function listAvailableGames() {
   return request("/games/available");
 }
 
-export async function getGame(gameId) {
-  return request(`/games/${gameId}`);
-}
-
 export async function cancelGame(gameId) {
   return request(`/games/${gameId}`, { method: "DELETE" });
 }

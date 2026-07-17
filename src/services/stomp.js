@@ -100,6 +100,4 @@ export function disconnectStomp() {
   }
 }
 
-export function isStompConnected() {
-  return stompClient?.connected ?? false;
-}
+

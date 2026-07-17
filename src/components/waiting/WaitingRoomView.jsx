@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { BrandMark } from "../shared/BrandMark";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGame } from "../../contexts/GameContext";
 
 export function WaitingRoomView() {
   const { user } = useAuth();
-  const { gameId, roomCode, opponent, leaveGame } = useGame();
+  const { roomCode, opponent, leaveGame } = useGame();
   const [copied, setCopied] = useState(false);
   const [dots, setDots] = useState("");
 
