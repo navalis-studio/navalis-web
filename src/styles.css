@@ -42,6 +42,19 @@
 }
 
 @layer base {
+  /* Texto claro → seleção fundo branco, texto preto */
+  ::selection {
+    background-color: var(--paper-white);
+    color: var(--ink-black);
+  }
+
+  /* Texto escuro → seleção fundo preto, texto branco */
+  .text-ink-black::selection,
+  .text-ink-black *::selection {
+    background-color: var(--ink-black);
+    color: var(--paper-white);
+  }
+
   html, body {
     background-color: var(--surface);
     color: var(--on-surface);
