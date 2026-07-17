@@ -4,7 +4,8 @@ import { BoardGrid } from "../board/BoardGrid";
 import { useGame } from "../../contexts/GameContext";
 
 export function PlacingShipsView() {
-  const { confirmFleet, leaveGame, opponentReady, opponentDisconnected, reconnectCountdown } = useGame();
+  const { confirmFleet, leaveGame, opponentReady, opponentDisconnected, reconnectCountdown } =
+    useGame();
   const [placed, setPlaced] = useState([]);
   const [orientation, setOrientation] = useState("H");
   const [selectedShipId, setSelectedShipId] = useState(FLEET[0].id);
@@ -148,7 +149,8 @@ export function PlacingShipsView() {
               disabled={confirming}
               className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-sm font-extrabold py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
               onMouseEnter={(e) => {
-                if (!confirming) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                if (!confirming)
+                  e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.animation = "none";
@@ -164,11 +166,15 @@ export function PlacingShipsView() {
             </button>
 
             <button
-              onClick={() => { setPlaced([]); setSelectedShipId(FLEET[0].id); }}
+              onClick={() => {
+                setPlaced([]);
+                setSelectedShipId(FLEET[0].id);
+              }}
               disabled={confirming || placed.length === 0}
               className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-sm font-extrabold py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
               onMouseEnter={(e) => {
-                if (!confirming && placed.length > 0) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                if (!confirming && placed.length > 0)
+                  e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.animation = "none";
@@ -217,7 +223,10 @@ export function PlacingShipsView() {
                   <div
                     key={s.id}
                     draggable={!isPlaced && !confirming}
-                    onDragStart={() => { setDraggingId(s.id); setSelectedShipId(s.id); }}
+                    onDragStart={() => {
+                      setDraggingId(s.id);
+                      setSelectedShipId(s.id);
+                    }}
                     onDragEnd={() => setDraggingId(null)}
                     onClick={() => {
                       if (confirming) return;
@@ -231,8 +240,8 @@ export function PlacingShipsView() {
                       isPlaced
                         ? "border-mid-tone-grey/50 bg-light-grain/50 opacity-60 hover:opacity-80 hover:border-ink-black"
                         : isSelected
-                        ? "border-ink-black bg-surface-container-high shadow-[3px_3px_0px_0px_#000]"
-                        : "border-ink-black bg-white hover:bg-light-grain"
+                          ? "border-ink-black bg-surface-container-high shadow-[3px_3px_0px_0px_#000]"
+                          : "border-ink-black bg-white hover:bg-light-grain"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -243,9 +252,15 @@ export function PlacingShipsView() {
                         {SHIP_ICONS[s.id]}
                       </span>
                       <div className="flex flex-col gap-1">
-                        <span className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight whitespace-nowrap ${
-                          isPlaced ? "text-mid-tone-grey line-through" : isSelected ? "text-paper-white" : "text-ink-black"
-                        }`}>
+                        <span
+                          className={`font-mono text-[13px] font-bold tracking-[0.05em] uppercase leading-tight whitespace-nowrap ${
+                            isPlaced
+                              ? "text-mid-tone-grey line-through"
+                              : isSelected
+                                ? "text-paper-white"
+                                : "text-ink-black"
+                          }`}
+                        >
                           {s.name}
                         </span>
                         <div className="flex gap-1">
@@ -302,7 +317,10 @@ export function PlacingShipsView() {
           <div className="bg-surface-container-high ink-border rounded-lg p-3 hard-shadow-sm">
             <div className="font-mono text-[12px] text-on-surface-variant leading-relaxed space-y-1">
               <div>· Arraste ou clique para posicionar</div>
-              <div>· Pressione <span className="text-paper-white font-bold">[R]</span> para girar</div>            </div>
+              <div>
+                · Pressione <span className="text-paper-white font-bold">[R]</span> para girar
+              </div>{" "}
+            </div>
           </div>
 
           <button
@@ -314,7 +332,8 @@ export function PlacingShipsView() {
                 : "bg-surface-container text-mid-tone-grey border-2 border-mid-tone-grey/50 cursor-not-allowed opacity-50"
             }`}
             onMouseEnter={(e) => {
-              if (allPlaced && !confirming) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+              if (allPlaced && !confirming)
+                e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.animation = "none";
@@ -328,7 +347,6 @@ export function PlacingShipsView() {
             </span>
             {confirming ? "Enviando..." : "Confirmar Frota"}
           </button>
-
         </aside>
       </div>
 
@@ -343,15 +361,16 @@ export function PlacingShipsView() {
             <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
 
             <div className="relative z-10 flex flex-col items-center gap-4">
-              <span className="material-symbols-outlined text-paper-white text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <span
+                className="material-symbols-outlined text-paper-white text-5xl"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
                 wifi_off
               </span>
               <h3 className="font-display text-2xl font-extrabold text-paper-white uppercase tracking-tight">
                 Oponente Desconectou
               </h3>
-              <p className="font-sans text-sm text-on-surface-variant">
-                Aguardando reconexão...
-              </p>
+              <p className="font-sans text-sm text-on-surface-variant">Aguardando reconexão...</p>
               {reconnectCountdown !== null && (
                 <div className="font-mono text-4xl font-bold text-paper-white">
                   {reconnectCountdown}s

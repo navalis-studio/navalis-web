@@ -33,7 +33,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Rodar lint
-        run: bun run lint
+        run: bun run lint -- --max-warnings 15
 
       - name: Build da aplicação
         env:

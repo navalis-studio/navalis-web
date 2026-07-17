@@ -108,8 +108,7 @@ export function LobbyView() {
 
           <div className="relative z-10">
             <h1 className="font-display text-[28px] 2xl:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight">
-              Bem-vindo a bordo,{" "}
-              <span className="inline-block">{user?.username}</span>
+              Bem-vindo a bordo, <span className="inline-block">{user?.username}</span>
             </h1>
             <p className="font-sans text-base text-on-surface-variant mt-2 max-w-md">
               Crie uma nova partida ou entre em uma operação ativa.
@@ -125,7 +124,8 @@ export function LobbyView() {
                 : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
             }`}
             onMouseEnter={(e) => {
-              if (!loading) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+              if (!loading)
+                e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.animation = "none";
@@ -280,7 +280,8 @@ export function LobbyView() {
                       : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
                   }`}
                   onMouseEnter={(e) => {
-                    if (!loading) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                    if (!loading)
+                      e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.animation = "none";

@@ -118,7 +118,9 @@ export function WaitingRoomView() {
                 >
                   {opponent ? "person" : "hourglass_top"}
                 </span>
-                <span className={`font-display text-sm font-extrabold uppercase ${opponent ? "text-paper-white" : "text-on-surface-variant"}`}>
+                <span
+                  className={`font-display text-sm font-extrabold uppercase ${opponent ? "text-paper-white" : "text-on-surface-variant"}`}
+                >
                   {opponent || "???"}
                 </span>
               </div>

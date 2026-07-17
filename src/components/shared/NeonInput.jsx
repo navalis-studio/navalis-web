@@ -36,7 +36,10 @@ export function NeonInput({ label, value, onChange, type = "text", placeholder }
           onClick={() => setShowPassword(!showPassword)}
           className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-mid-tone-grey hover:text-ink-black transition-colors"
         >
-          <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <span
+            className="material-symbols-outlined text-xl"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
             {showPassword ? "visibility_off" : "visibility"}
           </span>
         </button>

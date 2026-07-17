@@ -71,12 +71,7 @@ export function AuthView() {
             />
             {/* Navio com walk-in-place animation */}
             <div className="ship-walk mt-0">
-              <img
-                src={navalisShip}
-                alt=""
-                className="w-28 2xl:w-40 h-auto"
-                draggable="false"
-              />
+              <img src={navalisShip} alt="" className="w-28 2xl:w-40 h-auto" draggable="false" />
             </div>
           </div>
 
@@ -91,7 +86,11 @@ export function AuthView() {
               <button
                 key={t}
                 type="button"
-                onClick={() => { setTab(t); setLocalError(null); clearError(); }}
+                onClick={() => {
+                  setTab(t);
+                  setLocalError(null);
+                  clearError();
+                }}
                 className={`flex-1 py-2 2xl:py-2.5 font-mono text-[11px] 2xl:text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
                   tab === t
                     ? "bg-ink-black text-paper-white"
@@ -111,13 +110,11 @@ export function AuthView() {
           )}
 
           {/* Form */}
-          <form className="w-full max-w-xs 2xl:max-w-sm space-y-2.5 2xl:space-y-4" onSubmit={handleSubmit}>
-            <NeonInput
-              label="USUÁRIO"
-              value={name}
-              onChange={setName}
-              placeholder="Seu usuário"
-            />
+          <form
+            className="w-full max-w-xs 2xl:max-w-sm space-y-2.5 2xl:space-y-4"
+            onSubmit={handleSubmit}
+          >
+            <NeonInput label="USUÁRIO" value={name} onChange={setName} placeholder="Seu usuário" />
             <NeonInput
               label="SENHA"
               type="password"
@@ -146,7 +143,8 @@ export function AuthView() {
                     : "hover:scale-105 hover:scale-y-95 active:scale-95 active:scale-y-105"
                 }`}
                 onMouseEnter={(e) => {
-                  if (!submitting) e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                  if (!submitting)
+                    e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.animation = "none";
@@ -154,7 +152,10 @@ export function AuthView() {
               >
                 <span>{submitting ? "AGUARDE..." : tab === "login" ? "ENTRAR" : "REGISTRAR"}</span>
                 {!submitting && (
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
                     {tab === "login" ? "login" : "how_to_reg"}
                   </span>
                 )}

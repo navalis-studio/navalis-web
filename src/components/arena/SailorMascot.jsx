@@ -9,7 +9,12 @@ import player2Img from "../../img/player2.png";
  * - damaged: boolean (animação de dano ativa)
  * - className: string
  */
-export function SailorMascot({ isEnemy = false, shooting = false, damaged = false, className = "" }) {
+export function SailorMascot({
+  isEnemy = false,
+  shooting = false,
+  damaged = false,
+  className = "",
+}) {
   const img = isEnemy ? player2Img : player1Img;
 
   // All mascot PNGs face RIGHT by default.

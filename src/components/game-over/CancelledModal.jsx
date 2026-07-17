@@ -20,9 +20,7 @@ export function CancelledModal({ message, onConfirm }) {
             OPONENTE FUGIU
           </h2>
 
-          <p className="font-sans text-sm text-on-surface-variant">
-            {message}
-          </p>
+          <p className="font-sans text-sm text-on-surface-variant">{message}</p>
 
           <button
             onClick={onConfirm}

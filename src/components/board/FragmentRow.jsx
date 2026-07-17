@@ -17,7 +17,6 @@ export function FragmentRow({
   disabled,
   sunkCells,
 }) {
-
   return (
     <>
       {/* Row label */}
@@ -70,7 +69,13 @@ export function FragmentRow({
             // Regular hit — X noir
             bg = "bg-paper-white/10";
             content = (
-              <svg viewBox="0 0 24 24" className="h-4 w-4 text-paper-white" fill="none" stroke="currentColor" strokeWidth="3">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4 text-paper-white"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             );
@@ -106,10 +111,18 @@ export function FragmentRow({
             onMouseEnter={() => onCellEnter?.(row, c)}
             onMouseLeave={() => onCellLeave?.()}
             onClick={() => onCellClick?.(row, c)}
-            onDragOver={(e) => { e.preventDefault(); onCellEnter?.(row, c); }}
-            onDrop={(e) => { e.preventDefault(); onCellDrop?.(row, c); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              onCellEnter?.(row, c);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              onCellDrop?.(row, c);
+            }}
             className={`relative aspect-square border border-paper-white/20 transition-all overflow-hidden ${bg} ${extra} ${
-              clickable ? "cursor-crosshair hover:bg-paper-white/10 hover:border-paper-white/50" : "cursor-default"
+              clickable
+                ? "cursor-crosshair hover:bg-paper-white/10 hover:border-paper-white/50"
+                : "cursor-default"
             } ${disabled && attackMode ? "opacity-60" : ""}`}
           >
             <span className="absolute inset-0 flex items-center justify-center">{content}</span>

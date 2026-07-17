@@ -18,8 +18,16 @@ export function BoardGrid({
   disabled,
   sunkCells,
 }) {
-  const previewKeys = new Set((preview?.cells || []).filter(c => c.r >= 0 && c.r < GRID && c.c >= 0 && c.c < GRID).map((c) => key(c.r, c.c)));
-  const previewInvalidKeys = new Set((preview?.cells || []).filter(c => c.invalid && c.r >= 0 && c.r < GRID && c.c >= 0 && c.c < GRID).map((c) => key(c.r, c.c)));
+  const previewKeys = new Set(
+    (preview?.cells || [])
+      .filter((c) => c.r >= 0 && c.r < GRID && c.c >= 0 && c.c < GRID)
+      .map((c) => key(c.r, c.c)),
+  );
+  const previewInvalidKeys = new Set(
+    (preview?.cells || [])
+      .filter((c) => c.invalid && c.r >= 0 && c.r < GRID && c.c >= 0 && c.c < GRID)
+      .map((c) => key(c.r, c.c)),
+  );
   const shipCells = new Set();
   placed?.forEach((p) => cellsFor(p).forEach((k) => shipCells.add(k)));
 
@@ -78,7 +86,10 @@ export function BoardGrid({
       <div className="grid" style={{ gridTemplateColumns: `24px repeat(${GRID}, 1fr)` }}>
         <div />
         {LETTERS.map((letter) => (
-          <div key={letter} className="text-center font-mono text-[11px] font-bold text-paper-white py-1 tracking-wider">
+          <div
+            key={letter}
+            className="text-center font-mono text-[11px] font-bold text-paper-white py-1 tracking-wider"
+          >
             {letter}
           </div>
         ))}

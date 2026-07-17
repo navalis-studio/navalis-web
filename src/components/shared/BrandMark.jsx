@@ -17,12 +17,5 @@ export function BrandMark({ size = "md" }) {
 
   const w = resolveSize(size);
 
-  return (
-    <img
-      src={navalisLogo}
-      alt="Navalis"
-      className={`${w} h-auto`}
-      draggable="false"
-    />
-  );
+  return <img src={navalisLogo} alt="Navalis" className={`${w} h-auto`} draggable="false" />;
 }

@@ -39,9 +39,7 @@ export function GameOverModal({ result, reason, onReturn }) {
             {getTitle()}
           </h1>
 
-          <p className="font-sans text-sm text-on-surface-variant">
-            {getMessage()}
-          </p>
+          <p className="font-sans text-sm text-on-surface-variant">{getMessage()}</p>
 
           <button
             onClick={onReturn}

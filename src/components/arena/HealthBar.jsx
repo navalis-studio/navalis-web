@@ -23,7 +23,9 @@ export function HealthBar({ sunkCount = 0, label = "" }) {
             <span
               key={i}
               className={`text-lg transition-all duration-300 ${
-                isAlive ? "text-paper-white drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" : "text-mid-tone-grey/40"
+                isAlive
+                  ? "text-paper-white drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]"
+                  : "text-mid-tone-grey/40"
               }`}
               style={{ fontVariationSettings: isAlive ? "'FILL' 1" : "'FILL' 0'" }}
             >

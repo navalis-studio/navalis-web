@@ -37,24 +37,46 @@ export function FilmOverlay() {
           <div
             key={p.id}
             className={`dust-particle dust-pattern-${p.pattern}`}
-            style={{ top: p.top, left: p.left, animationDelay: p.delay, animationDuration: p.duration }}
+            style={{
+              top: p.top,
+              left: p.left,
+              animationDelay: p.delay,
+              animationDuration: p.duration,
+            }}
           />
         ))}
         {largeParticles.map((p) => (
           <div
             key={p.id}
             className={`dust-particle-lg dust-pattern-${p.pattern}`}
-            style={{ top: p.top, left: p.left, animationDelay: p.delay, animationDuration: p.duration }}
+            style={{
+              top: p.top,
+              left: p.left,
+              animationDelay: p.delay,
+              animationDuration: p.duration,
+            }}
           />
         ))}
       </div>
 
       {/* Vertical scratches */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-[9996] overflow-hidden">
-        <div className="film-scratch" style={{ left: "18%", animationDuration: "6s", animationDelay: "0s" }} />
-        <div className="film-scratch" style={{ left: "42%", animationDuration: "7.5s", animationDelay: "2s" }} />
-        <div className="film-scratch" style={{ left: "65%", animationDuration: "6.5s", animationDelay: "4.5s" }} />
-        <div className="film-scratch" style={{ left: "83%", animationDuration: "8s", animationDelay: "1s" }} />
+        <div
+          className="film-scratch"
+          style={{ left: "18%", animationDuration: "6s", animationDelay: "0s" }}
+        />
+        <div
+          className="film-scratch"
+          style={{ left: "42%", animationDuration: "7.5s", animationDelay: "2s" }}
+        />
+        <div
+          className="film-scratch"
+          style={{ left: "65%", animationDuration: "6.5s", animationDelay: "4.5s" }}
+        />
+        <div
+          className="film-scratch"
+          style={{ left: "83%", animationDuration: "8s", animationDelay: "1s" }}
+        />
       </div>
 
       {/* Vignette estilo funil - bordas escuras */}
@@ -78,7 +100,8 @@ export function FilmOverlay() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-[1] projector-glow"
         style={{
-          background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 60%)",
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 60%)",
         }}
       />
 

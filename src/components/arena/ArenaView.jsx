@@ -24,7 +24,21 @@ const SHIP_ICONS = {
 
 export function ArenaView() {
   const { user } = useAuth();
-  const { myTurn, enemyMarks, myMarks, placedShips, fire, leaveGame, sunkEnemyShips, sunkMyShips, sunkEnemyCells, opponentDisconnected, reconnectCountdown, opponentName, turnTimer } = useGame();
+  const {
+    myTurn,
+    enemyMarks,
+    myMarks,
+    placedShips,
+    fire,
+    leaveGame,
+    sunkEnemyShips,
+    sunkMyShips,
+    sunkEnemyCells,
+    opponentDisconnected,
+    reconnectCountdown,
+    opponentName,
+    turnTimer,
+  } = useGame();
 
   // Mascot animation states
   const [myShooting, setMyShooting] = useState(false);
@@ -39,7 +53,9 @@ export function ArenaView() {
   useEffect(() => {
     // Count my hits on enemy board
     let myHits = 0;
-    enemyMarks.forEach((v) => { if (v === "hit") myHits++; });
+    enemyMarks.forEach((v) => {
+      if (v === "hit") myHits++;
+    });
 
     // On first run, just store the count (skip animations on reconnect/reload)
     if (prevMyHitCount.current === null) {
@@ -60,7 +76,9 @@ export function ArenaView() {
   useEffect(() => {
     // Count enemy hits on my board
     let enemyHits = 0;
-    myMarks.forEach((v) => { if (v === "hit") enemyHits++; });
+    myMarks.forEach((v) => {
+      if (v === "hit") enemyHits++;
+    });
 
     // On first run, just store the count (skip animations on reconnect/reload)
     if (prevEnemyHitCount.current === null) {
@@ -123,19 +141,27 @@ export function ArenaView() {
       <div className="relative flex items-center justify-end mb-3 2xl:mb-5">
         {/* Turn indicator — absolutely centered in the boards area (left column) */}
         <div className="absolute left-0 right-[260px] 2xl:right-[300px] flex justify-center pointer-events-none">
-          <div className={`pointer-events-auto flex items-center gap-2.5 px-5 py-2 rounded-full border-3 transition-all ${
-            myTurn ? "border-paper-white bg-surface-container-high hard-shadow-sm" : "border-mid-tone-grey/50 bg-surface-container"
-          }`}>
+          <div
+            className={`pointer-events-auto flex items-center gap-2.5 px-5 py-2 rounded-full border-3 transition-all ${
+              myTurn
+                ? "border-paper-white bg-surface-container-high hard-shadow-sm"
+                : "border-mid-tone-grey/50 bg-surface-container"
+            }`}
+          >
             {myTurn && <span className="h-2.5 w-2.5 rounded-full bg-paper-white animate-pulse" />}
-            <span className={`font-display text-sm 2xl:text-base font-extrabold uppercase tracking-tight ${
-              myTurn ? "text-paper-white" : "text-mid-tone-grey"
-            }`}>
+            <span
+              className={`font-display text-sm 2xl:text-base font-extrabold uppercase tracking-tight ${
+                myTurn ? "text-paper-white" : "text-mid-tone-grey"
+              }`}
+            >
               {myTurn ? "SEU TURNO — ATAQUE!" : "TURNO DO OPONENTE"}
             </span>
             {turnTimer !== null && (
-              <span className={`font-mono text-sm 2xl:text-base font-bold ${
-                turnTimer <= 5 ? "text-paper-white animate-pulse" : "text-mid-tone-grey"
-              }`}>
+              <span
+                className={`font-mono text-sm 2xl:text-base font-bold ${
+                  turnTimer <= 5 ? "text-paper-white animate-pulse" : "text-mid-tone-grey"
+                }`}
+              >
                 {turnTimer}s
               </span>
             )}
@@ -145,8 +171,15 @@ export function ArenaView() {
         <div className="flex items-center">
           <div className="flex items-center bg-surface-container-high ink-border rounded-full overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-2">
-              <span className="material-symbols-outlined text-paper-white text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
-              <span className="font-mono text-[12px] font-bold text-paper-white tracking-[0.1em] uppercase">{user?.username}</span>
+              <span
+                className="material-symbols-outlined text-paper-white text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                person
+              </span>
+              <span className="font-mono text-[12px] font-bold text-paper-white tracking-[0.1em] uppercase">
+                {user?.username}
+              </span>
             </div>
             <div className="w-[2px] h-6 bg-paper-white/20" />
             <button
@@ -168,11 +201,18 @@ export function ArenaView() {
             {/* Board: Minha Frota */}
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1.5 2xl:mb-2">
-                <span className="material-symbols-outlined text-paper-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
+                <span
+                  className="material-symbols-outlined text-paper-white text-sm"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  shield
+                </span>
                 <h3 className="font-display text-xs 2xl:text-sm font-extrabold text-paper-white uppercase tracking-wide">
                   Minha Frota
                 </h3>
-                <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">DEFESA</span>
+                <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">
+                  DEFESA
+                </span>
               </div>
               <div className="w-full max-w-[280px] 2xl:max-w-[380px]">
                 <BoardGrid placed={placedShips} marks={myMarks} sunkCells={mySunkCells} />
@@ -190,11 +230,18 @@ export function ArenaView() {
             {/* Board: Frota Inimiga */}
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1.5 2xl:mb-2">
-                <span className="material-symbols-outlined text-paper-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>gps_fixed</span>
+                <span
+                  className="material-symbols-outlined text-paper-white text-sm"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  gps_fixed
+                </span>
                 <h3 className="font-display text-xs 2xl:text-sm font-extrabold text-paper-white uppercase tracking-wide">
                   Frota Inimiga
                 </h3>
-                <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">ATAQUE</span>
+                <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">
+                  ATAQUE
+                </span>
               </div>
               <div className="w-full max-w-[280px] 2xl:max-w-[380px] relative">
                 <BoardGrid
@@ -222,7 +269,12 @@ export function ArenaView() {
                   {opponentName || "OPONENTE"}
                 </span>
                 <HealthBar sunkCount={sunkEnemyShips?.length || 0} />
-                <SailorMascot isEnemy shooting={enemyShooting} damaged={enemyDamaged} className="h-32 2xl:h-44" />
+                <SailorMascot
+                  isEnemy
+                  shooting={enemyShooting}
+                  damaged={enemyDamaged}
+                  className="h-32 2xl:h-44"
+                />
               </div>
             </div>
           </div>
@@ -261,21 +313,28 @@ export function ArenaView() {
                         {SHIP_ICONS[ship.id]}
                       </span>
                       <div className="flex flex-col gap-0.5 2xl:gap-1">
-                        <span className={`font-mono text-[11px] 2xl:text-[13px] font-bold tracking-[0.05em] uppercase leading-tight whitespace-nowrap ${
-                          isSunk ? "text-mid-tone-grey line-through" : "text-ink-black"
-                        }`}>
+                        <span
+                          className={`font-mono text-[11px] 2xl:text-[13px] font-bold tracking-[0.05em] uppercase leading-tight whitespace-nowrap ${
+                            isSunk ? "text-mid-tone-grey line-through" : "text-ink-black"
+                          }`}
+                        >
                           {ship.name}
                         </span>
                         <div className="flex gap-1">
                           {Array.from({ length: ship.size }).map((_, i) => (
-                            <div key={i} className={`w-1.5 h-1.5 2xl:w-2 2xl:h-2 ${isSunk ? "bg-mid-tone-grey/40" : "bg-ink-black"}`} />
+                            <div
+                              key={i}
+                              className={`w-1.5 h-1.5 2xl:w-2 2xl:h-2 ${isSunk ? "bg-mid-tone-grey/40" : "bg-ink-black"}`}
+                            />
                           ))}
                         </div>
                       </div>
                     </div>
 
                     {isSunk && (
-                      <span className="ml-auto text-ink-black font-display text-xl 2xl:text-2xl font-black leading-none">✕</span>
+                      <span className="ml-auto text-ink-black font-display text-xl 2xl:text-2xl font-black leading-none">
+                        ✕
+                      </span>
                     )}
                   </div>
                 );
@@ -296,15 +355,16 @@ export function ArenaView() {
             <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
 
             <div className="relative z-10 flex flex-col items-center gap-4">
-              <span className="material-symbols-outlined text-paper-white text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <span
+                className="material-symbols-outlined text-paper-white text-5xl"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
                 wifi_off
               </span>
               <h3 className="font-display text-2xl font-extrabold text-paper-white uppercase tracking-tight">
                 Oponente Desconectou
               </h3>
-              <p className="font-sans text-sm text-on-surface-variant">
-                Aguardando reconexão...
-              </p>
+              <p className="font-sans text-sm text-on-surface-variant">Aguardando reconexão...</p>
               {reconnectCountdown !== null && (
                 <div className="font-mono text-4xl font-bold text-paper-white">
                   {reconnectCountdown}s

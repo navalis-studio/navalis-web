@@ -33,7 +33,9 @@ export function GameProvider({ children }) {
   const [turnTimer, setTurnTimer] = useState(null);
 
   const enemyMarksRef = useRef(enemyMarks);
-  useEffect(() => { enemyMarksRef.current = enemyMarks; }, [enemyMarks]);
+  useEffect(() => {
+    enemyMarksRef.current = enemyMarks;
+  }, [enemyMarks]);
 
   const countdownRef = useRef(null);
   const turnTimerRef = useRef(null);
@@ -83,142 +85,157 @@ export function GameProvider({ children }) {
   }
 
   // Handle incoming WebSocket events
-  const handleGameEvent = useCallback((event) => {
-    const myUserId = user?.userId;
+  const handleGameEvent = useCallback(
+    (event) => {
+      const myUserId = user?.userId;
 
-    switch (event.type) {
-      case "SHIP_PLACED":
-        break;
+      switch (event.type) {
+        case "SHIP_PLACED":
+          break;
 
-      case "PLAYER_READY":
-        if (event.playerId === myUserId) {
-          setMyReady(true);
-        } else {
-          setOpponentReady(true);
-        }
-        break;
+        case "PLAYER_READY":
+          if (event.playerId === myUserId) {
+            setMyReady(true);
+          } else {
+            setOpponentReady(true);
+          }
+          break;
 
-      case "GAME_STARTED":
-        setGameState("IN_PROGRESS");
-        // Backend sets currentTurnPlayerId to player1 on start
-        // We need to check if we're player1 via the game info
-        // For now, the GAME_STARTED event doesn't tell us who goes first
-        // So we fetch game info to determine turn
-        if (event.firstPlayerId) {
-          setMyTurn(event.firstPlayerId === myUserId);
-        } else {
-          // If backend doesn't send firstPlayerId, we'll determine by fetching
-          // For now assume the creator (player1) goes first
-          setMyTurn(true); // Will be corrected by SHOT_FIRED events
-        }
-        break;
+        case "GAME_STARTED":
+          setGameState("IN_PROGRESS");
+          // Backend sets currentTurnPlayerId to player1 on start
+          // We need to check if we're player1 via the game info
+          // For now, the GAME_STARTED event doesn't tell us who goes first
+          // So we fetch game info to determine turn
+          if (event.firstPlayerId) {
+            setMyTurn(event.firstPlayerId === myUserId);
+          } else {
+            // If backend doesn't send firstPlayerId, we'll determine by fetching
+            // For now assume the creator (player1) goes first
+            setMyTurn(true); // Will be corrected by SHOT_FIRED events
+          }
+          break;
 
-      case "SHOT_FIRED": {
-        const { shooterId, row, col, result, sunkShipType, sunkShipCells: shipCells, gameOver: isGameOver, winnerId } = event;
-        const isMyShot = shooterId === myUserId;
-        const hit = result === "HIT" || result === "SUNK";
-        const cellKey = key(row, col);
+        case "SHOT_FIRED": {
+          const {
+            shooterId,
+            row,
+            col,
+            result,
+            sunkShipType,
+            sunkShipCells: shipCells,
+            gameOver: isGameOver,
+            winnerId,
+          } = event;
+          const isMyShot = shooterId === myUserId;
+          const hit = result === "HIT" || result === "SUNK";
+          const cellKey = key(row, col);
 
-        if (isMyShot) {
-          setEnemyMarks((prev) => {
-            const next = new Map(prev);
-            next.set(cellKey, hit ? "hit" : "errou");
-            return next;
-          });
-          if (sunkShipType) {
-            setSunkEnemyShips((prev) => [...prev, sunkShipType]);
-            // Use ship cells from backend to mark all cells of the sunk ship
-            if (shipCells && shipCells.length > 0) {
-              setSunkEnemyCells((prev) => {
-                const next = new Set(prev);
-                shipCells.forEach((cell) => {
-                  next.add(key(cell[0], cell[1]));
+          if (isMyShot) {
+            setEnemyMarks((prev) => {
+              const next = new Map(prev);
+              next.set(cellKey, hit ? "hit" : "errou");
+              return next;
+            });
+            if (sunkShipType) {
+              setSunkEnemyShips((prev) => [...prev, sunkShipType]);
+              // Use ship cells from backend to mark all cells of the sunk ship
+              if (shipCells && shipCells.length > 0) {
+                setSunkEnemyCells((prev) => {
+                  const next = new Set(prev);
+                  shipCells.forEach((cell) => {
+                    next.add(key(cell[0], cell[1]));
+                  });
+                  return next;
                 });
-                return next;
-              });
+              }
+            }
+          } else {
+            setMyMarks((prev) => {
+              const next = new Map(prev);
+              next.set(cellKey, hit ? "hit" : "errou");
+              return next;
+            });
+            if (sunkShipType) {
+              setSunkMyShips((prev) => [...prev, sunkShipType]);
             }
           }
-        } else {
-          setMyMarks((prev) => {
-            const next = new Map(prev);
-            next.set(cellKey, hit ? "hit" : "errou");
-            return next;
-          });
-          if (sunkShipType) {
-            setSunkMyShips((prev) => [...prev, sunkShipType]);
-          }
-        }
 
-        if (isGameOver) {
-          setGameState("FINISHED");
-          const gameResult = winnerId === myUserId ? "victory" : "defeat";
-          setGameOver({ result: gameResult, winnerId });
-        } else {
-          // Turn logic: if hit, same player shoots again; if miss, turn switches
-          if (hit) {
-            setMyTurn(isMyShot);
+          if (isGameOver) {
+            setGameState("FINISHED");
+            const gameResult = winnerId === myUserId ? "victory" : "defeat";
+            setGameOver({ result: gameResult, winnerId });
           } else {
-            setMyTurn(!isMyShot);
+            // Turn logic: if hit, same player shoots again; if miss, turn switches
+            if (hit) {
+              setMyTurn(isMyShot);
+            } else {
+              setMyTurn(!isMyShot);
+            }
           }
+          break;
         }
-        break;
+
+        case "OPPONENT_JOINED":
+          setOpponent(event.playerId);
+          setOpponentName(event.username || null);
+          setGameState("PLACING_SHIPS");
+          break;
+
+        case "OPPONENT_DISCONNECTED":
+          setGameState("FINISHED");
+          setGameOver({ result: "victory", winnerId: event.winnerId, reason: "wo" });
+          setOpponentDisconnected(false);
+          clearCountdown();
+          break;
+
+        case "OPPONENT_DISCONNECTED_TEMP":
+          if (event.playerId !== myUserId) {
+            setOpponentDisconnected(true);
+            startCountdown(event.timeoutSeconds || 30);
+          }
+          break;
+
+        case "OPPONENT_RECONNECTED":
+          if (event.playerId !== myUserId) {
+            setOpponentDisconnected(false);
+            clearCountdown();
+          }
+          break;
+
+        case "GAME_CANCELLED":
+          // Opponent left during WAITING or PLACING_SHIPS, show modal
+          if (event.quitterId !== myUserId) {
+            setOpponentDisconnected(false);
+            clearCountdown();
+            setCancelledNotice("O covarde fugiu antes da batalha.");
+          }
+          break;
+
+        case "TURN_TIMER_START":
+          startTurnCountdown(event.durationSeconds || 20);
+          break;
+
+        default:
+          console.log("Unknown event type:", event.type);
       }
-
-      case "OPPONENT_JOINED":
-        setOpponent(event.playerId);
-        setOpponentName(event.username || null);
-        setGameState("PLACING_SHIPS");
-        break;
-
-      case "OPPONENT_DISCONNECTED":
-        setGameState("FINISHED");
-        setGameOver({ result: "victory", winnerId: event.winnerId, reason: "wo" });
-        setOpponentDisconnected(false);
-        clearCountdown();
-        break;
-
-      case "OPPONENT_DISCONNECTED_TEMP":
-        if (event.playerId !== myUserId) {
-          setOpponentDisconnected(true);
-          startCountdown(event.timeoutSeconds || 30);
-        }
-        break;
-
-      case "OPPONENT_RECONNECTED":
-        if (event.playerId !== myUserId) {
-          setOpponentDisconnected(false);
-          clearCountdown();
-        }
-        break;
-
-      case "GAME_CANCELLED":
-        // Opponent left during WAITING or PLACING_SHIPS, show modal
-        if (event.quitterId !== myUserId) {
-          setOpponentDisconnected(false);
-          clearCountdown();
-          setCancelledNotice("O covarde fugiu antes da batalha.");
-        }
-        break;
-
-      case "TURN_TIMER_START":
-        startTurnCountdown(event.durationSeconds || 20);
-        break;
-
-      default:
-        console.log("Unknown event type:", event.type);
-    }
-  }, [user?.userId]);
+    },
+    [user?.userId],
+  );
 
   // Connect to game WebSocket
-  const connectToGame = useCallback(async (gId) => {
-    if (!user?.token) return;
-    try {
-      await stomp.connectStomp(user.token);
-      stomp.subscribeToGame(gId, handleGameEvent);
-    } catch (err) {
-      setError("Falha na conexão WebSocket: " + err.message);
-    }
-  }, [user?.token, handleGameEvent]);
+  const connectToGame = useCallback(
+    async (gId) => {
+      if (!user?.token) return;
+      try {
+        await stomp.connectStomp(user.token);
+        stomp.subscribeToGame(gId, handleGameEvent);
+      } catch (err) {
+        setError("Falha na conexão WebSocket: " + err.message);
+      }
+    },
+    [user?.token, handleGameEvent],
+  );
 
   // Check for active game on page load (reconnection after reload)
   useEffect(() => {
@@ -248,7 +265,13 @@ export function GameProvider({ children }) {
             DESTROYER: "patrol",
           };
           const SHIP_SIZES = { carrier: 5, battleship: 4, destroyer: 3, submarine: 3, patrol: 2 };
-          const SHIP_NAMES = { carrier: "Porta-Aviões", battleship: "Encouraçado", destroyer: "Cruzador", submarine: "Submarino", patrol: "Destroyer" };
+          const SHIP_NAMES = {
+            carrier: "Porta-Aviões",
+            battleship: "Encouraçado",
+            destroyer: "Cruzador",
+            submarine: "Submarino",
+            patrol: "Destroyer",
+          };
 
           const restoredShips = data.myShips.map((s) => {
             const id = SHIP_TYPE_TO_ID[s.shipType] || s.shipType.toLowerCase();
@@ -268,7 +291,10 @@ export function GameProvider({ children }) {
         if (data.myShots && data.myShots.length > 0) {
           const marks = new Map();
           data.myShots.forEach((s) => {
-            marks.set(key(s.row, s.col), s.result === "HIT" || s.result === "SUNK" ? "hit" : "errou");
+            marks.set(
+              key(s.row, s.col),
+              s.result === "HIT" || s.result === "SUNK" ? "hit" : "errou",
+            );
           });
           setEnemyMarks(marks);
         }
@@ -277,7 +303,10 @@ export function GameProvider({ children }) {
         if (data.enemyShots && data.enemyShots.length > 0) {
           const marks = new Map();
           data.enemyShots.forEach((s) => {
-            marks.set(key(s.row, s.col), s.result === "HIT" || s.result === "SUNK" ? "hit" : "errou");
+            marks.set(
+              key(s.row, s.col),
+              s.result === "HIT" || s.result === "SUNK" ? "hit" : "errou",
+            );
           });
           setMyMarks(marks);
         }
@@ -324,7 +353,7 @@ export function GameProvider({ children }) {
       setRoomCode(game.roomCode);
       setGameState("WAITING_FOR_OPPONENT");
       setOpponent(null);
-    setOpponentName(null);
+      setOpponentName(null);
       resetGameState();
       await connectToGame(id);
       return game;
@@ -335,30 +364,33 @@ export function GameProvider({ children }) {
   }, [connectToGame]);
 
   // Join an existing game (by UUID or room code)
-  const joinGame = useCallback(async (gId) => {
-    setError(null);
-    try {
-      // Detect if it's a room code (short, letters only) or a UUID
-      const isRoomCode = gId.length <= 6 && /^[A-Za-z]+$/.test(gId);
-      const game = isRoomCode
-        ? await api.joinByRoomCode(gId.toUpperCase())
-        : await api.joinGame(gId);
-      // GameResponse: { gameId, roomCode, status, message }
-      const id = game.gameId;
-      setGameId(id);
-      setRoomCode(game.roomCode);
-      setGameState("PLACING_SHIPS");
-      setOpponent(null);
-    setOpponentName(null);
-      setOpponentName(game.hostUsername || null);
-      resetGameState();
-      await connectToGame(id);
-      return game;
-    } catch (err) {
-      setError(err.message || "Falha ao entrar na partida");
-      throw err;
-    }
-  }, [connectToGame]);
+  const joinGame = useCallback(
+    async (gId) => {
+      setError(null);
+      try {
+        // Detect if it's a room code (short, letters only) or a UUID
+        const isRoomCode = gId.length <= 6 && /^[A-Za-z]+$/.test(gId);
+        const game = isRoomCode
+          ? await api.joinByRoomCode(gId.toUpperCase())
+          : await api.joinGame(gId);
+        // GameResponse: { gameId, roomCode, status, message }
+        const id = game.gameId;
+        setGameId(id);
+        setRoomCode(game.roomCode);
+        setGameState("PLACING_SHIPS");
+        setOpponent(null);
+        setOpponentName(null);
+        setOpponentName(game.hostUsername || null);
+        resetGameState();
+        await connectToGame(id);
+        return game;
+      } catch (err) {
+        setError(err.message || "Falha ao entrar na partida");
+        throw err;
+      }
+    },
+    [connectToGame],
+  );
 
   // Fetch available games
   const fetchAvailableGames = useCallback(async () => {
@@ -388,36 +420,45 @@ export function GameProvider({ children }) {
       typeMap[ship.id] || ship.id.toUpperCase(),
       ship.row,
       ship.col,
-      ship.orientation === "H" ? "HORIZONTAL" : "VERTICAL"
+      ship.orientation === "H" ? "HORIZONTAL" : "VERTICAL",
     );
   }, []);
 
   // Send all ships and mark ready
-  const confirmFleet = useCallback((ships) => {
-    if (!gameId) return;
-    setPlacedShips(ships);
-    // Send each ship placement with a small delay between them
-    ships.forEach((ship, index) => {
-      setTimeout(() => {
-        placeShip(gameId, ship);
-      }, index * 200);
-    });
-    // Send ready signal after all ships are placed
-    setTimeout(() => {
-      stomp.sendReady(gameId);
-      setMyReady(true);
-    }, ships.length * 200 + 300);
-  }, [gameId, placeShip]);
+  const confirmFleet = useCallback(
+    (ships) => {
+      if (!gameId) return;
+      setPlacedShips(ships);
+      // Send each ship placement with a small delay between them
+      ships.forEach((ship, index) => {
+        setTimeout(() => {
+          placeShip(gameId, ship);
+        }, index * 200);
+      });
+      // Send ready signal after all ships are placed
+      setTimeout(
+        () => {
+          stomp.sendReady(gameId);
+          setMyReady(true);
+        },
+        ships.length * 200 + 300,
+      );
+    },
+    [gameId, placeShip],
+  );
 
   // Fire at a cell
-  const fire = useCallback((row, col) => {
-    if (!gameId || !myTurn) return;
-    const cellKey = key(row, col);
-    // Don't fire at already-attacked cells
-    if (enemyMarks.has(cellKey)) return;
-    stomp.sendFire(gameId, row, col);
-    setMyTurn(false); // Optimistically disable until server responds
-  }, [gameId, myTurn, enemyMarks]);
+  const fire = useCallback(
+    (row, col) => {
+      if (!gameId || !myTurn) return;
+      const cellKey = key(row, col);
+      // Don't fire at already-attacked cells
+      if (enemyMarks.has(cellKey)) return;
+      stomp.sendFire(gameId, row, col);
+      setMyTurn(false); // Optimistically disable until server responds
+    },
+    [gameId, myTurn, enemyMarks],
+  );
 
   // Leave game / cancel
   const leaveGame = useCallback(async () => {

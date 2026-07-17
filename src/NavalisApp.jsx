@@ -14,8 +14,6 @@ export function NavalisApp() {
   const { user, loading } = useAuth();
   const { gameState, gameOver, leaveGame, cancelledNotice, dismissCancelledNotice } = useGame();
 
-  if (loading) return null;
-
   function getCurrentView() {
     if (!user) return "auth";
     if (!gameState) return "lobby";
@@ -38,6 +36,8 @@ export function NavalisApp() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view]);
+
+  if (loading) return null;
 
   return (
     <div className="min-h-screen w-full bg-surface text-on-surface font-sans relative overflow-x-hidden overflow-y-auto">
@@ -63,10 +63,7 @@ export function NavalisApp() {
       )}
 
       {cancelledNotice && (
-        <CancelledModal
-          message={cancelledNotice}
-          onConfirm={dismissCancelledNotice}
-        />
+        <CancelledModal message={cancelledNotice} onConfirm={dismissCancelledNotice} />
       )}
     </div>
   );
