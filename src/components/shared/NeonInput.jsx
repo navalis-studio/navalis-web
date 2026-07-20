@@ -8,7 +8,7 @@ export function NeonInput({ label, value, onChange, type = "text", placeholder }
   return (
     <div className="relative">
       {/* Label flutuante sobre a borda */}
-      <label className="font-mono text-[12px] font-bold tracking-[0.1em] text-ink-black bg-paper-white px-2 absolute -top-2 left-4 z-10 uppercase">
+      <label className="font-mono text-[11px] 2xl:text-[12px] font-bold tracking-[0.1em] text-ink-black bg-paper-white px-2 absolute -top-2 left-4 z-10 uppercase">
         {label}
       </label>
       <input
@@ -16,7 +16,7 @@ export function NeonInput({ label, value, onChange, type = "text", placeholder }
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full bg-light-grain text-ink-black p-3 ${isPassword ? "pr-11" : ""} font-sans text-sm placeholder:text-mid-tone-grey relative z-0 rounded-lg outline-none transition-all`}
+        className={`w-full bg-light-grain text-ink-black p-2.5 2xl:p-3 ${isPassword ? "pr-11" : ""} font-sans text-xs 2xl:text-sm placeholder:text-mid-tone-grey relative z-0 rounded-lg outline-none transition-all`}
         style={{
           border: "3px solid #000",
           boxShadow: "inset 2px 2px 0px rgba(0,0,0,0.1), 3px 3px 0px rgba(0,0,0,1)",

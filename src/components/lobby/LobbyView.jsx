@@ -107,10 +107,10 @@ export function LobbyView() {
           <div className="absolute inset-3 border-2 border-paper-white/30 border-dashed rounded-lg pointer-events-none" />
 
           <div className="relative z-10">
-            <h1 className="font-display text-[28px] 2xl:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight">
+            <h1 className="font-display text-[24px] 2xl:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight">
               Bem-vindo a bordo, <span className="inline-block">{user?.username}</span>
             </h1>
-            <p className="font-sans text-base text-on-surface-variant mt-2 max-w-md">
+            <p className="font-sans text-sm 2xl:text-base text-on-surface-variant mt-2 max-w-md">
               Crie uma nova partida ou entre em uma operação ativa.
             </p>
           </div>
@@ -118,7 +118,7 @@ export function LobbyView() {
           <button
             onClick={handleCreateGame}
             disabled={loading}
-            className={`self-start bg-paper-white text-ink-black font-display text-base 2xl:text-lg font-extrabold py-2.5 2xl:py-3 px-6 2xl:px-8 rounded-full ink-border hard-shadow uppercase flex items-center gap-2 transition-all ${
+            className={`self-start bg-paper-white text-ink-black font-display text-sm 2xl:text-lg font-extrabold py-2.5 2xl:py-3 px-5 2xl:px-8 rounded-full ink-border hard-shadow uppercase flex items-center gap-2 transition-all ${
               loading
                 ? "opacity-50 cursor-wait"
                 : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
@@ -215,14 +215,14 @@ export function LobbyView() {
 
         {/* Room list */}
         {availableGames.length === 0 ? (
-          <div className="px-6 py-8 2xl:py-14 text-center flex flex-col items-center gap-3">
+          <div className="px-6 py-6 2xl:py-14 text-center flex flex-col items-center gap-2">
             <span
-              className="material-symbols-outlined text-mid-tone-grey text-5xl"
+              className="material-symbols-outlined text-mid-tone-grey text-4xl 2xl:text-5xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               sailing
             </span>
-            <p className="font-sans text-mid-tone-grey text-base">
+            <p className="font-sans text-mid-tone-grey text-sm 2xl:text-base">
               Nenhuma sala disponível. Crie uma partida!
             </p>
           </div>

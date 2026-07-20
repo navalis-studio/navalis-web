@@ -4,7 +4,7 @@ import { BoardGrid } from "../board/BoardGrid";
 import { useGame } from "../../contexts/GameContext";
 
 export function PlacingShipsView() {
-  const { confirmFleet, leaveGame, opponentReady, opponentDisconnected, reconnectCountdown } =
+  const { confirmFleet, cancelReady, leaveGame, opponentReady, myReady, opponentDisconnected, reconnectCountdown } =
     useGame();
   const [placed, setPlaced] = useState([]);
   const [orientation, setOrientation] = useState("H");
@@ -12,6 +12,7 @@ export function PlacingShipsView() {
   const [hover, setHover] = useState(null);
   const [draggingId, setDraggingId] = useState(null);
   const [confirming, setConfirming] = useState(false);
+  const [showFleeModal, setShowFleeModal] = useState(false);
 
   const occupied = useMemo(() => {
     const s = new Set();
@@ -99,9 +100,12 @@ export function PlacingShipsView() {
   };
 
   return (
-    <div className="min-h-screen px-8 2xl:px-12 py-6 max-w-[1200px] mx-auto relative z-10">
-      {/* Header */}
-      <div className="flex items-center justify-end mb-6">
+    <div className="min-h-screen px-8 2xl:px-12 py-4 2xl:py-6 max-w-[1200px] mx-auto relative z-10">
+      {/* Header - title + flee button on same line */}
+      <div className="flex items-center justify-between 2xl:justify-end mb-3 2xl:mb-4">
+        <h1 className="font-display text-xl 2xl:hidden font-extrabold uppercase tracking-tight text-paper-white">
+          Grade de Posicionamento
+        </h1>
         <div className="flex items-center gap-3">
           {opponentReady && (
             <span className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container-high px-3 py-1.5 rounded-full ink-border flex items-center gap-2">
@@ -110,7 +114,7 @@ export function PlacingShipsView() {
             </span>
           )}
           <button
-            onClick={leaveGame}
+            onClick={() => setShowFleeModal(true)}
             className="font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white hover:text-ink-black transition-colors uppercase border-2 border-paper-white rounded-full px-5 py-2 hover:bg-paper-white"
           >
             FUGIR
@@ -119,17 +123,17 @@ export function PlacingShipsView() {
       </div>
 
       {/* Main layout: Grid + Controls */}
-      <div className="grid lg:grid-cols-[1fr_320px] gap-6 2xl:gap-8">
+      <div className="grid lg:grid-cols-[1fr_280px] 2xl:grid-cols-[1fr_320px] gap-5 2xl:gap-8 items-start">
         {/* Grid Section */}
         <div className="flex flex-col items-center justify-start relative">
-          {/* Title centered above board */}
-          <div className="flex flex-col items-center mb-3 2xl:mb-6">
-            <h1 className="font-display text-2xl 2xl:text-4xl font-extrabold uppercase tracking-tight text-paper-white">
+          {/* Title centered above board - only on large screens */}
+          <div className="hidden 2xl:flex flex-col items-center mb-2 2xl:mb-6">
+            <h1 className="font-display text-4xl font-extrabold uppercase tracking-tight text-paper-white">
               Grade de Posicionamento
             </h1>
           </div>
 
-          <div className="max-w-[420px] 2xl:max-w-[520px] w-full">
+          <div className="max-w-[350px] 2xl:max-w-[520px] w-full">
             <BoardGrid
               occupied={occupied}
               placed={placed}
@@ -143,11 +147,11 @@ export function PlacingShipsView() {
           </div>
 
           {/* Action Buttons below board */}
-          <div className="mt-4 2xl:mt-6 max-w-[420px] 2xl:max-w-[520px] w-full flex gap-3">
+          <div className="mt-3 2xl:mt-6 max-w-[350px] 2xl:max-w-[520px] w-full flex gap-3">
             <button
               onClick={autoPlace}
               disabled={confirming}
-              className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-sm font-extrabold py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-xs 2xl:text-sm font-extrabold py-2 2xl:py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
               onMouseEnter={(e) => {
                 if (!confirming)
                   e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
@@ -171,7 +175,7 @@ export function PlacingShipsView() {
                 setSelectedShipId(FLEET[0].id);
               }}
               disabled={confirming || placed.length === 0}
-              className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-sm font-extrabold py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 bg-surface-container-high text-paper-white ink-border font-display text-xs 2xl:text-sm font-extrabold py-2 2xl:py-2.5 rounded-xl hard-shadow-sm uppercase flex items-center justify-center gap-2 transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105 disabled:opacity-40 disabled:cursor-not-allowed"
               onMouseEnter={(e) => {
                 if (!confirming && placed.length > 0)
                   e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
@@ -190,32 +194,73 @@ export function PlacingShipsView() {
             </button>
           </div>
 
+          {/* Confirm button below board */}
+          <div className="mt-3 2xl:mt-4 max-w-[350px] 2xl:max-w-[520px] w-full">
+            <button
+              disabled={!allPlaced || confirming}
+              onClick={handleConfirm}
+              className={`w-full font-display text-xs 2xl:text-base font-extrabold py-2.5 2xl:py-3.5 rounded-xl uppercase flex items-center justify-center gap-2 transition-all ${
+                allPlaced && !confirming
+                  ? "bg-paper-white text-ink-black border-4 border-ink-black shadow-[6px_6px_0px_0px_#000] hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
+                  : "bg-surface-container text-mid-tone-grey border-2 border-mid-tone-grey/50 cursor-not-allowed opacity-50"
+              }`}
+              onMouseEnter={(e) => {
+                if (allPlaced && !confirming)
+                  e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.animation = "none";
+              }}
+            >
+              <span
+                className="material-symbols-outlined text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                check_circle
+              </span>
+              {confirming ? "Enviando..." : "Confirmar Frota"}
+            </button>
+          </div>
+
           {confirming && (
-            <div className="absolute inset-0 flex items-center justify-center bg-surface/80 rounded-xl">
-              <div className="bg-surface-container-high ink-border rounded-lg px-8 py-4 hard-shadow flex items-center gap-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-paper-white animate-pulse" />
-                <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide">
-                  Aguardando oponente...
-                </span>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-black/70">
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-surface-container-high ink-border rounded-lg px-8 py-4 hard-shadow flex items-center gap-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-paper-white animate-pulse" />
+                  <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide">
+                    Aguardando oponente...
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    cancelReady();
+                    setConfirming(false);
+                    setPlaced([]);
+                    setSelectedShipId(FLEET[0].id);
+                  }}
+                  className="font-display text-sm font-extrabold tracking-[0.05em] text-ink-black uppercase py-3 px-8 bg-paper-white rounded-full ink-border hard-shadow-sm transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
+                >
+                  CANCELAR
+                </button>
               </div>
             </div>
           )}
         </div>
 
         {/* Right Panel: Fleet Dock + Controls */}
-        <aside className="flex flex-col gap-4">
+        <aside className="flex flex-col gap-3 2xl:gap-4">
           {/* Fleet Dock */}
-          <div className="bg-paper-white border-4 border-ink-black rounded-xl p-5 shadow-[6px_6px_0px_0px_#000]">
-            <h3 className="font-display text-xl font-extrabold text-ink-black uppercase tracking-tight text-center border-b-4 border-ink-black pb-2 mb-4">
+          <div className="bg-paper-white border-4 border-ink-black rounded-xl p-4 2xl:p-5 shadow-[6px_6px_0px_0px_#000]">
+            <h3 className="font-display text-lg 2xl:text-xl font-extrabold text-ink-black uppercase tracking-tight text-center border-b-4 border-ink-black pb-2 mb-3">
               Doca da Frota
             </h3>
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-mono text-[12px] font-bold text-mid-tone-grey tracking-[0.1em]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-mono text-[11px] 2xl:text-[12px] font-bold text-mid-tone-grey tracking-[0.1em]">
                 {placed.length}/{FLEET.length} POSICIONADOS
               </span>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               {FLEET.map((s) => {
                 const isPlaced = placedIds.has(s.id);
                 const isSelected = selectedShipId === s.id && !isPlaced;
@@ -236,7 +281,7 @@ export function PlacingShipsView() {
                         setSelectedShipId(s.id);
                       }
                     }}
-                    className={`flex items-center justify-between p-2.5 2xl:p-3.5 rounded-lg border-2 transition-all ${
+                    className={`flex items-center justify-between p-2 2xl:p-3.5 rounded-lg border-2 transition-all ${
                       isPlaced
                         ? "border-mid-tone-grey/50 bg-light-grain/50 opacity-60 hover:opacity-80 hover:border-ink-black"
                         : isSelected
@@ -280,7 +325,7 @@ export function PlacingShipsView() {
           </div>
 
           {/* Orientation Toggle */}
-          <div className="bg-surface-container-high ink-border rounded-xl p-3 2xl:p-4 hard-shadow-sm flex flex-col items-center gap-2 2xl:gap-3">
+          <div className="bg-surface-container-high ink-border rounded-xl p-2.5 2xl:p-4 hard-shadow-sm flex flex-col items-center gap-1.5 2xl:gap-3">
             <span className="font-mono text-[12px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
               Orientação · [R]
             </span>
@@ -313,8 +358,8 @@ export function PlacingShipsView() {
             </div>
           </div>
 
-          {/* Instructions */}
-          <div className="bg-surface-container-high ink-border rounded-lg p-3 hard-shadow-sm">
+          {/* Instructions - hidden on small screens */}
+          <div className="hidden 2xl:block bg-surface-container-high ink-border rounded-lg p-3 hard-shadow-sm">
             <div className="font-mono text-[12px] text-on-surface-variant leading-relaxed space-y-1">
               <div>· Arraste ou clique para posicionar</div>
               <div>
@@ -323,32 +368,61 @@ export function PlacingShipsView() {
             </div>
           </div>
 
-          <button
-            disabled={!allPlaced || confirming}
-            onClick={handleConfirm}
-            className={`w-full font-display text-base 2xl:text-lg font-extrabold py-3 2xl:py-4 rounded-xl uppercase flex items-center justify-center gap-2 transition-all ${
-              allPlaced && !confirming
-                ? "bg-paper-white text-ink-black border-4 border-ink-black shadow-[6px_6px_0px_0px_#000] hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
-                : "bg-surface-container text-mid-tone-grey border-2 border-mid-tone-grey/50 cursor-not-allowed opacity-50"
-            }`}
-            onMouseEnter={(e) => {
-              if (allPlaced && !confirming)
-                e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.animation = "none";
-            }}
-          >
-            <span
-              className="material-symbols-outlined text-xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              check_circle
-            </span>
-            {confirming ? "Enviando..." : "Confirmar Frota"}
-          </button>
+          {/* Confirm button removed from aside - now below the board */}
         </aside>
       </div>
+
+      {/* Flee confirmation modal */}
+      {showFleeModal && (
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-ink-black/85">
+          <div className="relative w-full max-w-sm bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center overflow-hidden">
+            {/* Corner circles */}
+            <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-paper-white" />
+            <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-paper-white" />
+
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <span
+                className="material-symbols-outlined text-paper-white text-5xl"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                directions_run
+              </span>
+
+              <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper-white">
+                FUGIR?
+              </h2>
+
+              <p className="font-sans text-sm text-on-surface-variant">
+                Abandonar a fase de posicionamento cancelará a partida para ambos os jogadores.
+              </p>
+
+              <div className="flex flex-col gap-3 w-full mt-2">
+                <button
+                  onClick={leaveGame}
+                  className="w-full bg-paper-white text-ink-black font-display text-sm font-extrabold py-3 px-6 rounded-full ink-border hard-shadow uppercase transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.animation = "none";
+                  }}
+                >
+                  SIM, ABANDONAR
+                </button>
+
+                <button
+                  onClick={() => setShowFleeModal(false)}
+                  className="w-full font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white uppercase py-2 transition-colors hover:text-mid-tone-grey"
+                >
+                  VOLTAR AO POSICIONAMENTO
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Opponent disconnected overlay */}
       {opponentDisconnected && (
