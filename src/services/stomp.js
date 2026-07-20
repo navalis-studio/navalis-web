@@ -81,6 +81,14 @@ export function sendReady(gameId) {
   });
 }
 
+export function sendUnready(gameId) {
+  if (!stompClient?.connected) return;
+  stompClient.publish({
+    destination: `/app/game/${gameId}/unready`,
+    body: "",
+  });
+}
+
 export function sendFire(gameId, row, col) {
   if (!stompClient?.connected) return;
   stompClient.publish({

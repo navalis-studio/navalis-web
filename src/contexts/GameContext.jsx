@@ -101,6 +101,14 @@ export function GameProvider({ children }) {
           }
           break;
 
+        case "PLAYER_UNREADY":
+          if (event.playerId === myUserId) {
+            setMyReady(false);
+          } else {
+            setOpponentReady(false);
+          }
+          break;
+
         case "GAME_STARTED":
           setGameState("IN_PROGRESS");
           // Backend sets currentTurnPlayerId to player1 on start
@@ -447,6 +455,14 @@ export function GameProvider({ children }) {
     [gameId, placeShip],
   );
 
+  // Cancel ready - unmark ready and clear ships on server
+  const cancelReady = useCallback(() => {
+    if (!gameId) return;
+    stomp.sendUnready(gameId);
+    setMyReady(false);
+    setPlacedShips([]);
+  }, [gameId]);
+
   // Fire at a cell
   const fire = useCallback(
     (row, col) => {
@@ -550,6 +566,7 @@ export function GameProvider({ children }) {
         joinGame,
         fetchAvailableGames,
         confirmFleet,
+        cancelReady,
         fire,
         leaveGame,
         dismissCancelledNotice,
