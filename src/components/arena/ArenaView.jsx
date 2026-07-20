@@ -5,6 +5,7 @@ import { SailorMascot } from "./SailorMascot";
 import { HealthBar } from "./HealthBar";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGame } from "../../contexts/GameContext";
+import { useSound } from "../../contexts/AudioContext";
 
 const SHIP_TYPE_MAP = {
   CARRIER: "carrier",
@@ -39,6 +40,7 @@ export function ArenaView() {
     opponentName,
     turnTimer,
   } = useGame();
+  const { playSfx } = useSound();
 
   // Mascot animation states
   const [myShooting, setMyShooting] = useState(false);
@@ -67,6 +69,7 @@ export function ArenaView() {
       // I hit the enemy — my mascot shoots, enemy takes damage
       setMyShooting(true);
       setEnemyDamaged(true);
+      playSfx("hit");
       setTimeout(() => setMyShooting(false), 600);
       setTimeout(() => setEnemyDamaged(false), 600);
     }

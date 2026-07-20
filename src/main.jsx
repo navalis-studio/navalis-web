@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AuthProvider } from "./contexts/AuthContext";
 import { GameProvider } from "./contexts/GameContext";
+import { AudioProvider } from "./contexts/AudioContext";
 import { NavalisApp } from "./NavalisApp";
 import "./styles.css";
 
@@ -13,7 +14,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <GameProvider>
-        <NavalisApp />
+        <AudioProvider>
+          <NavalisApp />
+        </AudioProvider>
       </GameProvider>
     </AuthProvider>
   </StrictMode>,
