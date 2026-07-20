@@ -9,8 +9,16 @@ export function useIris() {
 export function IrisTransitionProvider({ children }) {
   const [phase, setPhase] = useState("idle"); // idle | closing | closed | opening
   const [onMidpoint, setOnMidpoint] = useState(null);
+  const [autoOpen, setAutoOpen] = useState(true);
 
   const trigger = useCallback((callback) => {
+    setAutoOpen(true);
+    setOnMidpoint(() => callback);
+    setPhase("closing");
+  }, []);
+
+  const triggerCloseOnly = useCallback((callback) => {
+    setAutoOpen(false);
     setOnMidpoint(() => callback);
     setPhase("closing");
   }, []);
@@ -23,7 +31,7 @@ export function IrisTransitionProvider({ children }) {
     if (phase === "closing") {
       const timer = setTimeout(() => {
         setPhase("closed");
-      }, 700);
+      }, 1500);
       return () => clearTimeout(timer);
     }
 
@@ -33,22 +41,27 @@ export function IrisTransitionProvider({ children }) {
         onMidpoint();
         setOnMidpoint(null);
       }
-      const timer = setTimeout(() => {
-        setPhase("opening");
-      }, 200);
-      return () => clearTimeout(timer);
+      if (autoOpen) {
+        const timer = setTimeout(() => {
+          setPhase("opening");
+        }, 200);
+        return () => clearTimeout(timer);
+      } else {
+        // Don't auto-open, just go idle
+        setPhase("idle");
+      }
     }
 
     if (phase === "opening") {
       const timer = setTimeout(() => {
         setPhase("idle");
-      }, 700);
+      }, 1200);
       return () => clearTimeout(timer);
     }
-  }, [phase, onMidpoint]);
+  }, [phase, onMidpoint, autoOpen]);
 
   return (
-    <IrisContext.Provider value={{ trigger, triggerOpen, isTransitioning: phase !== "idle" }}>
+    <IrisContext.Provider value={{ trigger, triggerCloseOnly, triggerOpen, isTransitioning: phase !== "idle" }}>
       {children}
       {phase !== "idle" && <IrisOverlay phase={phase} />}
     </IrisContext.Provider>

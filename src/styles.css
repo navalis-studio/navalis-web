@@ -299,7 +299,7 @@
 }
 
 .iris-close {
-  animation: iris-close 0.7s cubic-bezier(0.4, 0, 0.8, 1) forwards;
+  animation: iris-close 1.5s cubic-bezier(0.4, 0, 0.8, 1) forwards;
 }
 
 .iris-closed {
@@ -307,7 +307,7 @@
 }
 
 .iris-open {
-  animation: iris-open 0.7s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+  animation: iris-open 1.2s cubic-bezier(0.2, 0, 0.2, 1) forwards;
 }
 
 /* === Splash Screen === */
@@ -332,4 +332,13 @@
 
 .splash-bounce {
   animation: splash-bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
