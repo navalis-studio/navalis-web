@@ -258,3 +258,78 @@
 @utility animate-ping-once {
   animation: ping-once 0.4s ease-out forwards;
 }
+
+
+/* === Iris Wipe Transition (Cuphead style) === */
+/* The overlay is black. We cut a circular hole using clip-path (inverted).
+   We animate a custom property --iris-size to control the hole radius. */
+
+@property --iris-size {
+  syntax: "<percentage>";
+  initial-value: 150%;
+  inherits: false;
+}
+
+@keyframes iris-close {
+  0% {
+    --iris-size: 150%;
+  }
+  100% {
+    --iris-size: 0%;
+  }
+}
+
+@keyframes iris-open {
+  0% {
+    --iris-size: 0%;
+  }
+  100% {
+    --iris-size: 150%;
+  }
+}
+
+.iris-close,
+.iris-closed,
+.iris-open {
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent var(--iris-size),
+    #000 var(--iris-size)
+  );
+}
+
+.iris-close {
+  animation: iris-close 0.7s cubic-bezier(0.4, 0, 0.8, 1) forwards;
+}
+
+.iris-closed {
+  --iris-size: 0%;
+}
+
+.iris-open {
+  animation: iris-open 0.7s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+}
+
+/* === Splash Screen === */
+
+@keyframes splash-bounce {
+  0%, 100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+  15% {
+    transform: translateY(-12px) scaleY(1.05) scaleX(0.95);
+  }
+  40% {
+    transform: translateY(0) scaleY(0.95) scaleX(1.03);
+  }
+  65% {
+    transform: translateY(-8px) scaleY(1.03) scaleX(0.97);
+  }
+  85% {
+    transform: translateY(0) scaleY(0.97) scaleX(1.02);
+  }
+}
+
+.splash-bounce {
+  animation: splash-bounce 1.2s ease-in-out infinite;
+}
