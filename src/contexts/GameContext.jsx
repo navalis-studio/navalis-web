@@ -207,11 +207,11 @@ export function GameProvider({ children }) {
               }, 2000);
             }
 
-            // Show game over modal after 8s
+            // Show game over modal after 6s
             setTimeout(() => {
               setGameOver({ result: gameResult, winnerId });
               setGameOverPending(false);
-            }, 8000);
+            }, 6000);
           } else {
             // Turn logic: if hit, same player shoots again; if miss, turn switches
             if (hit) {
