@@ -20,6 +20,15 @@ async function request(endpoint, options = {}) {
   });
 
   if (!response.ok) {
+    // Auto-logout on invalid/expired token
+    if ((response.status === 401 || response.status === 403) && token) {
+      localStorage.removeItem("navalis_token");
+      localStorage.removeItem("navalis_username");
+      localStorage.removeItem("navalis_user_id");
+      window.location.reload();
+      return;
+    }
+
     const body = await response.json().catch(() => ({}));
     const error = new Error(body.message || body.error || `Request failed: ${response.status}`);
     error.status = response.status;
