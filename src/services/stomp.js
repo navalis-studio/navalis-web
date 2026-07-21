@@ -5,11 +5,44 @@ const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:5000/ws";
 let stompClient = null;
 let activeSubscription = null;
 
-export function connectStomp(token, onEvent) {
+// Track current subscription for auto-reconnect
+let currentGameId = null;
+let currentEventHandler = null;
+
+function resubscribe() {
+  if (currentGameId && currentEventHandler && stompClient?.connected) {
+    // Unsubscribe old (stale) subscription if any
+    if (activeSubscription) {
+      try {
+        activeSubscription.unsubscribe();
+      } catch {
+        // Subscription may already be dead from disconnect
+      }
+      activeSubscription = null;
+    }
+
+    activeSubscription = stompClient.subscribe(`/topic/game/${currentGameId}`, (message) => {
+      try {
+        const event = JSON.parse(message.body);
+        currentEventHandler(event);
+      } catch (e) {
+        console.error("Failed to parse game event:", e);
+      }
+    });
+  }
+}
+
+export function connectStomp(token) {
   return new Promise((resolve, reject) => {
     if (stompClient?.connected) {
       resolve(stompClient);
       return;
+    }
+
+    // If there's an existing client trying to reconnect, deactivate it first
+    if (stompClient) {
+      stompClient.deactivate();
+      stompClient = null;
     }
 
     stompClient = new Client({
@@ -21,6 +54,8 @@ export function connectStomp(token, onEvent) {
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
       onConnect: () => {
+        // Re-subscribe on every connect (initial + auto-reconnects)
+        resubscribe();
         resolve(stompClient);
       },
       onStompError: (frame) => {
@@ -28,7 +63,7 @@ export function connectStomp(token, onEvent) {
         reject(new Error(frame.headers["message"] || "STOMP connection failed"));
       },
       onWebSocketClose: () => {
-        console.warn("WebSocket closed");
+        console.warn("WebSocket closed, will auto-reconnect...");
       },
     });
 
@@ -37,14 +72,22 @@ export function connectStomp(token, onEvent) {
 }
 
 export function subscribeToGame(gameId, onEvent) {
+  // Always store for reconnect
+  currentGameId = gameId;
+  currentEventHandler = onEvent;
+
   if (!stompClient?.connected) {
-    console.error("STOMP not connected");
+    console.warn("STOMP not connected yet, will subscribe on connect");
     return null;
   }
 
   // Unsubscribe from previous game if any
   if (activeSubscription) {
-    activeSubscription.unsubscribe();
+    try {
+      activeSubscription.unsubscribe();
+    } catch {
+      // May already be dead
+    }
     activeSubscription = null;
   }
 
@@ -98,8 +141,15 @@ export function sendFire(gameId, row, col) {
 }
 
 export function disconnectStomp() {
+  currentGameId = null;
+  currentEventHandler = null;
+
   if (activeSubscription) {
-    activeSubscription.unsubscribe();
+    try {
+      activeSubscription.unsubscribe();
+    } catch {
+      // May already be dead
+    }
     activeSubscription = null;
   }
   if (stompClient) {
