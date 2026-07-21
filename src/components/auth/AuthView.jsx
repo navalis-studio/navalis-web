@@ -168,7 +168,7 @@ export function AuthView() {
       {/* Walk-in-place animation styles */}
       <style>{`
         .ship-walk {
-          animation: ship-bounce 1.8s ease-in-out infinite;
+          animation: ship-bounce 2.2s ease-in-out infinite;
         }
 
         .ship-walk img {
