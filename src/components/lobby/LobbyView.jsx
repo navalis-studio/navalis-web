@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BrandMark } from "../shared/BrandMark";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGame } from "../../contexts/GameContext";
+import * as api from "../../services/api";
 
 export function LobbyView() {
   const { user, logout } = useAuth();
@@ -9,6 +10,9 @@ export function LobbyView() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [lobbyTab, setLobbyTab] = useState("salas"); // "salas" | "ranking"
+  const [ranking, setRanking] = useState([]);
+  const [rankingLoading, setRankingLoading] = useState(false);
 
   useEffect(() => {
     loadGames();
@@ -16,10 +20,28 @@ export function LobbyView() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (lobbyTab === "ranking") {
+      loadRanking();
+    }
+  }, [lobbyTab]);
+
   async function loadGames() {
     setRefreshing(true);
     await fetchAvailableGames();
     setRefreshing(false);
+  }
+
+  async function loadRanking() {
+    setRankingLoading(true);
+    try {
+      const data = await api.getRanking();
+      setRanking(data || []);
+    } catch {
+      setRanking([]);
+    } finally {
+      setRankingLoading(false);
+    }
   }
 
   async function handleCreateGame() {
@@ -184,114 +206,218 @@ export function LobbyView() {
         </div>
       </div>
 
-      {/* Available Rooms */}
+      {/* Available Rooms / Ranking */}
       <div className="w-full bg-surface-container-high ink-border rounded-xl hard-shadow overflow-hidden">
-        {/* Header */}
+        {/* Header with tabs */}
         <div className="flex items-center justify-between px-4 2xl:px-6 py-3 2xl:py-4 border-b-4 border-paper-white">
-          <div className="flex items-center gap-3">
-            <span
-              className="material-symbols-outlined text-paper-white text-2xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              folder_open
-            </span>
-            <h2 className="font-display text-lg 2xl:text-2xl font-extrabold uppercase tracking-tight text-paper-white">
-              Salas Disponíveis
-            </h2>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[11px] font-bold text-on-surface-variant tracking-[0.1em]">
-              {availableGames.length} ATIVAS
-            </span>
+          <div className="flex items-center gap-1">
             <button
-              onClick={loadGames}
-              disabled={refreshing}
-              className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-1.5 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
+              onClick={() => setLobbyTab("salas")}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
+                lobbyTab === "salas"
+                  ? "bg-paper-white text-ink-black"
+                  : "text-on-surface-variant hover:text-paper-white"
+              }`}
             >
-              {refreshing ? "..." : "ATUALIZAR"}
+              <span
+                className="material-symbols-outlined text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                folder_open
+              </span>
+              SALAS
+            </button>
+            <button
+              onClick={() => setLobbyTab("ranking")}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
+                lobbyTab === "ranking"
+                  ? "bg-paper-white text-ink-black"
+                  : "text-on-surface-variant hover:text-paper-white"
+              }`}
+            >
+              <span
+                className="material-symbols-outlined text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                emoji_events
+              </span>
+              RANKING
             </button>
           </div>
+          {lobbyTab === "salas" && (
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[11px] font-bold text-on-surface-variant tracking-[0.1em]">
+                {availableGames.length} ATIVAS
+              </span>
+              <button
+                onClick={loadGames}
+                disabled={refreshing}
+                className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-1.5 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
+              >
+                {refreshing ? "..." : "ATUALIZAR"}
+              </button>
+            </div>
+          )}
+          {lobbyTab === "ranking" && (
+            <button
+              onClick={loadRanking}
+              disabled={rankingLoading}
+              className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-1.5 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
+            >
+              {rankingLoading ? "..." : "ATUALIZAR"}
+            </button>
+          )}
         </div>
 
-        {/* Room list */}
-        {availableGames.length === 0 ? (
-          <div className="px-6 py-6 2xl:py-14 text-center flex flex-col items-center gap-2">
-            <span
-              className="material-symbols-outlined text-mid-tone-grey text-4xl 2xl:text-5xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              sailing
-            </span>
-            <p className="font-sans text-mid-tone-grey text-sm 2xl:text-base">
-              Nenhuma sala disponível. Crie uma partida!
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3 p-4">
-            {availableGames.map((game) => (
-              <div
-                key={game.gameId}
-                className="flex items-center justify-between bg-surface ink-border rounded-lg p-4 hard-shadow-sm hover:bg-surface-container transition-colors group"
-              >
-                {/* Host name + room code + status */}
-                <div className="flex items-center gap-5">
-                  {/* Host */}
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="material-symbols-outlined text-paper-white text-lg"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      person
-                    </span>
-                    <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide">
-                      {game.hostUsername || "???"}
-                    </span>
-                  </div>
-
-                  {/* Room code */}
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className="material-symbols-outlined text-on-surface-variant text-sm"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      anchor
-                    </span>
-                    <span className="font-mono text-xs font-bold text-on-surface-variant tracking-[0.1em]">
-                      {game.roomCode || game.gameId?.slice(0, 6).toUpperCase()}
-                    </span>
-                  </div>
-
-                  {/* Status: waiting indicator */}
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
-                    <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">
-                      1/2
-                    </span>
-                  </div>
-                </div>
-
-                {/* Join button */}
-                <button
-                  onClick={() => handleJoinGame(game.gameId)}
-                  disabled={loading}
-                  className={`bg-paper-white text-ink-black font-mono text-[12px] font-bold tracking-[0.1em] px-6 py-2.5 rounded-full ink-border hard-shadow-sm uppercase whitespace-nowrap transition-all ${
-                    loading
-                      ? "opacity-40 cursor-not-allowed"
-                      : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
-                  }`}
-                  onMouseEnter={(e) => {
-                    if (!loading)
-                      e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.animation = "none";
-                  }}
+        {/* Tab content: SALAS */}
+        {lobbyTab === "salas" && (
+          <>
+            {availableGames.length === 0 ? (
+              <div className="px-6 py-6 2xl:py-14 text-center flex flex-col items-center gap-2">
+                <span
+                  className="material-symbols-outlined text-mid-tone-grey text-4xl 2xl:text-5xl"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
                 >
-                  ENTRAR
-                </button>
+                  sailing
+                </span>
+                <p className="font-sans text-mid-tone-grey text-sm 2xl:text-base">
+                  Nenhuma sala disponível. Crie uma partida!
+                </p>
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="flex flex-col gap-3 p-4">
+                {availableGames.map((game) => (
+                  <div
+                    key={game.gameId}
+                    className="flex items-center justify-between bg-surface ink-border rounded-lg p-4 hard-shadow-sm hover:bg-surface-container transition-colors group"
+                  >
+                    {/* Host name + room code + status */}
+                    <div className="flex items-center gap-5">
+                      {/* Host */}
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="material-symbols-outlined text-paper-white text-lg"
+                          style={{ fontVariationSettings: "'FILL' 1" }}
+                        >
+                          person
+                        </span>
+                        <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide">
+                          {game.hostUsername || "???"}
+                        </span>
+                      </div>
+
+                      {/* Room code */}
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="material-symbols-outlined text-on-surface-variant text-sm"
+                          style={{ fontVariationSettings: "'FILL' 1" }}
+                        >
+                          anchor
+                        </span>
+                        <span className="font-mono text-xs font-bold text-on-surface-variant tracking-[0.1em]">
+                          {game.roomCode || game.gameId?.slice(0, 6).toUpperCase()}
+                        </span>
+                      </div>
+
+                      {/* Status: waiting indicator */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
+                        <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">
+                          1/2
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Join button */}
+                    <button
+                      onClick={() => handleJoinGame(game.gameId)}
+                      disabled={loading}
+                      className={`bg-paper-white text-ink-black font-mono text-[12px] font-bold tracking-[0.1em] px-6 py-2.5 rounded-full ink-border hard-shadow-sm uppercase whitespace-nowrap transition-all ${
+                        loading
+                          ? "opacity-40 cursor-not-allowed"
+                          : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
+                      }`}
+                      onMouseEnter={(e) => {
+                        if (!loading)
+                          e.currentTarget.style.animation = "boil 0.3s infinite alternate steps(2)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.animation = "none";
+                      }}
+                    >
+                      ENTRAR
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Tab content: RANKING */}
+        {lobbyTab === "ranking" && (
+          <>
+            {rankingLoading ? (
+              <div className="px-6 py-6 2xl:py-14 text-center flex flex-col items-center gap-2">
+                <span className="font-mono text-sm text-on-surface-variant">Carregando...</span>
+              </div>
+            ) : ranking.length === 0 ? (
+              <div className="px-6 py-6 2xl:py-14 text-center flex flex-col items-center gap-2">
+                <span
+                  className="material-symbols-outlined text-mid-tone-grey text-4xl 2xl:text-5xl"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  leaderboard
+                </span>
+                <p className="font-sans text-mid-tone-grey text-sm 2xl:text-base">
+                  Nenhum jogador no ranking ainda.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col p-4 gap-2">
+                {/* Table header */}
+                <div className="grid grid-cols-[40px_1fr_70px_70px_80px] gap-2 px-4 py-2">
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">#</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">JOGADOR</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">V</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">D</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">WIN%</span>
+                </div>
+                {ranking.map((player, index) => {
+                  const total = player.wins + player.losses;
+                  const winRate = total > 0 ? Math.round((player.wins / total) * 100) : 0;
+                  const isMe = player.username === user?.username;
+
+                  return (
+                    <div
+                      key={player.username}
+                      className={`grid grid-cols-[40px_1fr_70px_70px_80px] gap-2 items-center px-4 py-3 rounded-lg transition-colors ${
+                        isMe
+                          ? "bg-paper-white/10 border border-paper-white/30"
+                          : "bg-surface hover:bg-surface-container"
+                      }`}
+                    >
+                      <span className={`font-display text-sm font-extrabold ${index < 3 ? "text-paper-white" : "text-on-surface-variant"}`}>
+                        {index + 1}º
+                      </span>
+                      <span className={`font-display text-sm font-extrabold uppercase tracking-wide truncate ${isMe ? "text-paper-white" : "text-paper-white/80"}`}>
+                        {player.username}
+                      </span>
+                      <span className="font-mono text-sm font-bold text-paper-white text-center">
+                        {player.wins}
+                      </span>
+                      <span className="font-mono text-sm font-bold text-on-surface-variant text-center">
+                        {player.losses}
+                      </span>
+                      <span className="font-mono text-sm font-bold text-paper-white text-center">
+                        {winRate}%
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

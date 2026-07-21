@@ -499,7 +499,6 @@ export function GameProvider({ children }) {
     if (!gameId) return;
     stomp.sendUnready(gameId);
     setMyReady(false);
-    setPlacedShips([]);
   }, [gameId]);
 
   // Fire at a cell

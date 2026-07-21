@@ -67,15 +67,45 @@ export function PlacingShipsView() {
 
   function autoPlace() {
     const next = [];
-    const occ = new Set();
+    const occ = new Set(); // cells occupied by ships
+    const buffer = new Set(); // cells adjacent to ships (no-go zone)
+
+    function addShipWithBuffer(ship) {
+      const cells = cellsFor(ship);
+      cells.forEach((k) => {
+        occ.add(k);
+        // Add surrounding cells to buffer
+        const [r, c] = k.split("-").map(Number);
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr >= 0 && nr < GRID && nc >= 0 && nc < GRID) {
+              buffer.add(key(nr, nc));
+            }
+          }
+        }
+      });
+    }
+
+    function isValidWithBuffer(size, row, col, o) {
+      for (let i = 0; i < size; i++) {
+        const r = o === "H" ? row : row + i;
+        const c = o === "H" ? col + i : col;
+        if (r < 0 || c < 0 || r >= GRID || c >= GRID) return false;
+        if (occ.has(key(r, c)) || buffer.has(key(r, c))) return false;
+      }
+      return true;
+    }
+
     for (const s of FLEET) {
       for (let tries = 0; tries < 200; tries++) {
         const o = Math.random() > 0.5 ? "H" : "V";
         const row = Math.floor(Math.random() * GRID);
         const col = Math.floor(Math.random() * GRID);
-        if (isValidPlacement(s.size, row, col, o, occ)) {
+        if (isValidWithBuffer(s.size, row, col, o)) {
           const ship = { ...s, row, col, orientation: o };
-          cellsFor(ship).forEach((k) => occ.add(k));
+          addShipWithBuffer(ship);
           next.push(ship);
           break;
         }
@@ -235,8 +265,6 @@ export function PlacingShipsView() {
                   onClick={() => {
                     cancelReady();
                     setConfirming(false);
-                    setPlaced([]);
-                    setSelectedShipId(FLEET[0].id);
                   }}
                   className="font-display text-sm font-extrabold tracking-[0.05em] text-ink-black uppercase py-3 px-8 bg-paper-white rounded-full ink-border hard-shadow-sm transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
                 >

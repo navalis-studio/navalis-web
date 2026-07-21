@@ -108,3 +108,9 @@ export async function forfeitGame(gameId) {
 export async function getActiveGame() {
   return request("/games/active");
 }
+
+
+// Ranking
+export async function getRanking() {
+  return request("/players/ranking");
+}
