@@ -222,7 +222,7 @@ export function ArenaView() {
               >
                 person
               </span>
-              <span className="font-mono text-[12px] font-bold text-paper-white tracking-[0.1em] uppercase">
+              <span className="font-mono text-[12px] font-bold text-paper-white tracking-[0.1em] uppercase truncate max-w-[120px]">
                 {user?.username}
               </span>
             </div>

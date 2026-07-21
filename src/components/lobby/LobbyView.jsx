@@ -71,7 +71,7 @@ export function LobbyView() {
               >
                 person
               </span>
-              <span className="font-mono text-[12px] font-bold tracking-[0.1em] text-ink-black uppercase">
+              <span className="font-mono text-[12px] font-bold tracking-[0.1em] text-ink-black uppercase truncate max-w-[120px]">
                 {user?.username}
               </span>
             </div>
@@ -107,7 +107,7 @@ export function LobbyView() {
           <div className="absolute inset-3 border-2 border-paper-white/30 border-dashed rounded-lg pointer-events-none" />
 
           <div className="relative z-10">
-            <h1 className="font-display text-[24px] 2xl:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight">
+            <h1 className="font-display text-[24px] 2xl:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight truncate">
               Bem-vindo a bordo, <span className="inline-block">{user?.username}</span>
             </h1>
             <p className="font-sans text-sm 2xl:text-base text-on-surface-variant mt-2 max-w-md">

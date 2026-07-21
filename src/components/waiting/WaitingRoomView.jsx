@@ -87,14 +87,14 @@ export function WaitingRoomView() {
               <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
                 JOGADOR 1
               </span>
-              <div className="mt-2 flex items-center justify-center gap-2">
+              <div className="mt-2 flex items-center justify-center gap-2 min-w-0">
                 <span
-                  className="material-symbols-outlined text-paper-white text-lg"
+                  className="material-symbols-outlined text-paper-white text-lg shrink-0"
                   style={{ fontVariationSettings: "'FILL' 1" }}
                 >
                   person
                 </span>
-                <span className="font-display text-sm font-extrabold text-paper-white uppercase">
+                <span className="font-display text-sm font-extrabold text-paper-white uppercase truncate">
                   {user?.username}
                 </span>
               </div>
@@ -111,15 +111,15 @@ export function WaitingRoomView() {
               <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
                 JOGADOR 2
               </span>
-              <div className="mt-2 flex items-center justify-center gap-2">
+              <div className="mt-2 flex items-center justify-center gap-2 min-w-0">
                 <span
-                  className="material-symbols-outlined text-on-surface-variant text-lg"
+                  className="material-symbols-outlined text-on-surface-variant text-lg shrink-0"
                   style={{ fontVariationSettings: "'FILL' 1" }}
                 >
                   {opponent ? "person" : "hourglass_top"}
                 </span>
                 <span
-                  className={`font-display text-sm font-extrabold uppercase ${opponent ? "text-paper-white" : "text-on-surface-variant"}`}
+                  className={`font-display text-sm font-extrabold uppercase truncate ${opponent ? "text-paper-white" : "text-on-surface-variant"}`}
                 >
                   {opponent || "???"}
                 </span>
