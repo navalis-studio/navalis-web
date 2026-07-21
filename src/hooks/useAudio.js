@@ -21,7 +21,7 @@ function preloadSfx() {
   Object.entries(SFX).forEach(([name, path]) => {
     const audio = new Audio(path);
     audio.preload = "auto";
-    audio.volume = 0.5;
+    audio.volume = 0.3;
     sfxCache[name] = audio;
   });
 }
@@ -37,7 +37,7 @@ export function useAudio() {
   });
   const [sfxVolume, setSfxVolume] = useState(() => {
     const saved = localStorage.getItem("navalis-sfx-volume");
-    return saved !== null ? parseFloat(saved) : 0.5;
+    return saved !== null ? parseFloat(saved) : 0.3;
   });
   const [muted, setMuted] = useState(() => {
     return localStorage.getItem("navalis-muted") === "true";
