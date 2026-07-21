@@ -55,7 +55,7 @@ export function IrisTransitionProvider({ children }) {
     if (phase === "opening") {
       const timer = setTimeout(() => {
         setPhase("idle");
-      }, 1200);
+      }, 1800);
       return () => clearTimeout(timer);
     }
   }, [phase, onMidpoint, autoOpen]);

@@ -31,6 +31,9 @@ export function GameProvider({ children }) {
   const [opponentDisconnected, setOpponentDisconnected] = useState(false);
   const [reconnectCountdown, setReconnectCountdown] = useState(null);
   const [turnTimer, setTurnTimer] = useState(null);
+  const [revealedEnemyShips, setRevealedEnemyShips] = useState(new Set());
+  const [gameOverPending, setGameOverPending] = useState(false);
+  const [gameOverResult, setGameOverResult] = useState(null); // "victory" | "defeat" — set immediately on game end
 
   const enemyMarksRef = useRef(enemyMarks);
   useEffect(() => {
@@ -134,6 +137,7 @@ export function GameProvider({ children }) {
             sunkShipCells: shipCells,
             gameOver: isGameOver,
             winnerId,
+            revealedShips,
           } = event;
           const isMyShot = shooterId === myUserId;
           const hit = result === "HIT" || result === "SUNK";
@@ -171,8 +175,31 @@ export function GameProvider({ children }) {
 
           if (isGameOver) {
             setGameState("FINISHED");
+            clearTurnTimer();
+            setGameOverPending(true);
             const gameResult = winnerId === myUserId ? "victory" : "defeat";
-            setGameOver({ result: gameResult, winnerId });
+            setGameOverResult(gameResult);
+
+            // Reveal enemy ships after 2s
+            if (revealedShips) {
+              setTimeout(() => {
+                // Find the opponent's ships (the player who is NOT me)
+                const opponentId = Object.keys(revealedShips).find((id) => id !== myUserId);
+                if (opponentId && revealedShips[opponentId]) {
+                  const cells = new Set();
+                  revealedShips[opponentId].forEach((cell) => {
+                    cells.add(key(cell[0], cell[1]));
+                  });
+                  setRevealedEnemyShips(cells);
+                }
+              }, 2000);
+            }
+
+            // Show game over modal after 8s
+            setTimeout(() => {
+              setGameOver({ result: gameResult, winnerId });
+              setGameOverPending(false);
+            }, 8000);
           } else {
             // Turn logic: if hit, same player shoots again; if miss, turn switches
             if (hit) {
@@ -517,6 +544,9 @@ export function GameProvider({ children }) {
     setSunkMyShips([]);
     setSunkEnemyCells(new Set());
     setOpponentDisconnected(false);
+    setRevealedEnemyShips(new Set());
+    setGameOverPending(false);
+    setGameOverResult(null);
     clearCountdown();
     clearTurnTimer();
   }
@@ -562,6 +592,9 @@ export function GameProvider({ children }) {
         opponentDisconnected,
         reconnectCountdown,
         turnTimer,
+        revealedEnemyShips,
+        gameOverPending,
+        gameOverResult,
         createGame,
         joinGame,
         fetchAvailableGames,

@@ -16,6 +16,7 @@ export function FragmentRow({
   onCellDrop,
   disabled,
   sunkCells,
+  revealedCells,
 }) {
   return (
     <>
@@ -30,13 +31,27 @@ export function FragmentRow({
         const mark = marks?.get(k);
         const isAttacked = !!mark;
         const isSunkCell = sunkCells?.has(k);
+        const isRevealed = revealedCells?.has(k) && !isAttacked;
 
         let bg = "bg-surface";
         let extra = "";
         let content = null;
 
-        if (fog && !isAttacked) {
+        if (fog && !isAttacked && !isRevealed) {
           bg = "bg-surface-container";
+        }
+        if (isRevealed) {
+          // Ghost ship — revealed after game over (not previously hit)
+          bg = "bg-paper-white/10";
+          extra = "border-paper-white/40 animate-[fadeIn_0.5s_ease-in-out]";
+          content = (
+            <span
+              className="material-symbols-outlined text-paper-white/60 text-[14px]"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              directions_boat
+            </span>
+          );
         }
         if (hasShip && !attackMode) {
           bg = "bg-paper-white/20";

@@ -86,6 +86,7 @@ export function AuthView() {
               <button
                 key={t}
                 type="button"
+                tabIndex={-1}
                 onClick={() => {
                   setTab(t);
                   setLocalError(null);

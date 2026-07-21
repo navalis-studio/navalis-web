@@ -39,10 +39,10 @@ export function SoundControl() {
       {/* Mute button */}
       <button
         onClick={toggleMute}
-        className="w-10 h-10 bg-surface-container-high ink-border rounded-full hard-shadow-sm flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+        className="w-14 h-14 bg-paper-white border-[3px] border-ink-black rounded-full shadow-[4px_4px_0px_0px_#000] flex items-center justify-center transition-all hover:scale-110 active:scale-95"
       >
         <span
-          className="material-symbols-outlined text-paper-white text-xl"
+          className="material-symbols-outlined text-ink-black text-3xl"
           style={{ fontVariationSettings: "'FILL' 1" }}
         >
           {getIcon()}

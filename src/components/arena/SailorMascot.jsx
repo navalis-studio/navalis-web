@@ -13,6 +13,9 @@ export function SailorMascot({
   isEnemy = false,
   shooting = false,
   damaged = false,
+  shootKey = 0,
+  damageKey = 0,
+  gameOverState = null, // "victory" | "defeat" | null
   className = "",
 }) {
   const img = isEnemy ? player2Img : player1Img;
@@ -22,13 +25,21 @@ export function SailorMascot({
   // Flash always exits from the RIGHT side of the image (gun tip),
   // but since enemy is flipped, it visually appears on the left.
 
+  let gameOverClass = "";
+  if (gameOverState === "defeat") {
+    gameOverClass = "animate-mascot-defeat opacity-40 grayscale";
+  } else if (gameOverState === "victory") {
+    gameOverClass = "animate-mascot-victory";
+  }
+
   return (
     <div
-      className={`relative inline-block ${damaged ? "animate-mascot-damage" : ""} ${isEnemy ? "-scale-x-100" : ""}`}
+      key={`damage-${damageKey}`}
+      className={`relative inline-block ${damaged ? "animate-mascot-damage" : ""} ${gameOverClass} ${isEnemy ? "-scale-x-100" : ""}`}
     >
       {/* Muzzle flash — cartoon burst at gun tip (always right side of image) */}
       {shooting && (
-        <div className="absolute right-[-8px] top-[32%] animate-flash-fade pointer-events-none">
+        <div key={`flash-${shootKey}`} className="absolute right-[-8px] top-[32%] animate-flash-fade pointer-events-none">
           <div className="relative w-6 h-6">
             <div className="absolute inset-0 rounded-full bg-paper-white animate-ping-once" />
             <div className="absolute inset-1 rounded-full bg-paper-white opacity-90" />

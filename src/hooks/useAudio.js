@@ -121,17 +121,27 @@ export function useAudio() {
     [musicVolume, muted],
   );
 
-  // Stop music
+  // Stop music (with fade-out)
   const stopMusic = useCallback(() => {
     if (musicRef.current) {
-      musicRef.current.pause();
-      musicRef.current.currentTime = 0;
+      const audio = musicRef.current;
       musicRef.current = null;
       currentTrackRef.current = null;
+      const fadeOut = setInterval(() => {
+        if (audio.volume > 0.05) {
+          audio.volume = Math.max(0, audio.volume - 0.05);
+        } else {
+          clearInterval(fadeOut);
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }, 40);
     }
   }, []);
 
   // Play a sound effect (fire and forget)
+  const activeSfxRef = useRef([]);
+
   const playSfx = useCallback(
     (name) => {
       if (muted) return;
@@ -141,10 +151,30 @@ export function useAudio() {
       const audio = sfxCache[name]?.cloneNode();
       if (!audio) return;
       audio.volume = sfxVolume;
+      audio.addEventListener("ended", () => {
+        activeSfxRef.current = activeSfxRef.current.filter((a) => a !== audio);
+      });
+      activeSfxRef.current.push(audio);
       audio.play().catch(() => {});
     },
     [sfxVolume, muted],
   );
+
+  // Stop all active SFX (with fade-out)
+  const stopSfx = useCallback(() => {
+    activeSfxRef.current.forEach((audio) => {
+      const fadeOut = setInterval(() => {
+        if (audio.volume > 0.05) {
+          audio.volume = Math.max(0, audio.volume - 0.05);
+        } else {
+          clearInterval(fadeOut);
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }, 40);
+    });
+    activeSfxRef.current = [];
+  }, []);
 
   // Toggle mute
   const toggleMute = useCallback(() => {
@@ -171,6 +201,7 @@ export function useAudio() {
     playMusic,
     stopMusic,
     playSfx,
+    stopSfx,
     musicVolume,
     setMusicVolume,
     sfxVolume,

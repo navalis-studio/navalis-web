@@ -49,7 +49,7 @@ function NavalisContent() {
   const { user, loading } = useAuth();
   const { gameState, gameOver, leaveGame, cancelledNotice, dismissCancelledNotice } = useGame();
   const { trigger, triggerCloseOnly, triggerOpen } = useIris();
-  const { playMusic, stopMusic, playSfx } = useSound();
+  const { playMusic, stopMusic, playSfx, stopSfx } = useSound();
   const [displayedView, setDisplayedView] = useState(null);
   const hasSession = Boolean(localStorage.getItem("navalis_token"));
   const [showTitle, setShowTitle] = useState(!hasSession);
@@ -128,6 +128,7 @@ function NavalisContent() {
     if (shouldIris(from, to)) {
       // Full iris: close → swap → open
       transitioningRef.current = true;
+      stopSfx();
       trigger(() => {
         prevViewRef.current = to;
         setDisplayedView(to);
@@ -136,12 +137,14 @@ function NavalisContent() {
       });
     } else if (shouldIrisOpen(from, to)) {
       // Iris open only: instant swap then reveal
+      stopSfx();
       prevViewRef.current = to;
       setDisplayedView(to);
       triggerOpen();
       window.scrollTo(0, 0);
     } else {
       // Instant swap (no iris)
+      stopSfx();
       prevViewRef.current = to;
       setDisplayedView(to);
       window.scrollTo(0, 0);
@@ -160,12 +163,13 @@ function NavalisContent() {
   // Play victory/defeat SFX
   useEffect(() => {
     if (!gameOver) return;
+    stopMusic();
     if (gameOver.result === "victory") {
       playSfx("victory");
     } else {
       playSfx("defeat");
     }
-  }, [gameOver, playSfx]);
+  }, [gameOver, playSfx, stopMusic]);
 
   // Title screen
   if (showTitle) {

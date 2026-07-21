@@ -39,17 +39,62 @@ export function ArenaView() {
     reconnectCountdown,
     opponentName,
     turnTimer,
+    revealedEnemyShips,
+    gameOverPending,
+    gameOverResult,
   } = useGame();
   const { playSfx } = useSound();
 
-  // Mascot animation states
+  // Mascot animation states (counters to force re-trigger)
+  const [myShootCount, setMyShootCount] = useState(0);
+  const [enemyShootCount, setEnemyShootCount] = useState(0);
+  const [myDamageCount, setMyDamageCount] = useState(0);
+  const [enemyDamageCount, setEnemyDamageCount] = useState(0);
+  const [showFleeModal, setShowFleeModal] = useState(false);
+  const prevMyHitCount = useRef(null);
+  const prevEnemyHitCount = useRef(null);
+
+  // Derive booleans from counters with auto-reset
   const [myShooting, setMyShooting] = useState(false);
   const [enemyShooting, setEnemyShooting] = useState(false);
   const [myDamaged, setMyDamaged] = useState(false);
   const [enemyDamaged, setEnemyDamaged] = useState(false);
-  const [showFleeModal, setShowFleeModal] = useState(false);
-  const prevMyHitCount = useRef(null);
-  const prevEnemyHitCount = useRef(null);
+
+  useEffect(() => {
+    if (myShootCount === 0) return;
+    setMyShooting(false);
+    requestAnimationFrame(() => {
+      setMyShooting(true);
+      setTimeout(() => setMyShooting(false), 600);
+    });
+  }, [myShootCount]);
+
+  useEffect(() => {
+    if (enemyShootCount === 0) return;
+    setEnemyShooting(false);
+    requestAnimationFrame(() => {
+      setEnemyShooting(true);
+      setTimeout(() => setEnemyShooting(false), 600);
+    });
+  }, [enemyShootCount]);
+
+  useEffect(() => {
+    if (myDamageCount === 0) return;
+    setMyDamaged(false);
+    requestAnimationFrame(() => {
+      setMyDamaged(true);
+      setTimeout(() => setMyDamaged(false), 600);
+    });
+  }, [myDamageCount]);
+
+  useEffect(() => {
+    if (enemyDamageCount === 0) return;
+    setEnemyDamaged(false);
+    requestAnimationFrame(() => {
+      setEnemyDamaged(true);
+      setTimeout(() => setEnemyDamaged(false), 600);
+    });
+  }, [enemyDamageCount]);
 
   // Trigger shoot/damage animations on every HIT (not just sink)
   useEffect(() => {
@@ -67,11 +112,9 @@ export function ArenaView() {
 
     if (myHits > prevMyHitCount.current) {
       // I hit the enemy — my mascot shoots, enemy takes damage
-      setMyShooting(true);
-      setEnemyDamaged(true);
+      setMyShootCount((c) => c + 1);
+      setEnemyDamageCount((c) => c + 1);
       playSfx("hit");
-      setTimeout(() => setMyShooting(false), 600);
-      setTimeout(() => setEnemyDamaged(false), 600);
     }
     prevMyHitCount.current = myHits;
   }, [enemyMarks]);
@@ -91,10 +134,9 @@ export function ArenaView() {
 
     if (enemyHits > prevEnemyHitCount.current) {
       // Enemy hit me — enemy mascot shoots, I take damage
-      setEnemyShooting(true);
-      setMyDamaged(true);
-      setTimeout(() => setEnemyShooting(false), 600);
-      setTimeout(() => setMyDamaged(false), 600);
+      setEnemyShootCount((c) => c + 1);
+      setMyDamageCount((c) => c + 1);
+      playSfx("hit");
     }
     prevEnemyHitCount.current = enemyHits;
   }, [myMarks]);
@@ -226,7 +268,7 @@ export function ArenaView() {
                   {user?.username || "VOCÊ"} <span className="text-mid-tone-grey">(eu)</span>
                 </span>
                 <HealthBar sunkCount={sunkMyShips?.length || 0} />
-                <SailorMascot shooting={myShooting} damaged={myDamaged} className="h-32 2xl:h-44" />
+                <SailorMascot shooting={myShooting} damaged={myDamaged} shootKey={myShootCount} damageKey={myDamageCount} gameOverState={gameOverPending ? gameOverResult : null} className="h-32 2xl:h-44" />
               </div>
             </div>
 
@@ -250,13 +292,14 @@ export function ArenaView() {
                 <BoardGrid
                   marks={enemyMarks}
                   fog
-                  interactive
+                  interactive={!gameOverPending}
                   attackMode
-                  disabled={!myTurn}
+                  disabled={!myTurn || gameOverPending}
                   onCellClick={(r, c) => handleFire(r, c)}
                   sunkCells={sunkEnemyCells}
+                  revealedCells={revealedEnemyShips}
                 />
-                {!myTurn && (
+                {!myTurn && !gameOverPending && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                     <div className="bg-surface-container-high/90 ink-border rounded-lg px-4 py-1.5 hard-shadow-sm">
                       <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-mid-tone-grey uppercase">
@@ -276,6 +319,9 @@ export function ArenaView() {
                   isEnemy
                   shooting={enemyShooting}
                   damaged={enemyDamaged}
+                  shootKey={enemyShootCount}
+                  damageKey={enemyDamageCount}
+                  gameOverState={gameOverPending ? (gameOverResult === "victory" ? "defeat" : "victory") : null}
                   className="h-32 2xl:h-44"
                 />
               </div>

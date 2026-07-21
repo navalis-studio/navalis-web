@@ -17,6 +17,7 @@ export function BoardGrid({
   onCellDrop,
   disabled,
   sunkCells,
+  revealedCells,
 }) {
   const previewKeys = new Set(
     (preview?.cells || [])
@@ -118,6 +119,7 @@ export function BoardGrid({
             onCellDrop={onCellDrop}
             disabled={disabled}
             sunkCells={sunkCells}
+            revealedCells={revealedCells}
           />
         ))}
       </div>
