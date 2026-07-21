@@ -85,7 +85,7 @@ function NavalisContent() {
         setShowTitle(false);
         setShowSplash(true);
       });
-    }, 300);
+    }, 100);
   }
 
   // Splash: wait for loading to finish, then fade out and reveal with music
