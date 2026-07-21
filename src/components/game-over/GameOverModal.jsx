@@ -1,4 +1,4 @@
-export function GameOverModal({ result, reason, onReturn }) {
+export function GameOverModal({ result, reason, opponentName, duration, onReturn }) {
   const victory = result === "victory";
   const isWO = reason === "wo";
 
@@ -16,6 +16,14 @@ export function GameOverModal({ result, reason, onReturn }) {
   function getIcon() {
     if (isWO) return "directions_run";
     return victory ? "emoji_events" : "skull";
+  }
+
+  function formatDuration(seconds) {
+    if (!seconds && seconds !== 0) return null;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins === 0) return `${secs}s`;
+    return `${mins}m ${secs.toString().padStart(2, "0")}s`;
   }
 
   return (
@@ -40,6 +48,38 @@ export function GameOverModal({ result, reason, onReturn }) {
           </h1>
 
           <p className="font-sans text-sm text-on-surface-variant">{getMessage()}</p>
+
+          {/* Match info */}
+          {(opponentName || duration) && (
+            <div className="w-full flex items-center justify-center gap-4 mt-1">
+              {opponentName && (
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="material-symbols-outlined text-mid-tone-grey text-base"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    person
+                  </span>
+                  <span className="font-mono text-xs font-bold text-paper-white uppercase tracking-wide">
+                    {opponentName}
+                  </span>
+                </div>
+              )}
+              {duration != null && (
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="material-symbols-outlined text-mid-tone-grey text-base"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    timer
+                  </span>
+                  <span className="font-mono text-xs font-bold text-paper-white tracking-wide">
+                    {formatDuration(duration)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           <button
             onClick={onReturn}

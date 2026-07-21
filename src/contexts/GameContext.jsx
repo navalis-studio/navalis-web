@@ -34,11 +34,18 @@ export function GameProvider({ children }) {
   const [revealedEnemyShips, setRevealedEnemyShips] = useState(new Set());
   const [gameOverPending, setGameOverPending] = useState(false);
   const [gameOverResult, setGameOverResult] = useState(null); // "victory" | "defeat" — set immediately on game end
+  const [gameStartTime, setGameStartTime] = useState(null);
+  const [gameDuration, setGameDuration] = useState(null);
 
   const enemyMarksRef = useRef(enemyMarks);
   useEffect(() => {
     enemyMarksRef.current = enemyMarks;
   }, [enemyMarks]);
+
+  const gameStartTimeRef = useRef(null);
+  useEffect(() => {
+    gameStartTimeRef.current = gameStartTime;
+  }, [gameStartTime]);
 
   const countdownRef = useRef(null);
   const turnTimerRef = useRef(null);
@@ -114,6 +121,7 @@ export function GameProvider({ children }) {
 
         case "GAME_STARTED":
           setGameState("IN_PROGRESS");
+          setGameStartTime(Date.now());
           // Backend sets currentTurnPlayerId to player1 on start
           // We need to check if we're player1 via the game info
           // For now, the GAME_STARTED event doesn't tell us who goes first
@@ -179,6 +187,10 @@ export function GameProvider({ children }) {
             setGameOverPending(true);
             const gameResult = winnerId === myUserId ? "victory" : "defeat";
             setGameOverResult(gameResult);
+            // Calculate duration
+            if (gameStartTimeRef.current) {
+              setGameDuration(Math.floor((Date.now() - gameStartTimeRef.current) / 1000));
+            }
 
             // Reveal enemy ships after 2s
             if (revealedShips) {
@@ -547,6 +559,8 @@ export function GameProvider({ children }) {
     setRevealedEnemyShips(new Set());
     setGameOverPending(false);
     setGameOverResult(null);
+    setGameStartTime(null);
+    setGameDuration(null);
     clearCountdown();
     clearTurnTimer();
   }
@@ -595,6 +609,7 @@ export function GameProvider({ children }) {
         revealedEnemyShips,
         gameOverPending,
         gameOverResult,
+        gameDuration,
         createGame,
         joinGame,
         fetchAvailableGames,

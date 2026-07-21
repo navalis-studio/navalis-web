@@ -47,7 +47,7 @@ function shouldIrisOpen(from, to) {
 
 function NavalisContent() {
   const { user, loading } = useAuth();
-  const { gameState, gameOver, leaveGame, cancelledNotice, dismissCancelledNotice } = useGame();
+  const { gameState, gameOver, leaveGame, cancelledNotice, dismissCancelledNotice, opponentName, gameDuration } = useGame();
   const { trigger, triggerCloseOnly, triggerOpen } = useIris();
   const { playMusic, stopMusic, playSfx, stopSfx } = useSound();
   const [displayedView, setDisplayedView] = useState(null);
@@ -226,6 +226,8 @@ function NavalisContent() {
         <GameOverModal
           result={gameOver.result}
           reason={gameOver.reason}
+          opponentName={opponentName}
+          duration={gameDuration}
           onReturn={() => leaveGame()}
         />
       )}
