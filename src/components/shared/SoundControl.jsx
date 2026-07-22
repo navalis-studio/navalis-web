@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useSound } from "../../contexts/AudioContext";
 
 export function SoundControl() {
-  const { muted, toggleMute, musicVolume, setMusicVolume } = useSound();
+  const { muted, toggleMute, volume, setVolume } = useSound();
   const [showSlider, setShowSlider] = useState(false);
 
   function getIcon() {
-    if (muted || musicVolume === 0) return "volume_off";
-    if (musicVolume < 0.4) return "volume_down";
+    if (muted || volume === 0) return "volume_off";
+    if (volume < 0.4) return "volume_down";
     return "volume_up";
   }
 
@@ -38,10 +38,10 @@ export function SoundControl() {
             min="0"
             max="1"
             step="0.05"
-            value={muted ? 0 : musicVolume}
+            value={muted ? 0 : volume}
             onChange={(e) => {
               const val = parseFloat(e.target.value);
-              setMusicVolume(val);
+              setVolume(val);
               if (val > 0 && muted) toggleMute();
             }}
             className="w-20 h-1.5 appearance-none bg-ink-black/30 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-ink-black [&::-webkit-slider-thumb]:rounded-full"

@@ -14,6 +14,10 @@ const SFX = {
   defeat: "/audio/sfx/defeat.mp3",
 };
 
+// Gain multipliers (adjust relative loudness of music vs SFX)
+const MUSIC_GAIN = 0.6;
+const SFX_GAIN = 0.5;
+
 // === Preloaded SFX cache ===
 const sfxCache = {};
 
@@ -31,17 +35,18 @@ function preloadSfx() {
 export function useAudio() {
   const musicRef = useRef(null);
   const currentTrackRef = useRef(null);
-  const [musicVolume, setMusicVolume] = useState(() => {
-    const saved = localStorage.getItem("navalis-music-volume");
-    return saved !== null ? parseFloat(saved) : 0.3;
-  });
-  const [sfxVolume, setSfxVolume] = useState(() => {
-    const saved = localStorage.getItem("navalis-sfx-volume");
-    return saved !== null ? parseFloat(saved) : 0.3;
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem("navalis-volume");
+    return saved !== null ? parseFloat(saved) : 0.4;
   });
   const [muted, setMuted] = useState(() => {
     return localStorage.getItem("navalis-muted") === "true";
   });
+
+  // Logarithmic curve for natural volume perception
+  const applyVolumeCurve = useCallback((linear) => {
+    return linear * linear; // quadratic curve: 0.5 slider → 0.25 actual
+  }, []);
 
   // Preload SFX on mount
   useEffect(() => {
@@ -50,12 +55,8 @@ export function useAudio() {
 
   // Persist settings
   useEffect(() => {
-    localStorage.setItem("navalis-music-volume", musicVolume.toString());
-  }, [musicVolume]);
-
-  useEffect(() => {
-    localStorage.setItem("navalis-sfx-volume", sfxVolume.toString());
-  }, [sfxVolume]);
+    localStorage.setItem("navalis-volume", volume.toString());
+  }, [volume]);
 
   useEffect(() => {
     localStorage.setItem("navalis-muted", muted.toString());
@@ -64,9 +65,9 @@ export function useAudio() {
   // Update music volume when it changes
   useEffect(() => {
     if (musicRef.current) {
-      musicRef.current.volume = muted ? 0 : musicVolume;
+      musicRef.current.volume = muted ? 0 : applyVolumeCurve(volume) * MUSIC_GAIN;
     }
-  }, [musicVolume, muted]);
+  }, [volume, muted, applyVolumeCurve]);
 
   // Resume music on user interaction (if autoplay was blocked)
   useEffect(() => {
@@ -110,7 +111,7 @@ export function useAudio() {
       // Start new track
       const audio = new Audio(MUSIC_TRACKS[track]);
       audio.loop = true;
-      audio.volume = muted ? 0 : musicVolume;
+      audio.volume = muted ? 0 : applyVolumeCurve(volume) * MUSIC_GAIN;
       audio.play().catch(() => {
         // Autoplay blocked — will resume on first user interaction
       });
@@ -118,7 +119,7 @@ export function useAudio() {
       musicRef.current = audio;
       currentTrackRef.current = track;
     },
-    [musicVolume, muted],
+    [volume, muted, applyVolumeCurve],
   );
 
   // Stop music (with fade-out)
@@ -150,14 +151,14 @@ export function useAudio() {
       // Clone the cached audio to allow overlapping plays
       const audio = sfxCache[name]?.cloneNode();
       if (!audio) return;
-      audio.volume = sfxVolume;
+      audio.volume = applyVolumeCurve(volume) * SFX_GAIN;
       audio.addEventListener("ended", () => {
         activeSfxRef.current = activeSfxRef.current.filter((a) => a !== audio);
       });
       activeSfxRef.current.push(audio);
       audio.play().catch(() => {});
     },
-    [sfxVolume, muted],
+    [volume, muted, applyVolumeCurve],
   );
 
   // Stop all active SFX (with fade-out)
@@ -181,11 +182,11 @@ export function useAudio() {
     setMuted((m) => {
       const newMuted = !m;
       if (musicRef.current) {
-        musicRef.current.volume = newMuted ? 0 : musicVolume;
+        musicRef.current.volume = newMuted ? 0 : applyVolumeCurve(volume) * MUSIC_GAIN;
       }
       return newMuted;
     });
-  }, [musicVolume]);
+  }, [volume, applyVolumeCurve]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -202,10 +203,8 @@ export function useAudio() {
     stopMusic,
     playSfx,
     stopSfx,
-    musicVolume,
-    setMusicVolume,
-    sfxVolume,
-    setSfxVolume,
+    volume,
+    setVolume,
     muted,
     toggleMute,
   };
