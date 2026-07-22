@@ -30,7 +30,13 @@ async function request(endpoint, options = {}) {
     }
 
     const body = await response.json().catch(() => ({}));
-    const error = new Error(body.message || body.error || `Request failed: ${response.status}`);
+    let message = body.message || body.detail || body.error || `Request failed: ${response.status}`;
+    // Clean validation field prefixes (e.g. "password: Senha deve..." → "Senha deve...")
+    message = message
+      .split("; ")
+      .map((msg) => msg.replace(/^\w+:\s*/, ""))
+      .join(" ");
+    const error = new Error(message);
     error.status = response.status;
     error.body = body;
     throw error;
