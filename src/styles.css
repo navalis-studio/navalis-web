@@ -93,6 +93,8 @@
       auto !important;
   }
   button,
+  a,
+  input,
   [role="button"] {
     cursor: inherit;
   }
