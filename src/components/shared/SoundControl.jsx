@@ -44,7 +44,7 @@ export function SoundControl() {
               setMusicVolume(val);
               if (val > 0 && muted) toggleMute();
             }}
-            className="w-20 h-1.5 appearance-none bg-ink-black/30 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-ink-black [&::-webkit-slider-thumb]:rounded-full"
+            className="w-20 h-1.5 appearance-none bg-ink-black/30 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-ink-black [&::-webkit-slider-thumb]:rounded-full"
           />
         </div>
       )}
