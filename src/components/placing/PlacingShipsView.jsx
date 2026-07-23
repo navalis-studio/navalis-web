@@ -132,20 +132,21 @@ export function PlacingShipsView() {
   return (
     <div className="min-h-screen px-8 2xl:px-12 py-4 2xl:py-6 max-w-[1200px] mx-auto relative z-10">
       {/* Header - title + flee button on same line */}
-      <div className="flex items-center justify-between 2xl:justify-end mb-3 2xl:mb-4">
+      <div className="flex items-center justify-between 2xl:justify-end mb-3 2xl:mb-4 pl-14 sm:pl-16 2xl:pl-0">
         <h1 className="font-display text-xl 2xl:hidden font-extrabold uppercase tracking-tight text-paper-white">
-          Grade de Posicionamento
+          <span className="sm:hidden">Posicionamento</span>
+          <span className="hidden sm:inline">Grade de Posicionamento</span>
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {opponentReady && (
-            <span className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container-high px-3 py-1.5 rounded-full ink-border flex items-center gap-2">
+            <span className="hidden sm:flex font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container-high px-3 py-1.5 rounded-full ink-border items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse" />
               OPONENTE PRONTO
             </span>
           )}
           <button
             onClick={() => setShowFleeModal(true)}
-            className="font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white hover:text-ink-black transition-colors uppercase border-2 border-paper-white rounded-full px-5 py-2 hover:bg-paper-white"
+            className="font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white hover:text-ink-black transition-colors uppercase border-2 border-paper-white rounded-full px-4 sm:px-5 py-2 hover:bg-paper-white whitespace-nowrap"
           >
             FUGIR
           </button>
@@ -355,7 +356,7 @@ export function PlacingShipsView() {
           {/* Orientation Toggle */}
           <div className="bg-surface-container-high ink-border rounded-xl p-2.5 2xl:p-4 hard-shadow-sm flex flex-col items-center gap-1.5 2xl:gap-3">
             <span className="font-mono text-[12px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
-              Orientação · [R]
+              Orientação<span className="hidden sm:inline"> · [R]</span>
             </span>
             <div className="flex w-full bg-surface border-2 border-paper-white rounded-full p-1 relative">
               <div

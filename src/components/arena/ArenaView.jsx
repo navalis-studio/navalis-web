@@ -184,10 +184,10 @@ export function ArenaView() {
     <div className="min-h-screen px-8 2xl:px-12 py-4 2xl:py-6 max-w-[1200px] 2xl:max-w-[1280px] mx-auto relative z-10">
       {/* Header */}
       <div className="relative flex items-center justify-end mb-3 2xl:mb-5">
-        {/* Turn indicator — absolutely centered in the boards area (left column) */}
-        <div className="absolute left-0 right-[260px] 2xl:right-[300px] flex justify-center pointer-events-none">
+        {/* Turn indicator — mobile: left-aligned; desktop: absolutely centered */}
+        <div className="sm:absolute sm:left-0 sm:right-[260px] 2xl:sm:right-[300px] sm:flex sm:justify-center sm:pointer-events-none mr-auto sm:mr-0 pl-14 sm:pl-0">
           <div
-            className={`pointer-events-auto flex items-center gap-2.5 px-5 py-2 rounded-full border-3 transition-all ${
+            className={`pointer-events-auto flex items-center gap-2 sm:gap-2.5 px-3 sm:px-5 py-2 rounded-full border-3 transition-all ${
               myTurn
                 ? "border-paper-white bg-surface-container-high hard-shadow-sm"
                 : "border-mid-tone-grey/50 bg-surface-container"
@@ -195,11 +195,11 @@ export function ArenaView() {
           >
             {myTurn && <span className="h-2.5 w-2.5 rounded-full bg-paper-white animate-pulse" />}
             <span
-              className={`font-display text-sm 2xl:text-base font-extrabold uppercase tracking-tight ${
+              className={`font-display text-xs sm:text-sm 2xl:text-base font-extrabold uppercase tracking-tight ${
                 myTurn ? "text-paper-white" : "text-mid-tone-grey"
               }`}
             >
-              {myTurn ? "SEU TURNO — ATAQUE!" : "TURNO DO OPONENTE"}
+              {myTurn ? <><span className="hidden sm:inline">SEU TURNO — ATAQUE!</span><span className="sm:hidden">ATAQUE!</span></> : <><span className="hidden sm:inline">TURNO DO OPONENTE</span><span className="sm:hidden">OPONENTE</span></>}
             </span>
             {turnTimer !== null && (
               <span
@@ -215,21 +215,21 @@ export function ArenaView() {
 
         <div className="flex items-center">
           <div className="flex items-center bg-surface-container-high ink-border rounded-full overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-2">
+            <div className="flex items-center gap-2 px-3 sm:px-4 py-2">
               <span
                 className="material-symbols-outlined text-paper-white text-lg"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 person
               </span>
-              <span className="font-mono text-[12px] font-bold text-paper-white tracking-[0.1em] uppercase truncate max-w-[120px]">
+              <span className="font-mono text-[11px] sm:text-[12px] font-bold text-paper-white tracking-[0.1em] uppercase truncate max-w-[80px] sm:max-w-[120px]">
                 {user?.username}
               </span>
             </div>
             <div className="w-[2px] h-6 bg-paper-white/20" />
             <button
               onClick={() => setShowFleeModal(true)}
-              className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white/60 px-4 py-2 hover:text-paper-white transition-colors uppercase"
+              className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white/60 px-3 sm:px-4 py-2 hover:text-paper-white transition-colors uppercase"
             >
               FUGIR
             </button>
@@ -238,11 +238,11 @@ export function ArenaView() {
       </div>
 
       {/* Main layout */}
-      <div className="grid lg:grid-cols-[1fr_240px] 2xl:grid-cols-[1fr_280px] gap-4 2xl:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_240px] 2xl:grid-cols-[1fr_280px] gap-4 2xl:gap-6">
         {/* Left: Boards area */}
         <div className="flex flex-col gap-3 2xl:gap-5">
-          {/* Two boards side by side */}
-          <div className="grid grid-cols-2 gap-4 2xl:gap-6">
+          {/* Two boards - stacked on mobile, side by side on sm+ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 2xl:gap-6">
             {/* Board: Minha Frota */}
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1.5 2xl:mb-2">
@@ -259,17 +259,21 @@ export function ArenaView() {
                   DEFESA
                 </span>
               </div>
-              <div className="w-full max-w-[280px] 2xl:max-w-[380px]">
+              <div className="w-full max-w-[320px] sm:max-w-[280px] 2xl:max-w-[380px]">
                 <BoardGrid placed={placedShips} marks={myMarks} sunkCells={mySunkCells} />
               </div>
-              {/* My Mascot */}
-              <div className="flex flex-col items-center gap-1 2xl:gap-3 mt-4 2xl:mt-6 w-full">
+              {/* My Mascot - hidden on mobile */}
+              <div className="hidden sm:flex flex-col items-center gap-1 2xl:gap-3 mt-4 2xl:mt-6 w-full">
                 <span className="font-mono text-[11px] 2xl:text-[13px] font-bold tracking-[0.1em] text-paper-white uppercase truncate max-w-[150px] text-center">
                   {user?.username || "VOCÊ"} <span className="text-mid-tone-grey">(eu)</span>
                 </span>
                 <HealthBar sunkCount={sunkMyShips?.length || 0} />
                 <SailorMascot shooting={myShooting} damaged={myDamaged} shootKey={myShootCount} damageKey={myDamageCount} gameOverState={gameOverPending ? gameOverResult : null} className="h-32 2xl:h-44" />
               </div>
+              {/* Mobile: just the nick */}
+              <span className="sm:hidden font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white uppercase mt-2">
+                {user?.username || "VOCÊ"} (eu)
+              </span>
             </div>
 
             {/* Board: Frota Inimiga */}
@@ -288,7 +292,7 @@ export function ArenaView() {
                   ATAQUE
                 </span>
               </div>
-              <div className="w-full max-w-[280px] 2xl:max-w-[380px] relative">
+              <div className="w-full max-w-[320px] sm:max-w-[280px] 2xl:max-w-[380px] relative">
                 <BoardGrid
                   marks={enemyMarks}
                   fog
@@ -309,8 +313,8 @@ export function ArenaView() {
                   </div>
                 )}
               </div>
-              {/* Enemy Mascot */}
-              <div className="flex flex-col items-center gap-1 2xl:gap-3 mt-4 2xl:mt-6 w-full">
+              {/* Enemy Mascot - hidden on mobile */}
+              <div className="hidden sm:flex flex-col items-center gap-1 2xl:gap-3 mt-4 2xl:mt-6 w-full">
                 <span className="font-mono text-[11px] 2xl:text-[13px] font-bold tracking-[0.1em] text-paper-white uppercase truncate max-w-[150px] text-center">
                   {opponentName || "OPONENTE"}
                 </span>
@@ -325,6 +329,10 @@ export function ArenaView() {
                   className="h-32 2xl:h-44"
                 />
               </div>
+              {/* Mobile: just the nick */}
+              <span className="sm:hidden font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white uppercase mt-2">
+                {opponentName || "OPONENTE"}
+              </span>
             </div>
           </div>
         </div>

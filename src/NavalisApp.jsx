@@ -149,7 +149,7 @@ function NavalisContent() {
       setDisplayedView(to);
       window.scrollTo(0, 0);
     }
-  }, [targetView, showSplash, displayedView, trigger]);
+  }, [targetView, showSplash, trigger]);
 
   // Play music based on current displayed view
   useEffect(() => {
@@ -220,16 +220,6 @@ function NavalisContent() {
 
       {/* Sound control - visible on all screens */}
       <SoundControl />
-
-      {/* Credits */}
-      <a
-        href="https://github.com/jhowzluk"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-4 right-4 z-[9000] font-mono text-[12px] font-bold text-paper-white hover:text-paper-white/60 transition-colors tracking-[0.1em]"
-      >
-        feito por @jhowzluk
-      </a>
 
       {/* Modals */}
       {gameOver && (

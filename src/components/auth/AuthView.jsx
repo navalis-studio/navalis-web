@@ -46,7 +46,7 @@ export function AuthView() {
   const displayError = localError || error;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-8 py-2">
+    <div className="min-h-screen flex items-center justify-center px-8 py-2 relative">
       {/* Card branco - Ink & Iron style */}
       <div className="w-full max-w-[380px] 2xl:max-w-[460px] bg-paper-white ink-border-heavy rounded-xl hard-shadow relative overflow-hidden flex flex-col z-10">
         {/* Cantos decorativos - círculos pretos */}
@@ -165,6 +165,16 @@ export function AuthView() {
           </form>
         </div>
       </div>
+
+      {/* Credits */}
+      <a
+        href="https://github.com/jhowzluk"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-4 right-4 font-mono text-[12px] font-bold text-paper-white hover:text-paper-white/60 transition-colors tracking-[0.1em]"
+      >
+        feito por @jhowzluk
+      </a>
 
       {/* Walk-in-place animation styles */}
       <style>{`

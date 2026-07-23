@@ -85,22 +85,22 @@ export function LobbyView() {
         <BrandMark size="sm" />
         <div className="flex items-center">
           {/* User badge with logout */}
-          <div className="hidden sm:flex items-center bg-paper-white ink-border rounded-full hard-shadow-sm overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-2">
+          <div className="flex items-center bg-paper-white ink-border rounded-full hard-shadow-sm overflow-hidden">
+            <div className="flex items-center gap-2 px-3 sm:px-4 py-2">
               <span
                 className="material-symbols-outlined text-ink-black text-lg"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 person
               </span>
-              <span className="font-mono text-[12px] font-bold tracking-[0.1em] text-ink-black uppercase truncate max-w-[120px]">
+              <span className="font-mono text-[11px] sm:text-[12px] font-bold tracking-[0.1em] text-ink-black uppercase truncate max-w-[80px] sm:max-w-[120px]">
                 {user?.username}
               </span>
             </div>
             <div className="w-[2px] h-6 bg-ink-black/20" />
             <button
               onClick={logout}
-              className="font-mono text-[11px] font-bold tracking-[0.1em] text-ink-black/60 px-4 py-2 hover:text-ink-black transition-colors uppercase"
+              className="font-mono text-[11px] font-bold tracking-[0.1em] text-ink-black/60 px-3 sm:px-4 py-2 hover:text-ink-black transition-colors uppercase"
             >
               SAIR
             </button>
@@ -209,43 +209,60 @@ export function LobbyView() {
       {/* Available Rooms / Ranking */}
       <div className="w-full bg-surface-container-high ink-border rounded-xl hard-shadow overflow-hidden">
         {/* Header with tabs */}
-        <div className="flex items-center justify-between px-4 2xl:px-6 py-3 2xl:py-4 border-b-4 border-paper-white">
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setLobbyTab("salas")}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
-                lobbyTab === "salas"
-                  ? "bg-paper-white text-ink-black"
-                  : "text-on-surface-variant hover:text-paper-white"
-              }`}
-            >
-              <span
-                className="material-symbols-outlined text-lg"
-                style={{ fontVariationSettings: "'FILL' 1" }}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 2xl:px-6 py-3 2xl:py-4 border-b-4 border-paper-white gap-2 sm:gap-0">
+          <div className="flex items-center justify-between sm:justify-start sm:gap-0">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setLobbyTab("salas")}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
+                  lobbyTab === "salas"
+                    ? "bg-paper-white text-ink-black"
+                    : "text-on-surface-variant hover:text-paper-white"
+                }`}
               >
-                folder_open
-              </span>
-              SALAS
-            </button>
-            <button
-              onClick={() => setLobbyTab("ranking")}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
-                lobbyTab === "ranking"
-                  ? "bg-paper-white text-ink-black"
-                  : "text-on-surface-variant hover:text-paper-white"
-              }`}
-            >
-              <span
-                className="material-symbols-outlined text-lg"
-                style={{ fontVariationSettings: "'FILL' 1" }}
+                <span
+                  className="material-symbols-outlined text-lg"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  folder_open
+                </span>
+                SALAS
+              </button>
+              <button
+                onClick={() => setLobbyTab("ranking")}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
+                  lobbyTab === "ranking"
+                    ? "bg-paper-white text-ink-black"
+                    : "text-on-surface-variant hover:text-paper-white"
+                }`}
               >
-                emoji_events
+                <span
+                  className="material-symbols-outlined text-lg"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  emoji_events
+                </span>
+                RANKING
+              </button>
+            </div>
+            {lobbyTab === "salas" && (
+              <span className="sm:hidden font-mono text-[11px] font-bold text-on-surface-variant tracking-[0.1em]">
+                {availableGames.length} ATIVAS
               </span>
-              RANKING
-            </button>
+            )}
           </div>
+          {/* Mobile: full-width button */}
+          <button
+            type="button"
+            onClick={lobbyTab === "salas" ? loadGames : loadRanking}
+            disabled={lobbyTab === "salas" ? refreshing : rankingLoading}
+            className="sm:hidden w-full font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-2 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
+          >
+            {(lobbyTab === "salas" ? refreshing : rankingLoading) ? "..." : "ATUALIZAR"}
+          </button>
+          {/* Desktop: inline controls */}
           {lobbyTab === "salas" && (
-            <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-3">
               <span className="font-mono text-[11px] font-bold text-on-surface-variant tracking-[0.1em]">
                 {availableGames.length} ATIVAS
               </span>
@@ -262,7 +279,7 @@ export function LobbyView() {
             <button
               onClick={loadRanking}
               disabled={rankingLoading}
-              className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-1.5 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
+              className="hidden sm:block font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-1.5 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
             >
               {rankingLoading ? "..." : "ATUALIZAR"}
             </button>
@@ -289,25 +306,25 @@ export function LobbyView() {
                 {availableGames.map((game) => (
                   <div
                     key={game.gameId}
-                    className="flex items-center justify-between bg-surface ink-border rounded-lg p-4 hard-shadow-sm hover:bg-surface-container transition-colors group"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between bg-surface ink-border rounded-lg p-4 hard-shadow-sm hover:bg-surface-container transition-colors group gap-3"
                   >
                     {/* Host name + room code + status */}
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-3 sm:gap-5 min-w-0">
                       {/* Host */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <span
-                          className="material-symbols-outlined text-paper-white text-lg"
+                          className="material-symbols-outlined text-paper-white text-lg shrink-0"
                           style={{ fontVariationSettings: "'FILL' 1" }}
                         >
                           person
                         </span>
-                        <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide">
+                        <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide truncate">
                           {game.hostUsername || "???"}
                         </span>
                       </div>
 
                       {/* Room code */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span
                           className="material-symbols-outlined text-on-surface-variant text-sm"
                           style={{ fontVariationSettings: "'FILL' 1" }}
@@ -320,7 +337,7 @@ export function LobbyView() {
                       </div>
 
                       {/* Status: waiting indicator */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
                         <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">
                           1/2
@@ -332,7 +349,7 @@ export function LobbyView() {
                     <button
                       onClick={() => handleJoinGame(game.gameId)}
                       disabled={loading}
-                      className={`bg-paper-white text-ink-black font-mono text-[12px] font-bold tracking-[0.1em] px-6 py-2.5 rounded-full ink-border hard-shadow-sm uppercase whitespace-nowrap transition-all ${
+                      className={`w-full sm:w-auto bg-paper-white text-ink-black font-mono text-[12px] font-bold tracking-[0.1em] px-6 py-2.5 rounded-full ink-border hard-shadow-sm uppercase whitespace-nowrap transition-all ${
                         loading
                           ? "opacity-40 cursor-not-allowed"
                           : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
@@ -376,7 +393,7 @@ export function LobbyView() {
             ) : (
               <div className="flex flex-col p-4 gap-2">
                 {/* Table header */}
-                <div className="grid grid-cols-[40px_1fr_70px_70px_80px] gap-2 px-4 py-2">
+                <div className="grid grid-cols-[28px_1fr_40px_40px_52px] sm:grid-cols-[40px_1fr_70px_70px_80px] gap-1 sm:gap-2 px-3 sm:px-4 py-2">
                   <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">#</span>
                   <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">JOGADOR</span>
                   <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">V</span>
@@ -391,25 +408,25 @@ export function LobbyView() {
                   return (
                     <div
                       key={player.username}
-                      className={`grid grid-cols-[40px_1fr_70px_70px_80px] gap-2 items-center px-4 py-3 rounded-lg transition-colors ${
+                      className={`grid grid-cols-[28px_1fr_40px_40px_52px] sm:grid-cols-[40px_1fr_70px_70px_80px] gap-1 sm:gap-2 items-center px-3 sm:px-4 py-3 rounded-lg transition-colors ${
                         isMe
                           ? "bg-paper-white/10 border border-paper-white/30"
                           : "bg-surface hover:bg-surface-container"
                       }`}
                     >
-                      <span className={`font-display text-sm font-extrabold ${index < 3 ? "text-paper-white" : "text-on-surface-variant"}`}>
+                      <span className={`font-display text-xs sm:text-sm font-extrabold ${index < 3 ? "text-paper-white" : "text-on-surface-variant"}`}>
                         {index + 1}º
                       </span>
-                      <span className={`font-display text-sm font-extrabold uppercase tracking-wide truncate ${isMe ? "text-paper-white" : "text-paper-white/80"}`}>
+                      <span className={`font-display text-xs sm:text-sm font-extrabold uppercase tracking-wide truncate ${isMe ? "text-paper-white" : "text-paper-white/80"}`}>
                         {player.username}
                       </span>
-                      <span className="font-mono text-sm font-bold text-paper-white text-center">
+                      <span className="font-mono text-xs sm:text-sm font-bold text-paper-white text-center">
                         {player.wins}
                       </span>
-                      <span className="font-mono text-sm font-bold text-on-surface-variant text-center">
+                      <span className="font-mono text-xs sm:text-sm font-bold text-on-surface-variant text-center">
                         {player.losses}
                       </span>
-                      <span className="font-mono text-sm font-bold text-paper-white text-center">
+                      <span className="font-mono text-xs sm:text-sm font-bold text-paper-white text-center">
                         {winRate}%
                       </span>
                     </div>
