@@ -2,10 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { FLEET, GRID, isValidPlacement, cellsFor, key } from "../shared/constants";
 import { BoardGrid } from "../board/BoardGrid";
 import { useGame } from "../../contexts/GameContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export function PlacingShipsView() {
   const { confirmFleet, cancelReady, leaveGame, opponentReady, myReady, opponentDisconnected, reconnectCountdown } =
     useGame();
+  const { t } = useLanguage();
   const [placed, setPlaced] = useState([]);
   const [orientation, setOrientation] = useState("H");
   const [selectedShipId, setSelectedShipId] = useState(FLEET[0].id);
@@ -134,21 +136,21 @@ export function PlacingShipsView() {
       {/* Header - title + flee button on same line */}
       <div className="flex items-center justify-between 2xl:justify-end mb-3 2xl:mb-4 pl-14 sm:pl-16 2xl:pl-0">
         <h1 className="font-display text-xl 2xl:hidden font-extrabold uppercase tracking-tight text-paper-white">
-          <span className="sm:hidden">Posicionamento</span>
-          <span className="hidden sm:inline">Grade de Posicionamento</span>
+          <span className="sm:hidden">{t('placing.titleShort')}</span>
+          <span className="hidden sm:inline">{t('placing.title')}</span>
         </h1>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {opponentReady && (
             <span className="hidden sm:flex font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container-high px-3 py-1.5 rounded-full ink-border items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse" />
-              OPONENTE PRONTO
+              {t('placing.opponentReady')}
             </span>
           )}
           <button
             onClick={() => setShowFleeModal(true)}
             className="font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white hover:text-ink-black transition-colors uppercase border-2 border-paper-white rounded-full px-4 sm:px-5 py-2 hover:bg-paper-white whitespace-nowrap"
           >
-            FUGIR
+            {t('placing.flee')}
           </button>
         </div>
       </div>
@@ -160,7 +162,7 @@ export function PlacingShipsView() {
           {/* Title centered above board - only on large screens */}
           <div className="hidden 2xl:flex flex-col items-center mb-2 2xl:mb-6">
             <h1 className="font-display text-4xl font-extrabold uppercase tracking-tight text-paper-white">
-              Grade de Posicionamento
+              {t('placing.title')}
             </h1>
           </div>
 
@@ -197,7 +199,7 @@ export function PlacingShipsView() {
               >
                 shuffle
               </span>
-              Auto-Posicionar
+              {t('placing.autoPlace')}
             </button>
 
             <button
@@ -221,7 +223,7 @@ export function PlacingShipsView() {
               >
                 delete
               </span>
-              Limpar Tudo
+              {t('placing.clearAll')}
             </button>
           </div>
 
@@ -249,7 +251,7 @@ export function PlacingShipsView() {
               >
                 check_circle
               </span>
-              {confirming ? "Enviando..." : "Confirmar Frota"}
+              {confirming ? t('placing.sending') : t('placing.confirmFleet')}
             </button>
           </div>
 
@@ -259,7 +261,7 @@ export function PlacingShipsView() {
                 <div className="bg-surface-container-high ink-border rounded-lg px-8 py-4 hard-shadow flex items-center gap-3">
                   <span className="h-2.5 w-2.5 rounded-full bg-paper-white animate-pulse" />
                   <span className="font-display text-base font-extrabold text-paper-white uppercase tracking-wide">
-                    Aguardando oponente...
+                    {t('placing.waitingOpponent')}
                   </span>
                 </div>
                 <button
@@ -269,7 +271,7 @@ export function PlacingShipsView() {
                   }}
                   className="font-display text-sm font-extrabold tracking-[0.05em] text-ink-black uppercase py-3 px-8 bg-paper-white rounded-full ink-border hard-shadow-sm transition-all hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
                 >
-                  CANCELAR
+                  {t('placing.cancelReady')}
                 </button>
               </div>
             </div>
@@ -281,11 +283,11 @@ export function PlacingShipsView() {
           {/* Fleet Dock */}
           <div className="bg-paper-white border-4 border-ink-black rounded-xl p-4 2xl:p-5 shadow-[6px_6px_0px_0px_#000]">
             <h3 className="font-display text-lg 2xl:text-xl font-extrabold text-ink-black uppercase tracking-tight text-center border-b-4 border-ink-black pb-2 mb-3">
-              Doca da Frota
+              {t('placing.fleetDock')}
             </h3>
             <div className="flex items-center justify-between mb-2">
               <span className="font-mono text-[11px] 2xl:text-[12px] font-bold text-mid-tone-grey tracking-[0.1em]">
-                {placed.length}/{FLEET.length} POSICIONADOS
+                {placed.length}/{FLEET.length} {t('placing.placed')}
               </span>
             </div>
 
@@ -335,7 +337,7 @@ export function PlacingShipsView() {
                                 : "text-ink-black"
                           }`}
                         >
-                          {s.name}
+                          {t('ships.' + s.id)}
                         </span>
                         <div className="flex gap-1">
                           {Array.from({ length: s.size }).map((_, i) => (
@@ -356,7 +358,7 @@ export function PlacingShipsView() {
           {/* Orientation Toggle */}
           <div className="bg-surface-container-high ink-border rounded-xl p-2.5 2xl:p-4 hard-shadow-sm flex flex-col items-center gap-1.5 2xl:gap-3">
             <span className="font-mono text-[12px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
-              Orientação<span className="hidden sm:inline"> · [R]</span>
+              {t('placing.orientation')}<span className="hidden sm:inline"> · [R]</span>
             </span>
             <div className="flex w-full bg-surface border-2 border-paper-white rounded-full p-1 relative">
               <div
@@ -374,7 +376,7 @@ export function PlacingShipsView() {
                   orientation === "H" ? "text-ink-black" : "text-on-surface-variant"
                 }`}
               >
-                HORIZ.
+                {t('placing.horizontal')}
               </button>
               <button
                 onClick={() => setOrientation("V")}
@@ -382,7 +384,7 @@ export function PlacingShipsView() {
                   orientation === "V" ? "text-ink-black" : "text-on-surface-variant"
                 }`}
               >
-                VERT.
+                {t('placing.vertical')}
               </button>
             </div>
           </div>
@@ -390,10 +392,8 @@ export function PlacingShipsView() {
           {/* Instructions - hidden on small screens */}
           <div className="hidden 2xl:block bg-surface-container-high ink-border rounded-lg p-3 hard-shadow-sm">
             <div className="font-mono text-[12px] text-on-surface-variant leading-relaxed space-y-1">
-              <div>· Arraste ou clique para posicionar</div>
-              <div>
-                · Pressione <span className="text-paper-white font-bold">[R]</span> para girar
-              </div>{" "}
+              <div>{t('placing.instructDrag')}</div>
+              <div>{t('placing.instructRotate')}</div>
             </div>
           </div>
 
@@ -420,11 +420,11 @@ export function PlacingShipsView() {
               </span>
 
               <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper-white">
-                FUGIR?
+                {t('placing.fleeTitle')}
               </h2>
 
               <p className="font-sans text-sm text-on-surface-variant">
-                Abandonar a fase de posicionamento cancelará a partida para ambos os jogadores.
+                {t('placing.fleeMessage')}
               </p>
 
               <div className="flex flex-col gap-3 w-full mt-2">
@@ -438,14 +438,14 @@ export function PlacingShipsView() {
                     e.currentTarget.style.animation = "none";
                   }}
                 >
-                  SIM, ABANDONAR
+                  {t('placing.fleeConfirm')}
                 </button>
 
                 <button
                   onClick={() => setShowFleeModal(false)}
                   className="w-full font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white uppercase py-2 transition-colors hover:text-mid-tone-grey"
                 >
-                  VOLTAR AO POSICIONAMENTO
+                  {t('placing.fleeCancel')}
                 </button>
               </div>
             </div>
@@ -471,9 +471,9 @@ export function PlacingShipsView() {
                 wifi_off
               </span>
               <h3 className="font-display text-2xl font-extrabold text-paper-white uppercase tracking-tight">
-                Oponente Desconectou
+                {t('placing.disconnectedTitle')}
               </h3>
-              <p className="font-sans text-sm text-on-surface-variant">Aguardando reconexão...</p>
+              <p className="font-sans text-sm text-on-surface-variant">{t('placing.disconnectedMessage')}</p>
               {reconnectCountdown !== null && (
                 <div className="font-mono text-4xl font-bold text-paper-white">
                   {reconnectCountdown}s

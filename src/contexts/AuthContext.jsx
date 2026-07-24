@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
       setUser({ username: data.username, token: data.token, userId: data.id });
       return data;
     } catch (err) {
-      setError(err.message || "Falha no login");
+      setError(err.message || "error.invalid_credentials");
       throw err;
     }
   }, []);
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
       setUser({ username: data.username, token: data.token, userId: data.id });
       return data;
     } catch (err) {
-      setError(err.message || "Falha no registro");
+      setError(err.message || "error.internal_server");
       throw err;
     }
   }, []);

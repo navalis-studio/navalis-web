@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGame } from "../../contexts/GameContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export function WaitingRoomView() {
   const { user } = useAuth();
   const { roomCode, opponent, leaveGame } = useGame();
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const [dots, setDots] = useState("");
 
@@ -40,18 +42,18 @@ export function WaitingRoomView() {
         <div className="relative z-10 flex flex-col items-center gap-4 2xl:gap-6">
           {/* Header label */}
           <span className="font-mono text-[10px] 2xl:text-[11px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
-            SALA CRIADA
+            {t('waiting.roomCreated')}
           </span>
 
           {/* Title with animated dots */}
           <h2 className="font-display text-xl 2xl:text-3xl font-extrabold uppercase tracking-tight text-paper-white">
-            Aguardando oponente{dots}
+            {t('waiting.waitingOpponent')}{dots}
           </h2>
 
           {/* Room code card */}
           <div className="w-full bg-surface ink-border rounded-lg p-4 2xl:p-6 hard-shadow-sm">
             <span className="font-mono text-[9px] 2xl:text-[10px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
-              CÓDIGO DA SALA
+              {t('waiting.roomCode')}
             </span>
             <div className="mt-2 2xl:mt-3 font-mono text-3xl 2xl:text-4xl font-bold text-paper-white tracking-[0.4em]">
               {displayCode}
@@ -72,12 +74,12 @@ export function WaitingRoomView() {
               >
                 content_copy
               </span>
-              {copied ? "COPIADO!" : "COPIAR CÓDIGO"}
+              {copied ? t('waiting.copied') : t('waiting.copyCode')}
             </button>
           </div>
 
           <p className="font-sans text-sm text-on-surface-variant">
-            Compartilhe o código acima com seu oponente.
+            {t('waiting.shareCode')}
           </p>
 
           {/* Players */}
@@ -85,7 +87,7 @@ export function WaitingRoomView() {
             {/* Player 1 (host) */}
             <div className="bg-surface ink-border rounded-lg p-3 2xl:p-4 hard-shadow-sm">
               <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
-                JOGADOR 1
+                {t('waiting.player1')}
               </span>
               <div className="mt-2 flex items-center justify-center gap-2 min-w-0">
                 <span
@@ -101,7 +103,7 @@ export function WaitingRoomView() {
               <div className="flex items-center justify-center gap-1.5 mt-2">
                 <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
                 <span className="font-mono text-[9px] font-bold text-on-surface-variant tracking-[0.1em]">
-                  CONECTADO
+                  {t('waiting.connected')}
                 </span>
               </div>
             </div>
@@ -109,7 +111,7 @@ export function WaitingRoomView() {
             {/* Player 2 (opponent) */}
             <div className="bg-surface ink-border rounded-lg p-3 2xl:p-4 hard-shadow-sm">
               <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-on-surface-variant uppercase">
-                JOGADOR 2
+                {t('waiting.player2')}
               </span>
               <div className="mt-2 flex items-center justify-center gap-2 min-w-0">
                 <span
@@ -129,14 +131,14 @@ export function WaitingRoomView() {
                   <>
                     <span className="h-2 w-2 rounded-full bg-paper-white animate-pulse shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
                     <span className="font-mono text-[9px] font-bold text-on-surface-variant tracking-[0.1em]">
-                      CONECTADO
+                      {t('waiting.connected')}
                     </span>
                   </>
                 ) : (
                   <>
                     <span className="h-2 w-2 rounded-full bg-mid-tone-grey/40" />
                     <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em]">
-                      AGUARDANDO
+                      {t('waiting.waiting')}
                     </span>
                   </>
                 )}
@@ -149,7 +151,7 @@ export function WaitingRoomView() {
             onClick={leaveGame}
             className="mt-2 font-mono text-[11px] font-bold tracking-[0.1em] text-mid-tone-grey hover:text-paper-white transition-colors uppercase"
           >
-            CANCELAR
+            {t('waiting.cancel')}
           </button>
         </div>
       </div>

@@ -1,4 +1,8 @@
+import { useLanguage } from "../../contexts/LanguageContext";
+
 export function CancelledModal({ message, onConfirm }) {
+  const { t } = useLanguage();
+
   return (
     <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-ink-black/85">
       <div className="relative w-full max-w-sm bg-surface-container-high ink-border rounded-xl p-8 hard-shadow text-center overflow-hidden">
@@ -17,10 +21,10 @@ export function CancelledModal({ message, onConfirm }) {
           </span>
 
           <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper-white">
-            OPONENTE FUGIU
+            {t('cancelled.title')}
           </h2>
 
-          <p className="font-sans text-sm text-on-surface-variant">{message}</p>
+          <p className="font-sans text-sm text-on-surface-variant">{t(message)}</p>
 
           <button
             onClick={onConfirm}
@@ -32,7 +36,7 @@ export function CancelledModal({ message, onConfirm }) {
               e.currentTarget.style.animation = "none";
             }}
           >
-            VOLTAR AO LOBBY
+            {t('cancelled.returnLobby')}
           </button>
         </div>
       </div>

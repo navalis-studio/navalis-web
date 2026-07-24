@@ -1,7 +1,10 @@
 import navalisName from "../../img/black_navalis_name.png";
 import navalisShip from "../../img/black_navalis_ship.png";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export function TitleScreen({ onStart }) {
+  const { t } = useLanguage();
+
   return (
     <div
       onClick={onStart}
@@ -28,10 +31,10 @@ export function TitleScreen({ onStart }) {
       {/* Press to start */}
       <div className="mt-12 flex flex-col items-center gap-3">
         <span className="font-display text-lg 2xl:text-xl font-extrabold text-paper-white uppercase tracking-[0.15em] animate-pulse">
-          Clique para jogar
+          {t('title.clickToPlay')}
         </span>
         <span className="font-mono text-[10px] text-mid-tone-grey tracking-[0.2em] uppercase">
-          Press anywhere to start
+          {t('title.pressAnywhere')}
         </span>
       </div>
     </div>

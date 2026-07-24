@@ -1,3 +1,5 @@
+import { useLanguage } from "../../contexts/LanguageContext";
+
 export function GameOverModal({
   result,
   reason,
@@ -8,12 +10,13 @@ export function GameOverModal({
   sunkMyShips = [],
   onReturn,
 }) {
+  const { t } = useLanguage();
   const victory = result === "victory";
   const isWO = reason === "wo";
 
   function getTitle() {
-    if (isWO) return "W.O.";
-    return victory ? "VITÓRIA" : "DERROTA";
+    if (isWO) return t('gameOver.wo');
+    return victory ? t('gameOver.victory') : t('gameOver.defeat');
   }
 
   function getIcon() {
@@ -86,7 +89,7 @@ export function GameOverModal({
           {/* W.O. message */}
           {isWO && (
             <p className="font-sans text-sm text-on-surface-variant">
-              Oponente abandonou a partida.
+              {t('gameOver.woMessage')}
             </p>
           )}
 
@@ -116,7 +119,7 @@ export function GameOverModal({
               e.currentTarget.style.animation = "none";
             }}
           >
-            VOLTAR AO LOBBY
+            {t('gameOver.returnLobby')}
           </button>
         </div>
       </div>

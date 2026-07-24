@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { GameProvider } from "./contexts/GameContext";
 import { AudioProvider } from "./contexts/AudioContext";
@@ -12,12 +13,14 @@ document.addEventListener("mouseup", () => document.documentElement.classList.re
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AuthProvider>
-      <GameProvider>
-        <AudioProvider>
-          <NavalisApp />
-        </AudioProvider>
-      </GameProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <GameProvider>
+          <AudioProvider>
+            <NavalisApp />
+          </AudioProvider>
+        </GameProvider>
+      </AuthProvider>
+    </LanguageProvider>
   </StrictMode>,
 );

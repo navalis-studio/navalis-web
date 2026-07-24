@@ -255,7 +255,7 @@ export function GameProvider({ children }) {
           if (event.quitterId !== myUserId) {
             setOpponentDisconnected(false);
             clearCountdown();
-            setCancelledNotice("O covarde fugiu antes da batalha.");
+            setCancelledNotice("cancelled.message");
           }
           break;
 
@@ -278,7 +278,7 @@ export function GameProvider({ children }) {
         await stomp.connectStomp(user.token);
         stomp.subscribeToGame(gId, handleGameEvent);
       } catch (err) {
-        setError("Falha na conexão WebSocket: " + err.message);
+        setError("error.internal_server");
       }
     },
     [user?.token, handleGameEvent],
@@ -405,7 +405,7 @@ export function GameProvider({ children }) {
       await connectToGame(id);
       return game;
     } catch (err) {
-      setError(err.message || "Falha ao criar partida");
+      setError(err.message || "error.internal_server");
       throw err;
     }
   }, [connectToGame]);
@@ -432,7 +432,7 @@ export function GameProvider({ children }) {
         await connectToGame(id);
         return game;
       } catch (err) {
-        setError(err.message || "Falha ao entrar na partida");
+        setError(err.message || "error.internal_server");
         throw err;
       }
     },
@@ -447,7 +447,7 @@ export function GameProvider({ children }) {
       setAvailableGames(games || []);
       return games;
     } catch (err) {
-      setError(err.message || "Falha ao listar partidas");
+      setError(err.message || "error.internal_server");
       return [];
     }
   }, []);

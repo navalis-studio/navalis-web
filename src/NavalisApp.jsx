@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FilmOverlay } from "./components/shared/FilmOverlay";
 import { IrisTransitionProvider, useIris } from "./components/shared/IrisTransition";
 import { SoundControl } from "./components/shared/SoundControl";
+import { LanguageSelector } from "./components/shared/LanguageSelector";
 import { TitleScreen } from "./components/shared/TitleScreen";
 import { AuthView } from "./components/auth/AuthView";
 import { LobbyView } from "./components/lobby/LobbyView";
@@ -13,6 +14,7 @@ import { CancelledModal } from "./components/game-over/CancelledModal";
 import { useAuth } from "./contexts/AuthContext";
 import { useGame } from "./contexts/GameContext";
 import { useSound } from "./contexts/AudioContext";
+import { useLanguage } from "./contexts/LanguageContext";
 import navalisShip from "./img/black_navalis_ship.png";
 
 // Music mapping per view
@@ -50,6 +52,7 @@ function NavalisContent() {
   const { gameState, gameOver, leaveGame, cancelledNotice, dismissCancelledNotice, opponentName, gameDuration, sunkEnemyShips, sunkMyShips } = useGame();
   const { trigger, triggerCloseOnly, triggerOpen } = useIris();
   const { playMusic, stopMusic, playSfx, stopSfx } = useSound();
+  const { t } = useLanguage();
   const [displayedView, setDisplayedView] = useState(null);
   const hasSession = Boolean(localStorage.getItem("navalis_token"));
   const [showTitle, setShowTitle] = useState(!hasSession);
@@ -197,7 +200,7 @@ function NavalisContent() {
             </div>
           </div>
           <span className="mt-3 font-mono text-[11px] font-bold tracking-[0.2em] text-mid-tone-grey uppercase">
-            Carregando
+            {t('splash.loading')}
           </span>
         </div>
       </div>
@@ -220,6 +223,11 @@ function NavalisContent() {
 
       {/* Sound control - visible on all screens */}
       <SoundControl />
+
+      {/* Language selector - bottom-right, above credits */}
+      <div className="fixed bottom-12 right-4 z-[9000]">
+        <LanguageSelector />
+      </div>
 
       {/* Modals */}
       {gameOver && (

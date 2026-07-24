@@ -6,6 +6,7 @@ import { HealthBar } from "./HealthBar";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGame } from "../../contexts/GameContext";
 import { useSound } from "../../contexts/AudioContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 const SHIP_TYPE_MAP = {
   CARRIER: "carrier",
@@ -44,6 +45,7 @@ export function ArenaView() {
     gameOverResult,
   } = useGame();
   const { playSfx } = useSound();
+  const { t } = useLanguage();
 
   // Mascot animation states (counters to force re-trigger)
   const [myShootCount, setMyShootCount] = useState(0);
@@ -199,7 +201,7 @@ export function ArenaView() {
                 myTurn ? "text-paper-white" : "text-mid-tone-grey"
               }`}
             >
-              {myTurn ? <><span className="hidden sm:inline">SEU TURNO — ATAQUE!</span><span className="sm:hidden">ATAQUE!</span></> : <><span className="hidden sm:inline">TURNO DO OPONENTE</span><span className="sm:hidden">OPONENTE</span></>}
+              {myTurn ? <><span className="hidden sm:inline">{t('arena.yourTurn')}</span><span className="sm:hidden">{t('arena.yourTurnShort')}</span></> : <><span className="hidden sm:inline">{t('arena.opponentTurn')}</span><span className="sm:hidden">{t('arena.opponentTurnShort')}</span></>}
             </span>
             {turnTimer !== null && (
               <span
@@ -231,7 +233,7 @@ export function ArenaView() {
               onClick={() => setShowFleeModal(true)}
               className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white/60 px-3 sm:px-4 py-2 hover:text-paper-white transition-colors uppercase"
             >
-              FUGIR
+              {t('arena.flee')}
             </button>
           </div>
         </div>
@@ -253,10 +255,10 @@ export function ArenaView() {
                   shield
                 </span>
                 <h3 className="font-display text-xs 2xl:text-sm font-extrabold text-paper-white uppercase tracking-wide">
-                  Minha Frota
+                  {t('arena.myFleet')}
                 </h3>
                 <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">
-                  DEFESA
+                  {t('arena.defense')}
                 </span>
               </div>
               <div className="w-full max-w-[320px] sm:max-w-[280px] 2xl:max-w-[380px]">
@@ -265,14 +267,14 @@ export function ArenaView() {
               {/* My Mascot - hidden on mobile */}
               <div className="hidden sm:flex flex-col items-center gap-1 2xl:gap-3 mt-4 2xl:mt-6 w-full">
                 <span className="font-mono text-[11px] 2xl:text-[13px] font-bold tracking-[0.1em] text-paper-white uppercase truncate max-w-[150px] text-center">
-                  {user?.username || "VOCÊ"} <span className="text-mid-tone-grey">(eu)</span>
+                  {user?.username || t('arena.you')} <span className="text-mid-tone-grey">{t('arena.me')}</span>
                 </span>
                 <HealthBar sunkCount={sunkMyShips?.length || 0} />
                 <SailorMascot shooting={myShooting} damaged={myDamaged} shootKey={myShootCount} damageKey={myDamageCount} gameOverState={gameOverPending ? gameOverResult : null} className="h-32 2xl:h-44" />
               </div>
               {/* Mobile: just the nick */}
               <span className="sm:hidden font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white uppercase mt-2">
-                {user?.username || "VOCÊ"} (eu)
+                {user?.username || t('arena.you')} {t('arena.me')}
               </span>
             </div>
 
@@ -286,10 +288,10 @@ export function ArenaView() {
                   gps_fixed
                 </span>
                 <h3 className="font-display text-xs 2xl:text-sm font-extrabold text-paper-white uppercase tracking-wide">
-                  Frota Inimiga
+                  {t('arena.enemyFleet')}
                 </h3>
                 <span className="font-mono text-[9px] font-bold text-mid-tone-grey tracking-[0.1em] ml-1">
-                  ATAQUE
+                  {t('arena.attack')}
                 </span>
               </div>
               <div className="w-full max-w-[320px] sm:max-w-[280px] 2xl:max-w-[380px] relative">
@@ -307,7 +309,7 @@ export function ArenaView() {
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                     <div className="bg-surface-container-high/90 ink-border rounded-lg px-4 py-1.5 hard-shadow-sm">
                       <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-mid-tone-grey uppercase">
-                        BLOQUEADO
+                        {t('arena.blocked')}
                       </span>
                     </div>
                   </div>
@@ -316,7 +318,7 @@ export function ArenaView() {
               {/* Enemy Mascot - hidden on mobile */}
               <div className="hidden sm:flex flex-col items-center gap-1 2xl:gap-3 mt-4 2xl:mt-6 w-full">
                 <span className="font-mono text-[11px] 2xl:text-[13px] font-bold tracking-[0.1em] text-paper-white uppercase truncate max-w-[150px] text-center">
-                  {opponentName || "OPONENTE"}
+                  {opponentName || t('arena.opponent')}
                 </span>
                 <HealthBar sunkCount={sunkEnemyShips?.length || 0} />
                 <SailorMascot
@@ -331,7 +333,7 @@ export function ArenaView() {
               </div>
               {/* Mobile: just the nick */}
               <span className="sm:hidden font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white uppercase mt-2">
-                {opponentName || "OPONENTE"}
+                {opponentName || t('arena.opponent')}
               </span>
             </div>
           </div>
@@ -342,11 +344,11 @@ export function ArenaView() {
           {/* Enemy Fleet Tracker */}
           <div className="bg-paper-white border-4 border-ink-black rounded-xl p-3 2xl:p-5 shadow-[6px_6px_0px_0px_#000]">
             <h3 className="font-display text-base 2xl:text-xl font-extrabold text-ink-black uppercase tracking-tight text-center border-b-4 border-ink-black pb-2 mb-3 2xl:mb-4">
-              Frota Inimiga
+              {t('arena.enemyFleet')}
             </h3>
             <div className="flex items-center justify-between mb-2 2xl:mb-3">
               <span className="font-mono text-[11px] 2xl:text-[12px] font-bold text-mid-tone-grey tracking-[0.1em]">
-                {sunkSet.size}/{FLEET.length} AFUNDADOS
+                {sunkSet.size}/{FLEET.length} {t('arena.sunk')}
               </span>
             </div>
 
@@ -375,7 +377,7 @@ export function ArenaView() {
                             isSunk ? "text-mid-tone-grey line-through" : "text-ink-black"
                           }`}
                         >
-                          {ship.name}
+                          {t('ships.' + ship.id)}
                         </span>
                         <div className="flex gap-1">
                           {Array.from({ length: ship.size }).map((_, i) => (
@@ -419,9 +421,9 @@ export function ArenaView() {
                 wifi_off
               </span>
               <h3 className="font-display text-2xl font-extrabold text-paper-white uppercase tracking-tight">
-                Oponente Desconectou
+                {t('arena.disconnectedTitle')}
               </h3>
-              <p className="font-sans text-sm text-on-surface-variant">Aguardando reconexão...</p>
+              <p className="font-sans text-sm text-on-surface-variant">{t('arena.disconnectedMessage')}</p>
               {reconnectCountdown !== null && (
                 <div className="font-mono text-4xl font-bold text-paper-white">
                   {reconnectCountdown}s
@@ -451,11 +453,11 @@ export function ArenaView() {
               </span>
 
               <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper-white">
-                FUGIR?
+                {t('arena.fleeTitle')}
               </h2>
 
               <p className="font-sans text-sm text-on-surface-variant">
-                Abandonar o campo de batalha contará como derrota. Seu oponente vencerá por W.O.
+                {t('arena.fleeMessage')}
               </p>
 
               <div className="flex flex-col gap-3 w-full mt-2">
@@ -469,14 +471,14 @@ export function ArenaView() {
                     e.currentTarget.style.animation = "none";
                   }}
                 >
-                  SIM, SOU UM COVARDE
+                  {t('arena.fleeConfirm')}
                 </button>
 
                 <button
                   onClick={() => setShowFleeModal(false)}
                   className="w-full font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white uppercase py-2 transition-colors hover:text-mid-tone-grey"
                 >
-                  VOLTAR À BATALHA
+                  {t('arena.fleeCancel')}
                 </button>
               </div>
             </div>

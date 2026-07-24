@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { BrandMark } from "../shared/BrandMark";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGame } from "../../contexts/GameContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 import * as api from "../../services/api";
 
 export function LobbyView() {
   const { user, logout } = useAuth();
   const { createGame, joinGame, fetchAvailableGames, availableGames, error } = useGame();
+  const { t, translateError } = useLanguage();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -102,7 +104,7 @@ export function LobbyView() {
               onClick={logout}
               className="font-mono text-[11px] font-bold tracking-[0.1em] text-ink-black/60 px-3 sm:px-4 py-2 hover:text-ink-black transition-colors uppercase"
             >
-              SAIR
+              {t('lobby.logout')}
             </button>
           </div>
         </div>
@@ -111,7 +113,7 @@ export function LobbyView() {
       {/* Error */}
       {error && (
         <div className="w-full max-w-3xl mb-6 px-4 py-3 text-sm text-center font-sans bg-error-container ink-border rounded-lg text-error">
-          {error}
+          {translateError(error)}
         </div>
       )}
 
@@ -130,10 +132,10 @@ export function LobbyView() {
 
           <div className="relative z-10">
             <h1 className="font-display text-[24px] 2xl:text-[40px] font-extrabold uppercase tracking-tight text-paper-white leading-tight truncate">
-              Bem-vindo a bordo, <span className="inline-block">{user?.username}</span>
+              {t('lobby.welcome')} <span className="inline-block">{user?.username}</span>
             </h1>
             <p className="font-sans text-sm 2xl:text-base text-on-surface-variant mt-2 max-w-md">
-              Crie uma nova partida ou entre em uma operação ativa.
+              {t('lobby.subtitle')}
             </p>
           </div>
 
@@ -159,7 +161,7 @@ export function LobbyView() {
             >
               add_circle
             </span>
-            <span>{loading ? "CRIANDO..." : "CRIAR PARTIDA"}</span>
+            <span>{loading ? t('lobby.creating') : t('lobby.createGame')}</span>
           </button>
         </div>
 
@@ -179,7 +181,7 @@ export function LobbyView() {
               vpn_key
             </span>
             <h3 className="font-mono text-[12px] font-bold tracking-[0.1em] text-paper-white uppercase">
-              Entrar por Código
+              {t('lobby.enterByCode')}
             </h3>
           </div>
 
@@ -187,7 +189,7 @@ export function LobbyView() {
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="Ex: ABCXYZ"
+              placeholder={t('lobby.codePlaceholder')}
               maxLength={6}
               className="w-full bg-surface border-2 border-paper-white rounded-lg p-3 text-paper-white font-mono text-sm tracking-wider text-center placeholder:text-mid-tone-grey outline-none transition-all focus:ring-2 focus:ring-paper-white uppercase"
             />
@@ -200,7 +202,7 @@ export function LobbyView() {
                   : "hover:scale-x-105 hover:scale-y-95 active:scale-x-95 active:scale-y-105"
               }`}
             >
-              ENTRAR NA SALA
+              {t('lobby.enterRoom')}
             </button>
           </div>
         </div>
@@ -226,7 +228,7 @@ export function LobbyView() {
                 >
                   folder_open
                 </span>
-                SALAS
+                {t('lobby.rooms')}
               </button>
               <button
                 onClick={() => setLobbyTab("ranking")}
@@ -242,12 +244,12 @@ export function LobbyView() {
                 >
                   emoji_events
                 </span>
-                RANKING
+                {t('lobby.ranking')}
               </button>
             </div>
             {lobbyTab === "salas" && (
               <span className="sm:hidden font-mono text-[11px] font-bold text-on-surface-variant tracking-[0.1em]">
-                {availableGames.length} ATIVAS
+                {availableGames.length} {t('lobby.active')}
               </span>
             )}
           </div>
@@ -258,20 +260,20 @@ export function LobbyView() {
             disabled={lobbyTab === "salas" ? refreshing : rankingLoading}
             className="sm:hidden w-full font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-2 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
           >
-            {(lobbyTab === "salas" ? refreshing : rankingLoading) ? "..." : "ATUALIZAR"}
+            {(lobbyTab === "salas" ? refreshing : rankingLoading) ? "..." : t('lobby.refresh')}
           </button>
           {/* Desktop: inline controls */}
           {lobbyTab === "salas" && (
             <div className="hidden sm:flex items-center gap-3">
               <span className="font-mono text-[11px] font-bold text-on-surface-variant tracking-[0.1em]">
-                {availableGames.length} ATIVAS
+                {availableGames.length} {t('lobby.active')}
               </span>
               <button
                 onClick={loadGames}
                 disabled={refreshing}
                 className="font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-1.5 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
               >
-                {refreshing ? "..." : "ATUALIZAR"}
+                {refreshing ? "..." : t('lobby.refresh')}
               </button>
             </div>
           )}
@@ -281,7 +283,7 @@ export function LobbyView() {
               disabled={rankingLoading}
               className="hidden sm:block font-mono text-[11px] font-bold tracking-[0.1em] text-paper-white bg-surface-container px-3 py-1.5 rounded-full border-2 border-paper-white transition-all hover:bg-paper-white hover:text-ink-black disabled:opacity-50"
             >
-              {rankingLoading ? "..." : "ATUALIZAR"}
+              {rankingLoading ? "..." : t('lobby.refresh')}
             </button>
           )}
         </div>
@@ -298,7 +300,7 @@ export function LobbyView() {
                   sailing
                 </span>
                 <p className="font-sans text-mid-tone-grey text-sm 2xl:text-base">
-                  Nenhuma sala disponível. Crie uma partida!
+                  {t('lobby.noRooms')}
                 </p>
               </div>
             ) : (
@@ -362,7 +364,7 @@ export function LobbyView() {
                         e.currentTarget.style.animation = "none";
                       }}
                     >
-                      ENTRAR
+                      {t('lobby.enter')}
                     </button>
                   </div>
                 ))}
@@ -376,7 +378,7 @@ export function LobbyView() {
           <>
             {rankingLoading ? (
               <div className="px-6 py-6 2xl:py-14 text-center flex flex-col items-center gap-2">
-                <span className="font-mono text-sm text-on-surface-variant">Carregando...</span>
+                <span className="font-mono text-sm text-on-surface-variant">{t('lobby.loading')}</span>
               </div>
             ) : ranking.length === 0 ? (
               <div className="px-6 py-6 2xl:py-14 text-center flex flex-col items-center gap-2">
@@ -387,7 +389,7 @@ export function LobbyView() {
                   leaderboard
                 </span>
                 <p className="font-sans text-mid-tone-grey text-sm 2xl:text-base">
-                  Nenhum jogador no ranking ainda.
+                  {t('lobby.noRanking')}
                 </p>
               </div>
             ) : (
@@ -395,10 +397,10 @@ export function LobbyView() {
                 {/* Table header */}
                 <div className="grid grid-cols-[28px_1fr_40px_40px_52px] sm:grid-cols-[40px_1fr_70px_70px_80px] gap-1 sm:gap-2 px-3 sm:px-4 py-2">
                   <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">#</span>
-                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">JOGADOR</span>
-                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">V</span>
-                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">D</span>
-                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">WIN%</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em]">{t('lobby.player')}</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">{t('lobby.wins')}</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">{t('lobby.losses')}</span>
+                  <span className="font-mono text-[10px] font-bold text-on-surface-variant tracking-[0.1em] text-center">{t('lobby.winRate')}</span>
                 </div>
                 {ranking.map((player, index) => {
                   const total = player.wins + player.losses;

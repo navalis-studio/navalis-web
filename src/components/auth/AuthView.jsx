@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { NeonInput } from "../shared/NeonInput";
 import { useAuth } from "../../contexts/AuthContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 import navalisName from "../../img/black_navalis_name.png";
 import navalisShip from "../../img/black_navalis_ship.png";
 
 export function AuthView() {
   const { login, register, error, clearError } = useAuth();
+  const { t, translateError } = useLanguage();
   const [tab, setTab] = useState("login");
   const [name, setName] = useState("");
   const [pwd, setPwd] = useState("");
@@ -20,12 +22,12 @@ export function AuthView() {
 
     const username = name.trim();
     if (!username || !pwd) {
-      setLocalError("Preencha todos os campos.");
+      setLocalError(t('auth.errorEmpty'));
       return;
     }
 
     if (tab === "register" && pwd !== confirmPwd) {
-      setLocalError("As senhas não coincidem.");
+      setLocalError(t('auth.errorMismatch'));
       return;
     }
 
@@ -77,28 +79,28 @@ export function AuthView() {
 
           {/* Tagline */}
           <p className="font-display text-sm 2xl:text-xl font-semibold text-ink-black text-center mb-3 2xl:mb-6 px-4 leading-tight">
-            "A frota aguarda seu comando."
+            {t('auth.tagline')}
           </p>
 
           {/* Tabs Login/Register - pill com hard shadow */}
           <div className="flex w-full max-w-[240px] 2xl:max-w-xs mb-4 2xl:mb-5 rounded-full ink-border hard-shadow-sm overflow-hidden">
-            {["login", "register"].map((t) => (
+            {["login", "register"].map((tabKey) => (
               <button
-                key={t}
+                key={tabKey}
                 type="button"
                 tabIndex={-1}
                 onClick={() => {
-                  setTab(t);
+                  setTab(tabKey);
                   setLocalError(null);
                   clearError();
                 }}
                 className={`flex-1 py-1.5 2xl:py-2.5 font-mono text-[11px] 2xl:text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${
-                  tab === t
+                  tab === tabKey
                     ? "bg-ink-black text-paper-white"
                     : "bg-paper-white text-ink-black hover:bg-light-grain"
                 }`}
               >
-                {t === "login" ? "LOGIN" : "REGISTRO"}
+                {tabKey === "login" ? t('auth.login') : t('auth.register')}
               </button>
             ))}
           </div>
@@ -106,7 +108,7 @@ export function AuthView() {
           {/* Error message */}
           {displayError && (
             <div className="w-full max-w-sm px-4 py-2 mb-4 text-sm text-center font-sans text-ink-black bg-light-grain ink-border rounded-lg">
-              {displayError}
+              {translateError(displayError)}
             </div>
           )}
 
@@ -115,9 +117,9 @@ export function AuthView() {
             className="w-full max-w-xs 2xl:max-w-sm space-y-3.5 2xl:space-y-4"
             onSubmit={handleSubmit}
           >
-            <NeonInput label="USUÁRIO" value={name} onChange={setName} placeholder="Seu usuário" />
+            <NeonInput label={t('auth.username')} value={name} onChange={setName} placeholder={t('auth.usernamePlaceholder')} />
             <NeonInput
-              label="SENHA"
+              label={t('auth.password')}
               type="password"
               value={pwd}
               onChange={setPwd}
@@ -125,7 +127,7 @@ export function AuthView() {
             />
             {tab === "register" && (
               <NeonInput
-                label="CONFIRMAR SENHA"
+                label={t('auth.confirmPassword')}
                 type="password"
                 value={confirmPwd}
                 onChange={setConfirmPwd}
@@ -151,7 +153,7 @@ export function AuthView() {
                   e.currentTarget.style.animation = "none";
                 }}
               >
-                <span>{submitting ? "AGUARDE..." : tab === "login" ? "ENTRAR" : "REGISTRAR"}</span>
+                <span>{submitting ? t('auth.wait') : tab === "login" ? t('auth.enterButton') : t('auth.registerButton')}</span>
                 {!submitting && (
                   <span
                     className="material-symbols-outlined"
@@ -173,7 +175,7 @@ export function AuthView() {
         rel="noopener noreferrer"
         className="absolute bottom-4 right-4 font-mono text-[12px] font-bold text-paper-white hover:text-paper-white/60 transition-colors tracking-[0.1em]"
       >
-        feito por @jhowzluk
+        {t('credits')} @jhowzluk
       </a>
 
       {/* Walk-in-place animation styles */}
